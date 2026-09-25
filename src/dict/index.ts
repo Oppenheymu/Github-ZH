@@ -7,6 +7,7 @@ import { issuesDict } from "./pages/issues.ts";
 import { profileDict } from "./pages/profile.ts";
 import { pullsDict } from "./pages/pulls.ts";
 import { repoDict } from "./pages/repo.ts";
+import { repoSettingsDict } from "./pages/repo-settings.ts";
 import { settingsDict } from "./pages/settings.ts";
 
 /** 页面模块注册表：越靠前越具体，词条与规则越先生效 */
@@ -14,6 +15,7 @@ export const pageDicts: readonly PageDict[] = [
 	issuesDict,
 	pullsDict,
 	settingsDict,
+	repoSettingsDict,
 	dashboardDict,
 	profileDict,
 	repoDict,
