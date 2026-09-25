@@ -33,6 +33,7 @@ Github-ZH/
 │   ├── checks/dict.ts       # 词典门禁（键值 / CJK / 正则 / 路由 / 重复键）
 │   ├── checks/manifest.ts   # manifest 门禁（MV3 字段 / matches / 资产与产物存在性）
 │   ├── gen-icons.ts         # assets/icon.svg → public/icons（无头浏览器 CDP 栅格化）
+│   ├── verify-live.ts       # 实机验证：无头浏览器加载 dist/ 逐页收集漏翻 → JSON（bun run verify）
 │   └── pack.ts              # dist/ 压 zip（零依赖 store 模式）
 ├── *.test.ts                # 与源码同目录，bun:test
 └── .github/workflows/ci.yml # bun install → bun run check
@@ -96,7 +97,8 @@ popup 底部的「开发者模式」开关**默认关闭**，用于系统性发�
 1. popup 开启「开发者模式」——已打开的 GitHub 页签自动刷新，之后开始收集（翻译开关关闭时不翻译，自然也不收集）；
 2. 正常浏览仓库 / 议题 / PR 等页面，引擎每 5 秒（以及页面隐藏 / 卸载时）把缓冲合并写入本机 `chrome.storage.local`；
 3. 回到 popup 查看「已收集 N 条」，点「复制」得到 JSON，粘贴给 AI 会话或按下方归档规则手工补词条；
-4. 点「清空」重新攒一批。
+4. 点「清空」重新攒一批；
+5. 自动化路径：`bun run verify` 跳过手工浏览——用无头浏览器加载 `dist/`，开启开发者模式后逐页访问内置页面清单（`--pages` 可换自定义清单，每行一个 URL，`#` 为注释），读取漏翻日志并输出与「复制」完全同构的 JSON（`--out` 落盘）。探针失败（扩展未加载 / 翻译未生效）时以非零码退出。
 
 ### 收集范围与导出格式
 
