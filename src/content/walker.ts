@@ -17,22 +17,33 @@ const TRANSLATABLE_ATTRS = [
 ] as const;
 
 /**
- * 对一段已 trim 的文本应用词典视图，返回译文；未命中返回 null。
- * 顺序：静态词典精确命中 → 首条命中的正则规则（pattern 不允许 g 标志，
- * test 无 lastIndex 累积问题，见 tooling/checks/dict.ts 门禁）。
+ * 对一段文本应用词典视图，返回译文；未命中返回 null。
+ * 查询键先 trim 并把连续空白折叠为单空格（GitHub React 页面的文本节点
+ * 常带首尾空白与换行缩进，精确匹配必须先归一），顺序：静态词典精确命中
+ * → 首条命中的正则规则（pattern 不允许 g 标志，test 无 lastIndex 累积
+ * 问题，见 tooling/checks/dict.ts 门禁）。
  */
 export function translateText(
 	text: string,
 	view: DictView,
 ): string | null {
 	if (!isTranslatableText(text)) return null;
-	const mapped = view.entries.get(text);
+	const normalized = normalizeKey(text);
+	const mapped = view.entries.get(normalized);
 	if (mapped !== undefined) return mapped;
 	for (const rule of view.rules) {
-		if (!rule.pattern.test(text)) continue;
-		return text.replace(rule.pattern, rule.replacement);
+		if (!rule.pattern.test(normalized)) continue;
+		return normalized.replace(
+			rule.pattern,
+			rule.replacement,
+		);
 	}
 	return null;
+}
+
+/** 查询键归一：trim 并折叠连续空白为单空格 */
+function normalizeKey(text: string): string {
+	return text.trim().replace(/\s+/g, " ");
 }
 
 /** 替换单个文本节点，保留原文首尾空白；返回是否发生了替换 */
@@ -65,12 +76,11 @@ function applyAttrs(
 	for (const name of TRANSLATABLE_ATTRS) {
 		const value = element.getAttribute(name);
 		if (value === null) continue;
-		const trimmed = value.trim();
-		if (!isTranslatableText(trimmed)) continue;
-		const mapped = view.entries.get(trimmed);
+		if (!isTranslatableText(value)) continue;
+		const mapped = view.entries.get(normalizeKey(value));
 		if (mapped === undefined) {
 			// 未命中词条的属性值：开发者模式下记录（属性不应用正则规则，只会因缺词条漏翻）
-			recordAttr(name, trimmed);
+			recordAttr(name, normalizeKey(value));
 			continue;
 		}
 		const lead = value.slice(

@@ -38,6 +38,17 @@ describe("translateText", () => {
 		);
 	});
 
+	it("collapses surrounding and inner whitespace before matching", () => {
+		// GitHub React 页面的文本节点常带首尾空白与换行缩进
+		expect(translateText("  Star  ", view)).toBe("星标");
+		expect(translateText("3\n   minutes ago", view)).toBe(
+			"3 分钟前",
+		);
+		expect(translateText("Fork\n            ", view)).toBe(
+			"复刻",
+		);
+	});
+
 	it("returns null when nothing matches", () => {
 		expect(translateText("Unknown", view)).toBeNull();
 	});

@@ -2,6 +2,8 @@
 // （buildView 词条先到先得、规则首条命中生效，靠此顺序保证具体页压过泛化页）
 
 import type { PageDict } from "../shared/types.ts";
+import { actionsDict } from "./pages/actions.ts";
+import { agentsDict } from "./pages/agents.ts";
 import { dashboardDict } from "./pages/dashboard.ts";
 import { issuesDict } from "./pages/issues.ts";
 import { profileDict } from "./pages/profile.ts";
@@ -16,6 +18,8 @@ export const pageDicts: readonly PageDict[] = [
 	pullsDict,
 	settingsDict,
 	repoSettingsDict,
+	actionsDict,
+	agentsDict,
 	dashboardDict,
 	profileDict,
 	repoDict,
