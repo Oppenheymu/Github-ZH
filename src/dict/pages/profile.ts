@@ -1,5 +1,9 @@
-// 个人主页模块：单段路径（如 /torvalds）
+// 个人与组织主页模块：单段路径（如 /torvalds、/microsoft）
 // 营销页（/pricing 等）同为单段路径，但本模块词条不会在其上出现，无副作用
+// Gist 列表页（gist.github.com 的 /、/starred、/用户名）同为单段路径，一并覆盖
+// 注：仓库名 / 用户名 / 仓库描述为用户内容不收录；语言名专有名词不译；
+// 属性（title/aria/alt）不应用规则（见 content/walker.ts），半动态计数
+// 收静态词条仅解当前值（同 actions.ts 先例）
 
 import type { PageDict } from "../../shared/types.ts";
 
@@ -13,6 +17,149 @@ export const profileDict: PageDict = {
 		"Contribution activity": "贡献动态",
 		"Set status": "设置状态",
 		"Send message": "发送消息",
+		// —— 主页页签 ——
+		Projects: "项目",
+		Packages: "软件包",
+		People: "成员",
+		Sponsoring: "正在赞助",
+		// —— 主页区块 ——
+		"View all repositories": "查看所有仓库",
+		"Most used topics": "最常用的主题",
+		"Top languages": "主要语言",
+		Highlights: "亮点",
+		following: "正在关注",
+		// —— 仓库列表筛选（Type / Language / Order 下拉）——
+		"Find a repository…": "查找仓库…",
+		Sources: "来源",
+		Mirrors: "镜像",
+		"Select language": "选择语言",
+		"Select type": "选择类型",
+		"Select order": "选择排序",
+		"Last updated": "最近更新",
+		// —— 仓库卡片元信息与徽标 ——
+		"Apache-2.0": "Apache-2.0 许可证",
+		"Forked from": "复刻自",
+		"Developer Program Member": "开发者计划成员",
+		"GitHub Sponsor": "GitHub 赞助者",
+		"Label: GitHub Sponsor": "标签：GitHub 赞助者",
+		"Label: Verified": "标签：已验证",
+		// —— Gist 列表页（/、/starred、/用户名）——
+		"All gists": "全部 Gist",
+		"Search Gists": "搜索 Gist",
+		Forked: "已复刻",
+		"— forked from": "— 复刻自",
+		// —— 组织认证横幅 ——
+		"We've verified that the organization":
+			"我们已验证该组织",
+		"controls the domains:": "控制以下域名：",
+		"Learn more about verified organizations":
+			"进一步了解已验证的组织",
+		// —— 屏蔽 / 举报对话框 ——
+		"Block user": "屏蔽用户",
+		"Report abuse": "举报滥用行为",
+		"Block or report user": "屏蔽或举报用户",
+		"blocking users": "屏蔽用户",
+		"reporting abuse": "举报滥用行为",
+		"You must be logged in to block users.":
+			"你必须登录才能屏蔽用户。",
+		// 长句键按归一化形式收录：节点内部连续空白在匹配前折叠为
+		// 单空格（见 content/walker.ts 的 normalizeKey），漏翻日志里
+		// 的换行缩进原文不能直接作键
+		"Prevent this user from interacting with your repositories and sending you notifications. Learn more about":
+			"阻止该用户与你的仓库互动并向你发送通知。进一步了解",
+		"Contact GitHub support about this user’s behavior. Learn more about":
+			"就该用户的行为联系 GitHub 支持团队。进一步了解",
+		"Add an optional note": "添加可选备注",
+		"Close all issues, pull requests, and discussions opened by this user":
+			"关闭该用户开启的所有议题、拉取请求和讨论",
+		"Content in all repositories owned by your account will be closed.":
+			"你账户名下所有仓库中的内容都将被关闭。",
+		"Maximum 250 characters. Please don’t include any personal information such as legal names or email addresses. Markdown is supported. This note will only be visible to you.":
+			"最多 250 个字符。请不要包含法定姓名或电子邮箱地址等任何个人信息。支持 Markdown。此备注仅你可见。",
+		// —— 属性词条（aria / alt）——
+		"User profile": "用户个人资料",
+		"Achievement: Arctic Code Vault Contributor":
+			"成就：北极代码库贡献者",
+		"Achievement: Pair Extraordinaire":
+			"成就：结对编程大师",
+		"Achievement: Starstruck": "成就：众星捧月",
+		// —— 半动态属性：aria 计数，词条键含具体数字，仅解当前值
+		// （属性不应用规则，见 content/walker.ts）——
+		"0 issues": "0 个议题",
+		"2 issues": "2 个议题",
+		"23 issues": "23 个议题",
+		"99 issues": "99 个议题",
+		"0 stars": "0 个星标",
+		"6 stars": "6 个星标",
+		"19 stars": "19 个星标",
+		"199 stars": "199 个星标",
+		"0 forks": "0 个复刻",
+		"2 forks": "2 个复刻",
+		"28 forks": "28 个复刻",
+		"88 forks": "88 个复刻",
+		"5 pull requests": "5 个拉取请求",
+		"6 pull requests": "6 个拉取请求",
+		"20 pull requests": "20 个拉取请求",
+		"26 pull requests": "26 个拉取请求",
+		// （续）组织 / 用户主页仓库卡片的 aria 计数
+		"20 issues": "20 个议题",
+		"21 issues": "21 个议题",
+		"39 issues": "39 个议题",
+		"82 issues": "82 个议题",
+		"84 issues": "84 个议题",
+		"158 issues": "158 个议题",
+		"1,331 issues": "1,331 个议题",
+		"4,863 issues": "4,863 个议题",
+		"1 star": "1 个星标",
+		"31 stars": "31 个星标",
+		"74 stars": "74 个星标",
+		"176 stars": "176 个星标",
+		"196 stars": "196 个星标",
+		"1022 stars": "1022 个星标",
+		"1934 stars": "1934 个星标",
+		"2563 stars": "2563 个星标",
+		"11107 stars": "11107 个星标",
+		"111197 stars": "111197 个星标",
+		"30 forks": "30 个复刻",
+		"35 forks": "35 个复刻",
+		"40 forks": "40 个复刻",
+		"89 forks": "89 个复刻",
+		"167 forks": "167 个复刻",
+		"456 forks": "456 个复刻",
+		"680 forks": "680 个复刻",
+		"9861 forks": "9861 个复刻",
+		"14830 forks": "14830 个复刻",
+		"0 pull requests": "0 个拉取请求",
+		"1 pull request": "1 个拉取请求",
+		"36 pull requests": "36 个拉取请求",
+		"40 pull requests": "40 个拉取请求",
+		"45 pull requests": "45 个拉取请求",
+		"105 pull requests": "105 个拉取请求",
+		"152 pull requests": "152 个拉取请求",
+		"3,000 pull requests": "3,000 个拉取请求",
 	},
-	rules: [],
+	rules: [
+		// 组织 / 用户仓库列表的提交动态说明（仓库名为用户内容，捕获保留）
+		{
+			pattern:
+				/^([\w.-]+\/[\w.-]+)['’]s past year of commit activity$/,
+			replacement: "$1 过去一年的提交动态",
+		},
+		// 仓库卡片的「需要帮助」议题计数（单复数折叠）
+		{
+			pattern: /^\(([\d,]+) issues? needs? help\)$/,
+			replacement: "（$1 个议题需要帮助）",
+		},
+		// 屏蔽 / 举报对话框标题带用户名（捕获保留；固定文案走静态词条）
+		{
+			pattern: /^Block or report ([\w.-]+)$/,
+			replacement: "屏蔽或举报 $1",
+		},
+		// 仓库列表分页说明
+		{
+			pattern:
+				/^Showing (\d+) of ([\d,]+) repositor(?:y|ies)$/,
+			replacement: "显示 $2 个仓库中的 $1 个",
+		},
+	],
 };

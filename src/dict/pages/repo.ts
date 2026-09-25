@@ -1,4 +1,5 @@
 // 仓库模块：任意两段路径（/owner/repo 及其子页）的仓库骨架词条
+// 覆盖仓库首页骨架、文件列表、发布（releases）与提交签名等子页 UI
 // 注意：本模块是最泛化的路由，其余模块词条都会压过它（先到先得合并）
 
 import type { PageDict } from "../../shared/types.ts";
@@ -40,6 +41,81 @@ export const repoDict: PageDict = {
 		"Create pull request": "创建拉取请求",
 		"Commit changes": "提交更改",
 		"Propose changes": "建议更改",
+		// —— 仓库导航栏与文件列表 ——
+		"Security and quality": "安全与质量",
+		"Not available": "不可用",
+		"Additional navigation options": "更多导航选项",
+		Name: "名称",
+		"This path skips through empty directories":
+			"此路径跳过了空目录",
+		"View commit history for this file.":
+			"查看此文件的提交历史",
+		// —— 仓库首页概览（文件区与 About 侧栏）——
+		"Latest commit": "最新提交",
+		"Last commit message": "最新提交信息",
+		"Last commit date": "最新提交日期",
+		"Folders and files": "文件夹与文件",
+		"View all files": "查看所有文件",
+		"Repository files": "仓库文件",
+		"Repository files navigation": "仓库文件导航",
+		README: "自述文件",
+		Readme: "自述文件",
+		Outline: "大纲",
+		"Open more actions menu": "打开更多操作菜单",
+		"Go to Branches page": "转到分支页面",
+		"Go to Tags page": "转到标签页面",
+		"Custom properties": "自定义属性",
+		"Used by": "使用方",
+		Activity: "活动",
+		Watchers: "关注者",
+		"Report repository": "举报仓库",
+		// —— 星标 / 关注 / 社区标准 ——
+		"You must be signed in to star a repository":
+			"你必须登录才能星标仓库",
+		"You must be signed in to change notification settings":
+			"你必须登录才能更改通知设置",
+		Contributors: "贡献者",
+		"Code of conduct": "行为准则",
+		Contributing: "贡献指南",
+		"Security policy": "安全策略",
+		"MIT license": "MIT 许可证",
+		// —— 发布页（releases）——
+		Latest: "最新",
+		Assets: "资产",
+		"Choose a tag to compare": "选择要比较的标签",
+		"View all tags": "查看所有标签",
+		"released this": "发布了此版本",
+		"All reactions": "全部回应",
+		Tag: "标签",
+		Commit: "提交",
+		"Releases and Tags": "发布与标签",
+		"Jump to release": "跳转到发布版本",
+		"Release list": "发布列表",
+		"Release list navigation": "发布列表导航",
+		"Release list pagination": "发布列表分页",
+		// —— 提交签名徽章与悬浮说明 ——
+		Verified: "已验证",
+		"Verified commit signature": "已验证的提交签名",
+		"This commit was created on GitHub.com and signed with GitHub’s":
+			"此提交创建于 GitHub.com 并使用 GitHub",
+		"verified signature": "的已验证签名进行签名",
+		"GPG key ID:": "GPG 密钥 ID：",
+		"Learn about vigilant mode": "了解警惕模式",
+		"main branch": "main 分支",
+		"commits by Copilot": "Copilot 的提交",
 	},
-	rules: [],
+	rules: [
+		{
+			pattern: /^([\d,]+) Commits$/,
+			replacement: "$1 次提交",
+		},
+		{
+			pattern: /^(\d+) reactions?$/,
+			replacement: "$1 次回应",
+		},
+		{
+			pattern: /^([\d,]+) people reacted$/,
+			replacement: "$1 人已回应",
+		},
+	],
 };

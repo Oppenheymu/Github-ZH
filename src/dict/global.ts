@@ -2,8 +2,197 @@
 // 归档纪律（AGENTS.md 硬性约束 2/3）：键 = GitHub 实际渲染的英文原文精确串；
 // 仅特定页面出现的词条进 pages/<页名>.ts，高风险泛化短词靠不收录回避
 
-import type { GlobalDict } from "../shared/types.ts";
+import type { GlobalDict, Rule } from "../shared/types.ts";
 import { commonRules } from "./rules.ts";
+
+/** 全站专属规则：绝对日期、回应记录与零散计数（commonRules 兜底之外的补充） */
+const globalRules: Rule[] = [
+	// 绝对日期（月份缩写）：Sep 25, 2026 → 2026 年 9 月 25 日
+	{
+		pattern: /^Jan (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 1 月 $1 日",
+	},
+	{
+		pattern: /^Feb (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 2 月 $1 日",
+	},
+	{
+		pattern: /^Mar (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 3 月 $1 日",
+	},
+	{
+		pattern: /^Apr (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 4 月 $1 日",
+	},
+	{
+		pattern: /^May (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 5 月 $1 日",
+	},
+	{
+		pattern: /^Jun (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 6 月 $1 日",
+	},
+	{
+		pattern: /^Jul (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 7 月 $1 日",
+	},
+	{
+		pattern: /^Aug (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 8 月 $1 日",
+	},
+	{
+		pattern: /^Sep (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 9 月 $1 日",
+	},
+	{
+		pattern: /^Oct (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 10 月 $1 日",
+	},
+	{
+		pattern: /^Nov (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 11 月 $1 日",
+	},
+	{
+		pattern: /^Dec (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 12 月 $1 日",
+	},
+	// 绝对日期（月份全称，不带时刻）：October 5, 2026 → 2026 年 10 月 5 日
+	// （May 全称与缩写同形，沿用上方规则）
+	{
+		pattern: /^January (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 1 月 $1 日",
+	},
+	{
+		pattern: /^February (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 2 月 $1 日",
+	},
+	{
+		pattern: /^March (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 3 月 $1 日",
+	},
+	{
+		pattern: /^April (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 4 月 $1 日",
+	},
+	{
+		pattern: /^June (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 6 月 $1 日",
+	},
+	{
+		pattern: /^July (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 7 月 $1 日",
+	},
+	{
+		pattern: /^August (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 8 月 $1 日",
+	},
+	{
+		pattern: /^September (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 9 月 $1 日",
+	},
+	{
+		pattern: /^October (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 10 月 $1 日",
+	},
+	{
+		pattern: /^November (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 11 月 $1 日",
+	},
+	{
+		pattern: /^December (\d{1,2}), (\d{4})$/,
+		replacement: "$2 年 12 月 $1 日",
+	},
+	// 绝对日期（月份全称 + 时刻）：November 27, 2014 16:57 → 2014 年 11 月 27 日 16:57
+	{
+		pattern: /^January (\d{1,2}), (\d{4}) (\d\d:\d\d)$/,
+		replacement: "$2 年 1 月 $1 日 $3",
+	},
+	{
+		pattern: /^February (\d{1,2}), (\d{4}) (\d\d:\d\d)$/,
+		replacement: "$2 年 2 月 $1 日 $3",
+	},
+	{
+		pattern: /^March (\d{1,2}), (\d{4}) (\d\d:\d\d)$/,
+		replacement: "$2 年 3 月 $1 日 $3",
+	},
+	{
+		pattern: /^April (\d{1,2}), (\d{4}) (\d\d:\d\d)$/,
+		replacement: "$2 年 4 月 $1 日 $3",
+	},
+	{
+		pattern: /^May (\d{1,2}), (\d{4}) (\d\d:\d\d)$/,
+		replacement: "$2 年 5 月 $1 日 $3",
+	},
+	{
+		pattern: /^June (\d{1,2}), (\d{4}) (\d\d:\d\d)$/,
+		replacement: "$2 年 6 月 $1 日 $3",
+	},
+	{
+		pattern: /^July (\d{1,2}), (\d{4}) (\d\d:\d\d)$/,
+		replacement: "$2 年 7 月 $1 日 $3",
+	},
+	{
+		pattern: /^August (\d{1,2}), (\d{4}) (\d\d:\d\d)$/,
+		replacement: "$2 年 8 月 $1 日 $3",
+	},
+	{
+		pattern: /^September (\d{1,2}), (\d{4}) (\d\d:\d\d)$/,
+		replacement: "$2 年 9 月 $1 日 $3",
+	},
+	{
+		pattern: /^October (\d{1,2}), (\d{4}) (\d\d:\d\d)$/,
+		replacement: "$2 年 10 月 $1 日 $3",
+	},
+	{
+		pattern: /^November (\d{1,2}), (\d{4}) (\d\d:\d\d)$/,
+		replacement: "$2 年 11 月 $1 日 $3",
+	},
+	{
+		pattern: /^December (\d{1,2}), (\d{4}) (\d\d:\d\d)$/,
+		replacement: "$2 年 12 月 $1 日 $3",
+	},
+	// 回应记录：用户名原样保留，多人以 and 连接由贪婪匹配一并覆盖
+	{
+		pattern: /^(.+) reacted with heart emoji$/,
+		replacement: "$1 回应了爱心表情",
+	},
+	{
+		pattern: /^(.+) reacted with rocket emoji$/,
+		replacement: "$1 回应了火箭表情",
+	},
+	{
+		pattern: /^(.+) reacted with thumbs up emoji$/,
+		replacement: "$1 回应了点赞表情",
+	},
+	{
+		pattern: /^(.+) reacted with eyes emoji$/,
+		replacement: "$1 回应了围观表情",
+	},
+	{
+		pattern: /^(.+) reacted with laugh emoji$/,
+		replacement: "$1 回应了大笑表情",
+	},
+	{
+		pattern: /^(.+) reacted with hooray emoji$/,
+		replacement: "$1 回应了欢呼表情",
+	},
+	// 零散计数
+	{ pattern: /^(\d+) tasks?$/, replacement: "$1 个任务" },
+	{ pattern: /^(\d+) files?$/, replacement: "$1 个文件" },
+	{
+		pattern: /^([\d,]+) forks?$/,
+		replacement: "$1 个复刻",
+	},
+	{
+		pattern: /^([\d,]+) comments?$/,
+		replacement: "$1 条评论",
+	},
+	// 页脚版权年份
+	{
+		pattern: /^© (\d{4}) GitHub, Inc\.$/,
+		replacement: "© $1 年 GitHub, Inc.",
+	},
+];
 
 export const globalDict: GlobalDict = {
 	entries: {
@@ -12,7 +201,9 @@ export const globalDict: GlobalDict = {
 		Homepage: "主页",
 		Dashboard: "仪表板",
 		"Pull requests": "拉取请求",
+		"Pull request": "拉取请求",
 		Issues: "议题",
+		Discussions: "讨论区",
 		Codespaces: "代码空间",
 		Marketplace: "市场",
 		Explore: "探索",
@@ -41,6 +232,15 @@ export const globalDict: GlobalDict = {
 		"All pull requests": "所有拉取请求",
 		"Chat with Copilot": "与 Copilot 聊天",
 		"Open Copilot…": "打开 Copilot…",
+		// —— 头部搜索框与移动端导航开关 ——
+		"Search or jump to, type / to search":
+			"搜索或跳转，输入 / 以搜索",
+		"Toggle navigation": "切换导航",
+		"Navigation Menu": "导航菜单",
+		"Close navigation menu": "关闭导航菜单",
+		"Close menu": "关闭菜单",
+		"Appearance settings": "外观设置",
+		"GitHub Homepage": "GitHub 主页",
 		// —— 「+」新建菜单 ——
 		New: "新建",
 		"New repository": "新建仓库",
@@ -82,8 +282,10 @@ export const globalDict: GlobalDict = {
 		Download: "下载",
 		Upload: "上传",
 		Search: "搜索",
+		"Search results": "搜索结果",
 		Filter: "筛选",
 		Sort: "排序",
+		"Sort by": "排序方式",
 		Clear: "清除",
 		Preview: "预览",
 		Write: "编写",
@@ -100,6 +302,21 @@ export const globalDict: GlobalDict = {
 		Subscribe: "订阅",
 		Unsubscribe: "取消订阅",
 		"Select all": "全选",
+		// —— 时间线与列表通用词 ——
+		commented: "发表了评论",
+		"This was referenced": "此内容曾被引用",
+		"Copy link": "复制链接",
+		"Copy Markdown": "复制 Markdown",
+		"Show options": "显示选项",
+		"Delete branch": "删除分支",
+		"None yet": "暂无",
+		"No results found": "未找到结果",
+		"Sign in to view": "登录后查看",
+		"You can’t perform that action at this time.":
+			"你目前无法执行此操作。",
+		"External link": "外部链接",
+		Updated: "更新时间",
+		"Last active": "最近活跃",
 		// —— 状态徽标（议题 / PR / 工作流通用）——
 		Open: "打开",
 		Closed: "已关闭",
@@ -113,6 +330,12 @@ export const globalDict: GlobalDict = {
 		"In progress": "进行中",
 		Queued: "排队中",
 		Pending: "等待中",
+		"Status: Open": "状态：打开",
+		"Status: Closed": "状态：已关闭",
+		Public: "公开",
+		Private: "私有",
+		"Public archive": "公开归档",
+		Archived: "已归档",
 		// —— 人与关注 ——
 		Author: "作者",
 		Owner: "所有者",
@@ -139,6 +362,9 @@ export const globalDict: GlobalDict = {
 		Organizations: "组织",
 		Pinned: "置顶",
 		Achievements: "成就",
+		Member: "成员",
+		Collaborator: "协作者",
+		Contributor: "贡献者",
 		// —— 页脚与法务 ——
 		Terms: "条款",
 		Privacy: "隐私",
@@ -151,6 +377,118 @@ export const globalDict: GlobalDict = {
 		"Manage cookies": "管理 Cookie",
 		"Do not share my personal information":
 			"不共享我的个人信息",
+		// —— 页脚营销链接（Why GitHub / Solutions / Resources 等栏目）——
+		Documentation: "文档",
+		Blog: "博客",
+		Partners: "合作伙伴",
+		Nonprofits: "非营利组织",
+		Changelog: "更新日志",
+		"Customer stories": "客户案例",
+		"Customer support": "客户支持",
+		"Community forum": "社区论坛",
+		"Trust center": "信任中心",
+		"Business insights": "商业洞察",
+		"Ebooks & reports": "电子书与报告",
+		"Events & webinars": "活动与网络研讨会",
+		"Maintainer Community": "维护者社区",
+		"Software Development": "软件开发",
+		Pricing: "定价",
+		Enterprise: "企业版",
+		Solutions: "解决方案",
+		Resources: "资源",
+		Platform: "平台",
+		"Open Source": "开源",
+		Trending: "趋势",
+		Topics: "主题",
+		Collections: "合集",
+		"Why GitHub": "为什么选择 GitHub",
+		"Premium Support": "Premium 支持",
+		"Find and fix vulnerabilities": "发现并修复漏洞",
+		"Code security": "代码安全",
+		"Secret protection": "机密防护",
+		"Secure your code as you build":
+			"在开发过程中保障代码安全",
+		"Stop leaks before they start": "防泄露于未然",
+		"Fund open source developers": "资助开源开发者",
+		"Automate any workflow": "自动化任意工作流",
+		"Plan and track work": "规划并跟踪工作",
+		"Manage code changes": "管理代码变更",
+		"Write better code with AI": "借助 AI 编写更优质的代码",
+		"Instant dev environments": "即时开发环境",
+		"Integrate external tools": "集成外部工具",
+		"Code Quality": "代码质量",
+		"Code Review": "代码审查",
+		"Direct agents from issue to merge":
+			"智能代理从议题直达合并",
+		"Enforce quality at merge": "在合并时保障质量",
+		"Enterprise platform": "企业级平台",
+		"Enterprise-grade 24/7 support": "企业级 24/7 支持",
+		"Enterprise-grade AI features": "企业级 AI 功能",
+		"Enterprise-grade security features": "企业级安全功能",
+		"AI-powered developer platform": "AI 驱动的开发者平台",
+		"App Modernization": "应用现代化",
+		Enterprises: "大型企业",
+		"Financial services": "金融服务",
+		Government: "政府",
+		Healthcare: "医疗保健",
+		Manufacturing: "制造业",
+		"Small and medium teams": "中小型团队",
+		Startups: "初创企业",
+		"View all use cases": "查看所有使用场景",
+		"View all industries": "查看所有行业",
+		"View all topics": "查看所有主题",
+		"View all features": "查看所有功能",
+		"View all resources": "查看所有资源",
+		"View all solutions": "查看所有解决方案",
+		"AI CODE CREATION": "AI 代码创作",
+		"APPLICATION SECURITY": "应用安全",
+		"DEVELOPER WORKFLOWS": "开发者工作流",
+		EXPLORE: "探索",
+		"BY COMPANY SIZE": "按公司规模",
+		"BY INDUSTRY": "按行业",
+		"BY USE CASE": "按使用场景",
+		COMMUNITY: "社区",
+		"EXPLORE BY TOPIC": "按主题探索",
+		"EXPLORE BY TYPE": "按类型探索",
+		PROGRAMS: "计划",
+		REPOSITORIES: "仓库",
+		"SUPPORT & SERVICES": "支持与服务",
+		"AVAILABLE ADD-ONS": "可用附加组件",
+		"ENTERPRISE SOLUTIONS": "企业解决方案",
+		// —— 页脚更多栏目与社交链接（各页页脚共用）——
+		Company: "公司",
+		Ecosystem: "生态系统",
+		Support: "支持",
+		Careers: "工作机会",
+		Education: "教育",
+		Inclusion: "多元包容",
+		"Social Impact": "社会影响",
+		Shop: "商店",
+		Skills: "技能",
+		Sitemap: "网站地图",
+		"Community Forum": "社区论坛",
+		"Compare GitHub": "对比 GitHub",
+		"Customer Stories": "客户案例",
+		"Developer API": "开发者 API",
+		"Professional Services": "专业服务",
+		"What is Git?": "什么是 Git？",
+		"GitHub on Instagram": "GitHub 的 Instagram",
+		"GitHub on LinkedIn": "GitHub 的 LinkedIn",
+		"GitHub on TikTok": "GitHub 的 TikTok",
+		"GitHub on Twitch": "GitHub 的 Twitch",
+		"GitHub on X": "GitHub 的 X",
+		"GitHub on YouTube": "GitHub 的 YouTube",
+		"GitHub’s organization on GitHub":
+			"GitHub 在 GitHub 上的组织",
+		English: "英语",
+		"English - Select language": "英语 - 选择语言",
+		"The developer newsletter": "开发者通讯",
+		"Get tips, technical guides, and best practices. Twice a month. Right in your inbox.":
+			"获取技巧、技术指南与最佳实践。每月两期，直达你的收件箱。",
+		"Site-wide Links": "全站链接",
+		"Legal and Resource Links": "法律与资源链接",
+		"GitHub's Social Media Links": "GitHub 的社交媒体链接",
+		"Go to GitHub homepage": "前往 GitHub 主页",
 		// —— 导航区域标注（aria landmark 与面包屑）——
 		Footer: "页脚",
 		"Footer navigation": "页脚导航",
@@ -164,6 +502,8 @@ export const globalDict: GlobalDict = {
 		Loading: "加载中",
 		"Loading...": "加载中…",
 		"Loading content...": "正在加载内容…",
+		"Load more…": "加载更多",
+		"Nothing to show": "暂无可显示的内容",
 		"Uh oh!": "哎呀！",
 		"There was an error while loading.": "加载时出现错误。",
 		"Sorry, something went wrong.": "抱歉，出了点问题。",
@@ -179,6 +519,15 @@ export const globalDict: GlobalDict = {
 		"Dismiss notice": "关闭通知",
 		"Dismiss alert": "关闭提醒",
 		"Dismiss error": "关闭错误",
+		// —— 分页 ——
+		Pagination: "分页",
+		Pages: "页码",
+		"Next page": "下一页",
+		"Previous page": "上一页",
+		"Next Page": "下一页",
+		// —— 回应（reaction 按钮读屏文案）——
+		"react with heart": "以爱心回应",
+		"react with rocket": "以火箭回应",
 		// —— 登录 / 注册页 ——
 		"Sign in to GitHub": "登录 GitHub",
 		"Username or email address": "用户名或电子邮箱",
@@ -186,6 +535,11 @@ export const globalDict: GlobalDict = {
 		"Forgot password?": "忘记密码？",
 		"Create an account": "创建账户",
 		"Remember me": "记住我",
+		// —— 未登录对话页底部的注册引导 ——
+		"Sign up for free": "免费注册",
+		"to subscribe to this conversation on GitHub":
+			"以订阅 GitHub 上关于此对话的动态",
+		". Already have an account?": "。已有账户？",
 	},
-	rules: commonRules,
+	rules: [...commonRules, ...globalRules],
 };

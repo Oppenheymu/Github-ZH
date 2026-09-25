@@ -27,7 +27,8 @@ describe("matchPageModules", () => {
 
 	it("does not match unrelated subpaths", () => {
 		expect(routes("/owner")).toHaveLength(1);
-		expect(routes("/features")).toHaveLength(1);
+		// /features：profileDict 与 marketingDict 均命中，合并全部命中模块
+		expect(routes("/features")).toHaveLength(2);
 	});
 });
 

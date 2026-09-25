@@ -22,9 +22,18 @@ export const actionsDict: PageDict = {
 		Workflow: "工作流",
 		"View workflow file": "查看工作流文件",
 		"pushed by": "推送者：",
+		"synchronize by": "同步者：",
+		by: "由",
+		Commit: "提交",
 		"Run duration": "运行时长",
 		"Show options": "显示选项",
 		"completed successfully:": "已成功完成：",
+		// 运行状态 aria 前缀与结论徽标（属性值精确命中）
+		"currently running:": "当前正在运行：",
+		"queued:": "排队中：",
+		"requires action with the application:":
+			"需要在应用中处理：",
+		"Action required": "需要操作",
 		// —— 筛选 ——
 		"Filter workflow runs": "筛选工作流运行",
 		"Clear filters": "清除筛选",
@@ -62,6 +71,8 @@ export const actionsDict: PageDict = {
 			"使用本文中详述的每请求覆盖标头来验证你的应用与工作流",
 		// —— 半动态属性：词条键含具体工作流名，仅解当前值（属性不应用规则）——
 		"Pin CI": "置顶 CI",
+		// 工作流侧栏钉选状态（aria）
+		pinned: "已置顶",
 	},
 	rules: [
 		// 运行时长：12s / 3m 40s / 1h 2m 3s（长格式在前，首条命中生效）
@@ -81,7 +92,20 @@ export const actionsDict: PageDict = {
 			pattern: /^([\d,]+)s$/,
 			replacement: "$1 秒",
 		},
+		// 运行行菜单「查看」链接与 sr-only 页头标题
+		{
+			pattern: /^View #(\d+)$/,
+			replacement: "查看 #$1",
+		},
+		{
+			pattern: /^Actions: ([^/]+\/[^/]+)$/,
+			replacement: "Actions 页面：$1",
+		},
 		// 运行计数与带仓库名的页头标题
+		{
+			pattern: /^([\d,]+)\+ workflow runs?$/,
+			replacement: "$1+ 个工作流运行",
+		},
 		{
 			pattern: /^([\d,]+) workflow runs?$/,
 			replacement: "$1 个工作流运行",
@@ -89,6 +113,11 @@ export const actionsDict: PageDict = {
 		{
 			pattern: /^Workflow runs · (.+)$/,
 			replacement: "工作流运行 · $1",
+		},
+		// 运行行「opened by <用户>」片段：内部空白随 JSX 渲染浮动，用 \s+ 容错
+		{
+			pattern: /^opened\s+by$/,
+			replacement: "打开者：",
 		},
 	],
 };
