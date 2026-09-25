@@ -96,6 +96,61 @@
 				color: #7d8590;
 				font-size: 12px;
 			}
+			.divider {
+				margin: 12px 0;
+				border: none;
+				border-top: 1px solid #21262d;
+			}
+			.dev-title {
+				font-size: 12px;
+				color: #e6edf3;
+			}
+			/* 开发者模式的小号开关：复用 .track 配色，尺寸缩小 */
+			.switch-row.small .track {
+				width: 28px;
+				height: 16px;
+				border-radius: 8px;
+			}
+			.switch-row.small .track::after {
+				width: 12px;
+				height: 12px;
+			}
+			.switch-row.small input:checked + .track::after {
+				transform: translateX(12px);
+			}
+			#dev-panel {
+				margin-top: 10px;
+			}
+			#dev-count {
+				display: block;
+				color: #7d8590;
+				font-size: 12px;
+			}
+			.dev-actions {
+				display: flex;
+				gap: 8px;
+				margin-top: 8px;
+			}
+			.dev-actions button {
+				flex: 1;
+				padding: 5px 0;
+				background: #21262d;
+				color: #e6edf3;
+				border: 1px solid #30363d;
+				border-radius: 6px;
+				font-size: 12px;
+				cursor: pointer;
+			}
+			.dev-actions button:hover {
+				background: #30363d;
+			}
+			.dev-actions button:disabled {
+				opacity: 0.6;
+				cursor: default;
+			}
+			.hidden {
+				display: none;
+			}
 			footer {
 				padding: 10px 14px;
 				border-top: 1px solid #21262d;
@@ -108,7 +163,7 @@
 		<header>
 			<img src="icons/icon-32.png" alt="" width="24" height="24" />
 			<h1>GitHub 汉化</h1>
-			<span class="version">0.1.0</span>
+			<span class="version">0.2.0</span>
 		</header>
 		<main>
 			<label class="switch-row">
@@ -119,6 +174,27 @@
 			<p class="hint" id="hint">
 				翻译完全在本地进行，不联网、不收集任何数据。切换后立即生效（页面会自动刷新）。
 			</p>
+			<hr class="divider" />
+			<section>
+				<label class="switch-row small">
+					<span class="dev-title">开发者模式</span>
+					<input type="checkbox" id="dev-toggle" />
+					<span class="track"></span>
+				</label>
+				<p class="hint">
+					收集本站未翻译文本，仅存本地；默认关闭，开启前零收集。
+				</p>
+				<div id="dev-panel" class="hidden">
+					<span id="dev-count">已收集 0 条</span>
+					<div class="dev-actions">
+						<button type="button" id="dev-copy">复制</button>
+						<button type="button" id="dev-clear">清空</button>
+					</div>
+					<p class="hint">
+						导出内容可能含页面文本（文件名、仓库名等），复制后请自查再粘贴；全程无网络请求。
+					</p>
+				</div>
+			</section>
 		</main>
 		<footer>词典持续扩充中，欢迎在仓库反馈漏翻与误伤。</footer>
 		<script src="popup.js"></script>

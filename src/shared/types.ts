@@ -30,3 +30,22 @@ export interface DictView {
 	/** 已按优先级排序：页面模块在前（先命中先生效），global 兜底在后 */
 	readonly rules: readonly Rule[];
 }
+
+/** 开发者模式收集的未翻译种类：text 为文本节点，其余为元素属性名 */
+export type MissKind =
+	| "text"
+	| "title"
+	| "aria-label"
+	| "placeholder"
+	| "alt";
+
+/** 开发者模式收集的一条未翻译记录（kind + text 唯一，text 即词典候选键） */
+export interface MissItem {
+	readonly kind: MissKind;
+	/** GitHub 实际渲染的英文原文精确串（trim 后） */
+	readonly text: string;
+	/** 首次出现页面的 location.pathname */
+	readonly path: string;
+	/** 累计出现次数 */
+	readonly count: number;
+}

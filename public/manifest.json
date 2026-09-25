@@ -1,7 +1,7 @@
 {
 	"manifest_version": 3,
 	"name": "GitHub 汉化",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "将 GitHub 界面译为简体中文：纯本地词典替换，不联网、不收集任何数据。",
 	"permissions": ["storage"],
 	"icons": {

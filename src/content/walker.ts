@@ -2,6 +2,7 @@
 // DOM 相关部分保持薄层；纯函数 translateText 导出供测试复用
 
 import type { DictView } from "../shared/types.ts";
+import { recordAttr, recordText } from "./collector.ts";
 import {
 	EXCLUDE_SELECTOR,
 	isTranslatableText,
@@ -41,7 +42,12 @@ function applyTextNode(
 ): boolean {
 	const value = node.nodeValue ?? "";
 	const translated = translateText(value, view);
-	if (translated === null) return false;
+	if (translated === null) {
+		// 未命中词典与规则：开发者模式下记录 trimmed 原文
+		// （可翻译判定已滤掉空白 / CJK / 超长，排除容器由调用方整树跳过）
+		if (isTranslatableText(value)) recordText(value);
+		return false;
+	}
 	const lead = value.slice(
 		0,
 		value.length - value.trimStart().length,
@@ -62,7 +68,11 @@ function applyAttrs(
 		const trimmed = value.trim();
 		if (!isTranslatableText(trimmed)) continue;
 		const mapped = view.entries.get(trimmed);
-		if (mapped === undefined) continue;
+		if (mapped === undefined) {
+			// 未命中词条的属性值：开发者模式下记录（属性不应用正则规则，只会因缺词条漏翻）
+			recordAttr(name, trimmed);
+			continue;
+		}
 		const lead = value.slice(
 			0,
 			value.length - value.trimStart().length,

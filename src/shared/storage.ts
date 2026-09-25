@@ -1,30 +1,128 @@
-// chrome.storage.local 的启用开关读写（content script 与 popup 共用）
+// chrome.storage.local 的开关与开发者漏翻日志读写（content script 与 popup 共用）
 
-const KEY = "enabled";
+import type { MissItem, MissKind } from "./types.ts";
 
-/** 读取开关状态；从未写入过（异常数据）时默认开启 */
+const ENABLED_KEY = "enabled";
+const DEV_MODE_KEY = "devMode";
+const MISS_LOG_KEY = "missLog";
+
+/** 需要整页刷新联动的开关键（content script 侧任一变化即 reload） */
+export type ToggleKey = "enabled" | "devMode";
+
+/** 读取翻译开关；从未写入过（异常数据）时默认开启 */
 export async function readEnabled(): Promise<boolean> {
-	const data = await chrome.storage.local.get(KEY);
-	const value = data[KEY];
+	const data = await chrome.storage.local.get(ENABLED_KEY);
+	const value = data[ENABLED_KEY];
 	return typeof value === "boolean" ? value : true;
 }
 
-/** 写入开关状态（popup 调用；content 侧经 onChanged 收到变更） */
+/** 写入翻译开关（popup 调用；content 侧经 onChanged 收到变更） */
 export async function writeEnabled(
 	enabled: boolean,
 ): Promise<void> {
-	await chrome.storage.local.set({ [KEY]: enabled });
+	await chrome.storage.local.set({
+		[ENABLED_KEY]: enabled,
+	});
 }
 
-/** 监听开关变化；非布尔新值（脏数据）忽略不回调 */
-export function watchEnabled(
-	callback: (enabled: boolean) => void,
+/** 读取开发者模式开关；默认关闭（关闭即零收集） */
+export async function readDevMode(): Promise<boolean> {
+	const data = await chrome.storage.local.get(DEV_MODE_KEY);
+	const value = data[DEV_MODE_KEY];
+	return typeof value === "boolean" ? value : false;
+}
+
+/** 写入开发者模式开关（popup 调用；content 侧经 onChanged 整页刷新生效） */
+export async function writeDevMode(
+	devMode: boolean,
+): Promise<void> {
+	await chrome.storage.local.set({
+		[DEV_MODE_KEY]: devMode,
+	});
+}
+
+function isMissKind(value: unknown): value is MissKind {
+	return (
+		value === "text" ||
+		value === "title" ||
+		value === "aria-label" ||
+		value === "placeholder" ||
+		value === "alt"
+	);
+}
+
+/** 收窄 storage 取出的漏翻日志：仅保留结构合法的条目，脏数据静默丢弃 */
+function narrowMissLog(value: unknown): MissItem[] {
+	if (!Array.isArray(value)) return [];
+	const items: MissItem[] = [];
+	for (const raw of value) {
+		if (typeof raw !== "object" || raw === null) continue;
+		const record = raw as {
+			kind?: unknown;
+			text?: unknown;
+			path?: unknown;
+			count?: unknown;
+		};
+		const { kind, text, path, count } = record;
+		if (
+			!isMissKind(kind) ||
+			typeof text !== "string" ||
+			text.length === 0 ||
+			typeof path !== "string" ||
+			typeof count !== "number" ||
+			!Number.isFinite(count) ||
+			count < 1
+		)
+			continue;
+		items.push({ kind, text, path, count });
+	}
+	return items;
+}
+
+/** 读取漏翻日志；异常数据视为空 */
+export async function readMissLog(): Promise<MissItem[]> {
+	const data = await chrome.storage.local.get(MISS_LOG_KEY);
+	return narrowMissLog(data[MISS_LOG_KEY]);
+}
+
+/** 写入漏翻日志（content flush 落盘与 popup 清空调用） */
+export async function writeMissLog(
+	items: readonly MissItem[],
+): Promise<void> {
+	await chrome.storage.local.set({
+		[MISS_LOG_KEY]: [...items],
+	});
+}
+
+/** 监听漏翻日志变化（popup 打开期间实时刷新计数） */
+export function watchMissLog(
+	callback: (items: MissItem[]) => void,
 ): void {
 	chrome.storage.onChanged.addListener((changes, area) => {
 		if (area !== "local") return;
-		const change = changes[KEY];
-		if (!change || typeof change.newValue !== "boolean")
-			return;
-		callback(change.newValue);
+		const change = changes[MISS_LOG_KEY];
+		if (!change) return;
+		callback(narrowMissLog(change.newValue));
+	});
+}
+
+/**
+ * 监听开关类键（enabled / devMode）变化；任一变化即回调，
+ * 非布尔新值（脏数据）忽略不回调。
+ */
+export function watchToggles(
+	callback: (key: ToggleKey, value: boolean) => void,
+): void {
+	chrome.storage.onChanged.addListener((changes, area) => {
+		if (area !== "local") return;
+		for (const key of [
+			ENABLED_KEY,
+			DEV_MODE_KEY,
+		] as const) {
+			const change = changes[key];
+			if (!change || typeof change.newValue !== "boolean")
+				continue;
+			callback(key, change.newValue);
+		}
 	});
 }

@@ -20,7 +20,8 @@
 ## 使用
 
 - 点击工具栏扩展图标弹出开关，切换后页面自动刷新生效；
-- 开关状态保存在 `chrome.storage.local`，仅本机生效。
+- 开关状态保存在 `chrome.storage.local`，仅本机生效；
+- 遇到漏翻？popup 底部「开发者模式」（默认关闭，仅存本地）可收集未翻译文本并一键复制为 JSON，用法见[开发指南](docs/guides/development.md)。
 
 ## 隐私
 

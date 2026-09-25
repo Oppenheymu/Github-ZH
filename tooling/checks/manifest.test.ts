@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
+import packageJson from "../../package.json";
 import manifestJson from "../../public/manifest.json";
 import type { ManifestLike } from "./manifest.ts";
 import {
@@ -9,17 +10,19 @@ import {
 } from "./manifest.ts";
 
 const rootDir = join(import.meta.dir, "..", "..");
+// 版本断言跟随 package.json，升版无需改测试
+const packageVersion = packageJson.version;
 const options = {
 	publicDir: join(rootDir, "public"),
 	rootDir,
 	distDir: null,
-	packageVersion: "0.1.0",
+	packageVersion,
 };
 
 const validManifest: ManifestLike = {
 	manifest_version: 3,
 	name: "GitHub 汉化",
-	version: "0.1.0",
+	version: packageVersion,
 	description: "测试描述",
 	permissions: ["storage"],
 	icons: { "16": "icons/icon-16.png" },
