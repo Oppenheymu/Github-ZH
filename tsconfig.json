@@ -1,0 +1,10 @@
+{
+	"extends": "./tsconfig.base.json",
+	// 浏览器侧工程：扩展源码（content / popup / dict / shared）
+	"compilerOptions": {
+		// 测试文件走 bun:test，故同时挂 chrome 与 bun 两套类型
+		"types": ["chrome", "bun"],
+		"lib": ["ES2023", "DOM", "DOM.Iterable"]
+	},
+	"include": ["src"]
+}

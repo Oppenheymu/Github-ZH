@@ -1,0 +1,11 @@
+{
+	"extends": "../tsconfig.base.json",
+	// 脚本侧工程：tooling（构建 / 门禁 / 图标 / 打包），bun 直跑
+	"compilerOptions": {
+		"types": ["bun"],
+		"lib": ["ES2023"],
+		// 门禁脚本要 import public/manifest.json 做断言
+		"resolveJsonModule": true
+	},
+	"include": ["**/*.ts"]
+}

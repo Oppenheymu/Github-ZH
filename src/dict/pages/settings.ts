@@ -1,0 +1,27 @@
+// 设置模块：/settings 子树的导航与表单词条
+
+import type { PageDict } from "../../shared/types.ts";
+
+export const settingsDict: PageDict = {
+	route: /^\/settings/,
+	entries: {
+		"Public profile": "公开资料",
+		Account: "账户",
+		Appearance: "外观",
+		Accessibility: "辅助功能",
+		Emails: "电子邮件",
+		"Password and authentication": "密码与身份验证",
+		"Two-factor authentication": "双因素认证",
+		"SSH and GPG keys": "SSH 与 GPG 密钥",
+		"Saved replies": "保存的回复",
+		"Billing and plans": "账单与套餐",
+		"Developer settings": "开发者设置",
+		"Danger Zone": "危险区域",
+		"Update profile": "更新资料",
+		Name: "姓名",
+		Bio: "个人简介",
+		Company: "公司",
+		Location: "位置",
+	},
+	rules: [],
+};

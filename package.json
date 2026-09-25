@@ -1,0 +1,27 @@
+{
+    "name": "github-zh",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "packageManager": "bun@1.4.2",
+    "description": "GitHub 汉化浏览器扩展（Chrome / Edge，Manifest V3）",
+    "scripts": {
+        "build": "bun tooling/build.ts",
+        "watch": "bun tooling/build.ts --watch",
+        "check": "bun run lint && bun run typecheck && bun run check:dict && bun run check:manifest && bun run test",
+        "lint": "biome check .",
+        "format": "biome format --write .",
+        "typecheck": "bunx tsc -p tsconfig.json && bunx tsc -p tooling/tsconfig.json",
+        "check:dict": "bun tooling/checks/dict.ts",
+        "check:manifest": "bun tooling/checks/manifest.ts",
+        "test": "bun test",
+        "icons": "bun tooling/gen-icons.ts",
+        "pack": "bun tooling/pack.ts"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^2.5.14",
+        "@types/bun": "^1.4.2",
+        "@types/chrome": "^0.3.0",
+        "typescript": "^7.0.2"
+    }
+}

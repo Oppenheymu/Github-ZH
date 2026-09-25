@@ -1,0 +1,27 @@
+{
+	"manifest_version": 3,
+	"name": "GitHub 汉化",
+	"version": "0.1.0",
+	"description": "将 GitHub 界面译为简体中文：纯本地词典替换，不联网、不收集任何数据。",
+	"permissions": ["storage"],
+	"icons": {
+		"16": "icons/icon-16.png",
+		"32": "icons/icon-32.png",
+		"48": "icons/icon-48.png",
+		"128": "icons/icon-128.png"
+	},
+	"action": {
+		"default_title": "GitHub 汉化",
+		"default_popup": "popup.html"
+	},
+	"content_scripts": [
+		{
+			"matches": [
+				"https://github.com/*",
+				"https://gist.github.com/*"
+			],
+			"js": ["content.js"],
+			"run_at": "document_start"
+		}
+	]
+}

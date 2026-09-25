@@ -1,0 +1,45 @@
+// 仓库模块：任意两段路径（/owner/repo 及其子页）的仓库骨架词条
+// 注意：本模块是最泛化的路由，其余模块词条都会压过它（先到先得合并）
+
+import type { PageDict } from "../../shared/types.ts";
+
+export const repoDict: PageDict = {
+	route: /^\/[^/]+\/[^/]+/,
+	entries: {
+		Code: "代码",
+		Clone: "克隆",
+		"Download ZIP": "下载 ZIP",
+		"Open with GitHub Desktop": "使用 GitHub Desktop 打开",
+		"Go to file": "转到文件",
+		"Add file": "添加文件",
+		"Create new file": "创建新文件",
+		"Upload files": "上传文件",
+		"Switch branches/tags": "切换分支 / 标签",
+		Branch: "分支",
+		Branches: "分支",
+		Tags: "标签",
+		Releases: "发布",
+		Packages: "软件包",
+		Deployments: "部署",
+		Environments: "环境",
+		Wiki: "维基",
+		Insights: "洞察",
+		Actions: "操作",
+		Projects: "项目",
+		Pulse: "动态",
+		Commits: "提交",
+		History: "历史记录",
+		Blame: "追溯",
+		Raw: "原始",
+		"Copy raw file": "复制原始文件",
+		"Download raw file": "下载原始文件",
+		Permalink: "永久链接",
+		Languages: "语言",
+		About: "关于",
+		Compare: "比较",
+		"Create pull request": "创建拉取请求",
+		"Commit changes": "提交更改",
+		"Propose changes": "建议更改",
+	},
+	rules: [],
+};

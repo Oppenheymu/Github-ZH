@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8" />
+		<title>GitHub 汉化</title>
+		<style>
+			:root {
+				color-scheme: dark;
+			}
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+			body {
+				width: 300px;
+				background: #0d1117;
+				color: #e6edf3;
+				font-family:
+					system-ui,
+					"Microsoft YaHei",
+					sans-serif;
+				font-size: 13px;
+				line-height: 1.5;
+			}
+			header {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				padding: 12px 14px;
+				border-bottom: 1px solid #21262d;
+			}
+			header h1 {
+				font-size: 14px;
+				font-weight: 600;
+			}
+			/* 图标为黑色剪影，popup 深色背景下反色显示 */
+			header img {
+				filter: invert(1);
+			}
+			header .version {
+				margin-left: auto;
+				color: #7d8590;
+				font-size: 11px;
+			}
+			main {
+				padding: 12px 14px;
+			}
+			.switch-row {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 10px;
+				cursor: pointer;
+				user-select: none;
+			}
+			.switch-row input {
+				position: absolute;
+				opacity: 0;
+				pointer-events: none;
+			}
+			.track {
+				position: relative;
+				width: 36px;
+				height: 20px;
+				border-radius: 10px;
+				background: #30363d;
+				transition: background 0.15s;
+				flex-shrink: 0;
+			}
+			.track::after {
+				content: "";
+				position: absolute;
+				top: 2px;
+				left: 2px;
+				width: 16px;
+				height: 16px;
+				border-radius: 50%;
+				background: #e6edf3;
+				transition: transform 0.15s;
+			}
+			input:checked + .track {
+				background: #238636;
+			}
+			input:checked + .track::after {
+				transform: translateX(16px);
+			}
+			#status.on {
+				color: #3fb950;
+			}
+			#status.off {
+				color: #f85149;
+			}
+			.hint {
+				margin-top: 10px;
+				color: #7d8590;
+				font-size: 12px;
+			}
+			footer {
+				padding: 10px 14px;
+				border-top: 1px solid #21262d;
+				color: #7d8590;
+				font-size: 11px;
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<img src="icons/icon-32.png" alt="" width="24" height="24" />
+			<h1>GitHub 汉化</h1>
+			<span class="version">0.1.0</span>
+		</header>
+		<main>
+			<label class="switch-row">
+				<span id="status">加载中…</span>
+				<input type="checkbox" id="toggle" />
+				<span class="track"></span>
+			</label>
+			<p class="hint" id="hint">
+				翻译完全在本地进行，不联网、不收集任何数据。切换后立即生效（页面会自动刷新）。
+			</p>
+		</main>
+		<footer>词典持续扩充中，欢迎在仓库反馈漏翻与误伤。</footer>
+		<script src="popup.js"></script>
+	</body>
+</html>
