@@ -17,13 +17,14 @@
 
 import {
 	access,
+	mkdir,
 	mkdtemp,
 	readFile,
 	rm,
 	writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type {
 	MissItem,
@@ -796,6 +797,9 @@ if (import.meta.main) {
 		const report = await runVerify(options);
 		const json = JSON.stringify(report, null, 2);
 		if (options.out) {
+			await mkdir(dirname(options.out), {
+				recursive: true,
+			}).catch(() => {});
 			await writeFile(options.out, json, "utf8");
 			const total = report.items.length;
 			console.log(
