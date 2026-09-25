@@ -1,11 +1,11 @@
 import { describe, expect, it } from "bun:test";
-import { globalDict } from "../dict/global.ts";
-import { pageDicts } from "../dict/index.ts";
+import { globalDict } from "../../dict/global.ts";
+import { pageDicts } from "../../dict/index.ts";
 import type {
 	GlobalDict,
 	PageDict,
-} from "../shared/types.ts";
-import { buildView, matchPageModules } from "./pages.ts";
+} from "../../shared/types.ts";
+import { buildView, matchPageModules } from "../pages.ts";
 
 const routes = (pathname: string) =>
 	matchPageModules(pathname, pageDicts).map(

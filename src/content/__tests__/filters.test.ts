@@ -3,7 +3,7 @@ import {
 	EXCLUDE_SELECTOR,
 	hasCJK,
 	isTranslatableText,
-} from "./filters.ts";
+} from "../filters.ts";
 
 describe("hasCJK", () => {
 	it("detects Han characters", () => {

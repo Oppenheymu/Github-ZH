@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import type { DictView } from "../shared/types.ts";
-import { translateText } from "./walker.ts";
+import type { DictView } from "../../shared/types.ts";
+import { translateText } from "../walker.ts";
 
 const view: DictView = {
 	entries: new Map([
