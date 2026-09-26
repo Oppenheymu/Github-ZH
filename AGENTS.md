@@ -48,14 +48,14 @@ bun run pack                    # dist/ 打 zip（Chrome Web Store / Edge Add-on
 ## 代码风格
 
 - 缩进 tab、双引号、无分号（asNeeded）——**biome 是格式的唯一权威**（`.editorconfig` 已与之对齐：代码 tab，文档 `.md`/`.yml` 2 空格）。
-- TS 严格全家桶（`tsconfig.base.json`）：`strict` + `noUncheckedIndexedAccess` + `noPropertyAccessFromIndexSignature` + `exactOptionalPropertyTypes` + `noUnusedLocals/Parameters` + `verbatimModuleSyntax` + `isolatedModules` + `erasableSyntaxOnly`；类型导入一律 `import type`；显式 `any` 保持 0，动态边界用 `unknown` + 收窄。
+- TS 严格全家桶（根 `tsconfig.json` 与 `tooling/tsconfig.json` **各维护一份完整 `compilerOptions`**，不用共享 extends 基座；改严格选项必须同步两处）：`strict` + `noUncheckedIndexedAccess` + `noPropertyAccessFromIndexSignature` + `exactOptionalPropertyTypes` + `noUnusedLocals/Parameters` + `verbatimModuleSyntax` + `isolatedModules` + `erasableSyntaxOnly`；类型导入一律 `import type`；显式 `any` 保持 0，动态边界用 `unknown` + 收窄。
 - 测试与源码同目录 `*.test.ts`，`bun:test`（`describe` / `it`，英文短描述）；门禁与工具脚本零第三方依赖、bun 直跑，校验逻辑导出为纯函数（`main` 用 `import.meta.main` 守卫）供测试复用；错误信息中文，失败统一 `process.exitCode = 1`。
 
 ## 已知坑（一行一条，细节见 docs/guides/development.md）
 
 - **biome.json 里不能写注释**：出现 `//` 会让 Biome **静默丢弃整个 `overrides` 数组**。
 - **Bun.build 没有 `outfile`**：产物命名靠 `naming` 模板，content 与 popup 按入口分别构建；iife 是硬约束（见硬性约束 5）。
-- **图标是静态资产，没有生成脚本**：`public/icons/` 下的 16/32/48/128 PNG 直接提交在仓库里，改图标就替换这四个文件（四个尺寸都要换）；`assets/icon.svg` 与 `tooling/gen-icons.ts` 已删除，`bun run icons` 不再存在（历史：曾用无头浏览器 CDP 栅格化 SVG，新版无头浏览器的 `--screenshot` 不支持透明背景，故当时必须走 CDP）。
+- **图标是静态资产，没有生成脚本**：`public/icons/` 下的 `logo-16.jpg` / `logo-32.jpg` / `logo-48.jpg` / `logo-128.jpg` 直接提交在仓库里，改图标就替换这四个文件（四个尺寸都要换）；**改文件名必须同步 `public/manifest.json` 的 `icons` 与 `public/popup.html` 的 `<img src>`**（`check:manifest` 校验引用存在性，漏改即红灯）；`assets/icon.svg` 与 `tooling/gen-icons.ts` 已删除，`bun run icons` 不再存在（历史：曾用无头浏览器 CDP 栅格化 SVG，新版无头浏览器的 `--screenshot` 不支持透明背景，故当时必须走 CDP）。
 - **GitHub 正在渐进迁移 React 重写页面**：类名 / 结构变动导致漏翻或排除失灵属常态，修词条前先修对应排除选择器。
 - **防翻译循环现在是两件事**：脚本守卫（文本含非拉丁字母即视为已译文，语言无关，见 `src/content/filters.ts`）负责收敛，结构门禁（译文不得等于任何键、替换产物不得再命中规则）负责让循环的第二条件不可能成立。**拉丁语系目标语言只能靠后者**——它与源语言同字系，脚本守卫结构上失效。
 - **`core/canonical.jsonc` 不进 content 包**：它只被 `tooling/checks/dict.ts` import；一旦 `src/**` 也 import 它，1618 个键就会进包（约 20 KB）。

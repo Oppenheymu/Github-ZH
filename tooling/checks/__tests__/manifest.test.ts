@@ -41,7 +41,7 @@ const validManifest: ManifestLike = {
 	version: packageVersion,
 	description: "__MSG_appDesc__",
 	permissions: ["storage"],
-	icons: { "16": "icons/icon-16.png" },
+	icons: { "16": "icons/logo-16.jpg" },
 	action: {
 		default_popup: "popup.html",
 		default_title: "__MSG_appName__",
