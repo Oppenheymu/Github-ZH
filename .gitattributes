@@ -1,0 +1,6 @@
+# 行尾统一为 LF：仓库里已提交的文件全部是 LF，Biome 的 lineEnding 也按 LF 校验。
+# 不加这一条时，Windows 上 Git 的全局 core.autocrlf=true 会在检出时把工作区变成
+# CRLF，`biome check`（bun run check 的第一道门禁）就会对每个被检出的文件报
+# 「Formatter would have printed the following content」——diff 里除行尾外空无一物，
+# 红灯却挡住所有提交。text=auto 只对文本生效，图片等二进制资产不受影响。
+* text=auto eol=lf
