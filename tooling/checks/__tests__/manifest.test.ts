@@ -17,7 +17,7 @@ import {
 	validateManifest,
 } from "../manifest.ts";
 
-const rootDir = join(import.meta.dir, "..", "..");
+const rootDir = join(import.meta.dir, "..", "..", "..");
 const publicDir = join(rootDir, "public");
 // 版本断言跟随 package.json，升版无需改测试
 const packageVersion = packageJson.version;

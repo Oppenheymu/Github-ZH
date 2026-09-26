@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import canonicalRaw from "../../src/dict/core/canonical.jsonc";
+import canonicalRaw from "../../../src/dict/core/canonical.jsonc";
 import {
 	buildEntries,
 	buildModules,
