@@ -1,7 +1,37 @@
 {
-	"extends": "../tsconfig.base.json",
 	// 脚本侧工程：tooling（构建 / 门禁 / 图标 / 打包），bun 直跑
+	// 编译选项在本文件内完整维护，与根 tsconfig.json 各自独立（不用共享 extends 基座）
 	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"moduleDetection": "force",
+		"strict": true,
+		// 索引访问必须显式 undefined 检查
+		"noUncheckedIndexedAccess": true,
+		// 属性访问一律走点号之外仍需显式声明（动态 key 强制方括号）
+		"noPropertyAccessFromIndexSignature": true,
+		"exactOptionalPropertyTypes": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitOverride": true,
+		"allowUnreachableCode": false,
+		"allowUnusedLabels": false,
+		// 模块纪律：类型导入一律 import type；禁用 TS 独有的运行时语法
+		"verbatimModuleSyntax": true,
+		"isolatedModules": true,
+		"erasableSyntaxOnly": true,
+		"noUncheckedSideEffectImports": true,
+		// bundler 解析下允许相对导入带 .ts 扩展名（bun 直跑 TS 的惯例）
+		"allowImportingTsExtensions": true,
+		"forceConsistentCasingInFileNames": true,
+		"noErrorTruncation": true,
+		// 第三方 d.ts 不校验（chrome / bun 类型体量大，自家代码全量严格）
+		"skipLibCheck": true,
+		"noEmit": true,
+		// 脚本侧不给 DOM：误用 window / document 直接编译报错
 		"types": ["bun"],
 		"lib": ["ES2023"],
 		// 门禁脚本要 import public/manifest.json 做断言
