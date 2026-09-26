@@ -975,6 +975,25 @@
 				{
 					"id": "settings/budget-amount-limit",
 					"pattern": "^(?<amount>[$][\\d.,]+) budget$"
+				},
+				// —— 许可页（/settings/billing/licensing）的「包含 / 不包含」清单 ——
+				// 含数量的四条按形态各锚一条（数量随方案变化）：数值与单位原样保留，
+				// 只把英文结构换成中文语序
+				{
+					"id": "settings/licensing-actions-minutes-per-month",
+					"pattern": "^(?<count>[\\d,]+) Actions minutes\\/month$"
+				},
+				{
+					"id": "settings/licensing-packages-storage",
+					"pattern": "^(?<count>[\\d.,]+)(?<unit>GB|MB|TB|KB) of Packages storage$"
+				},
+				{
+					"id": "settings/licensing-codespaces-compute",
+					"pattern": "^(?<count>[\\d,]+) core-hours of Codespaces compute per developer$"
+				},
+				{
+					"id": "settings/licensing-codespaces-storage",
+					"pattern": "^(?<count>[\\d.,]+)(?<unit>GB|MB|TB|KB) of Codespaces storage per developer$"
 				}
 			]
 		},

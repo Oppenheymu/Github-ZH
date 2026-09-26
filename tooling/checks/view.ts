@@ -57,6 +57,8 @@ export const PROBE_PATHS: readonly string[] = [
 	"/settings/billing/ai_usage",
 	// 预算与提醒页同理：同模块的第三个页面，自带 settings/budget-* 规则
 	"/settings/billing/budgets",
+	// 许可页：同模块的第四个页面，自带 settings/licensing-* 四条配额规则
+	"/settings/billing/licensing",
 	"/microsoft/vscode/actions",
 	"/microsoft/vscode/agents",
 	"/microsoft/vscode/commits",

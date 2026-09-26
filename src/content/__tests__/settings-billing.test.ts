@@ -812,3 +812,150 @@ describe("预算与提醒页的实机节点边界", () => {
 		}
 	});
 });
+
+/**
+ * 许可页（/settings/billing/licensing）的实机文本节点。
+ *
+ * 边界强度与其它账单子页同档：路由只命中 ^/settings/billing，页面需登录、
+ * **未进开发者模式导出**，节点原文按 2026-09 的实机截图逐行誊录。
+ * 截图里「许可（标题）」「GitHub Copilot」「Community support」「Web-based support」
+ * 「Code owners」「Required reviewers」「Multiple reviewers in pull requests」
+ * 「Protected branches」已由既有词条译出，故这里只收当时仍是英文的那些节点。
+ */
+const LICENSING_NODES: readonly string[] = [
+	"Upgrade Individual Plan",
+	"Upgrade to Business",
+	"Active subscription",
+	"Copilot Free",
+	"You can upgrade to Copilot Pro at any time. Check out this",
+	// 链接节点「documentation」刻意不收录（译文必然与键同形），不在本清单里
+	"Current GitHub base plan",
+	"Compare base plans",
+	"Upgrade to GitHub Pro",
+	"The basics for all developers",
+	"Unlimited public/private repos",
+	"Unlimited collaborators",
+	"2,000 Actions minutes/month",
+	"500MB of Packages storage",
+	"120 core-hours of Codespaces compute per developer",
+	"15GB of Codespaces storage per developer",
+	"Community support",
+	"Not included:",
+	"Free Codespaces usage per organization",
+	"Increase Codespaces",
+	"spend limits",
+	"Pages for static website hosting",
+	"See all features and compare plans",
+];
+
+/** 许可页命中的模块视图（与其它账单子页同一组模块） */
+const licensingView = buildView(
+	"/settings/billing/licensing",
+	dictForLocale("zh-CN"),
+	new Map(Object.entries(dictCore.aliases)),
+);
+
+describe("许可页的实机节点边界", () => {
+	it("translates every text node GitHub actually renders", () => {
+		for (const node of LICENSING_NODES) {
+			for (const variant of withWhitespace(node)) {
+				const translated = translateText(
+					variant,
+					licensingView,
+				);
+				expect(
+					translated,
+					`未命中：${JSON.stringify(variant)}`,
+				).not.toBeNull();
+				expect(translated ?? "").toMatch(/[\u4e00-\u9fff]/);
+			}
+		}
+	});
+
+	it("keeps the product names and the docs link as-is", () => {
+		// 纯专名与域名式链接词条不收录：收录只会让译文与键同形（门禁也拒）。
+		//「GitHub Free」是方案名（界面里就叫 GitHub Free），同样不收录
+		for (const raw of [
+			"GitHub Copilot",
+			"GitHub Free",
+			"GitHub",
+			"Copilot",
+			"documentation",
+		]) {
+			expect(
+				translateText(raw, licensingView),
+				`不应被翻译：${JSON.stringify(raw)}`,
+			).toBeNull();
+		}
+	});
+
+	it("rewrites the plan quota lines with their numbers", () => {
+		// 四条配额清单：数值与单位原样保留，英文结构换成中文语序
+		expect(
+			translateText(
+				"2,000 Actions minutes/month",
+				licensingView,
+			),
+		).toBe("2,000 分钟 Actions/月");
+		expect(
+			translateText(
+				"500MB of Packages storage",
+				licensingView,
+			),
+		).toBe("500MB Packages 存储");
+		expect(
+			translateText(
+				"120 core-hours of Codespaces compute per developer",
+				licensingView,
+			),
+		).toBe("每位开发者 120 个代码空间核心小时");
+		expect(
+			translateText(
+				"15GB of Codespaces storage per developer",
+				licensingView,
+			),
+		).toBe("每位开发者 15GB 代码空间存储");
+		// 数量变化不影响匹配
+		expect(
+			translateText(
+				"3,000 Actions minutes/month",
+				licensingView,
+			),
+		).toBe("3,000 分钟 Actions/月");
+		// 缺「of」「per developer」等结构的形态不命中，保留原文而不是截成半句
+		expect(
+			translateText(
+				"500MB Packages storage",
+				licensingView,
+			),
+		).toBeNull();
+		expect(
+			translateText(
+				"120 core-hours of compute",
+				licensingView,
+			),
+		).toBeNull();
+	});
+
+	it("reuses the marketing module for the shared feature list", () => {
+		// 「不包含」清单与左侧部分条目和定价页共用文案：跨模块复用正是不重复登记的理由
+		const expectations: readonly [string, string][] = [
+			["Community support", "社区支持"],
+			["Web-based support", "网页端支持"],
+			["Code owners", "代码所有者"],
+			["Required reviewers", "必需的审查者"],
+			[
+				"Multiple reviewers in pull requests",
+				"拉取请求中的多名审查者",
+			],
+			["Protected branches", "受保护的分支"],
+			["Licensing", "许可"],
+		];
+		for (const [raw, expected] of expectations) {
+			expect(
+				translateText(raw, licensingView),
+				`期望复用既有译文：${JSON.stringify(raw)}`,
+			).toBe(expected);
+		}
+	});
+});

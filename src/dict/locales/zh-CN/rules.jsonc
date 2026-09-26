@@ -467,6 +467,11 @@
 		// 预算与提醒页的标题行计数与预算行金额（金额含美元符号，见上一条的说明）
 		"settings/budget-count": "$<count> 条账户预算",
 		"settings/budget-amount-spent": "已支出 $<amount>",
-		"settings/budget-amount-limit": "$<amount> 预算"
+		"settings/budget-amount-limit": "$<amount> 预算",
+		// 许可页「包含」清单里带数量的四条：数值与单位原样保留，只把英文结构换成中文语序
+		"settings/licensing-actions-minutes-per-month": "$<count> 分钟 Actions/月",
+		"settings/licensing-packages-storage": "$<count>$<unit> Packages 存储",
+		"settings/licensing-codespaces-compute": "每位开发者 $<count> 个代码空间核心小时",
+		"settings/licensing-codespaces-storage": "每位开发者 $<count>$<unit> 代码空间存储"
 	}
 }

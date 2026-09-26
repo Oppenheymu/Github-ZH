@@ -695,10 +695,51 @@
 				"Yes",
 				"budget",
 				// 行尾溢出菜单按钮的无障碍名（账单页其它列表同样只暴露 aria-label）
-				"Budget options"
+				"Budget options",
 				// 注意：金额与计数**不在此登记**（「$0 spent」「$0 budget」「5 Account budgets」
 				// 随数据变化），由 core/rules.jsonc 的 settings/budget-amount-spent /
 				// settings/budget-amount-limit 与 settings/budget-count 覆盖
+				// —— 许可页（/settings/billing/licensing，账单侧栏「Licensing」进入）——
+				// 键逐字抄自 2026-09 的实机截图（页面需登录，未进开发者模式导出），节点边界见
+				// src/content/__tests__/settings-billing.test.ts 的 LICENSING_NODES。
+				// 页面标题「Licensing」不在此登记：pages/settings 已提供同一键（模块更靠前）。
+				// Copilot 区块
+				"Upgrade Individual Plan",
+				"Upgrade to Business",
+				"Active subscription",
+				"Copilot Free",
+				"You can upgrade to Copilot Pro at any time. Check out this",
+				// 链接节点「documentation」（指向 /docs）与方案名「GitHub Free」都**不登记**：
+				// 中文界面里它们保持原样，译文必然与键同形（自触发循环，门禁会拒），
+				// 登记成死键只会把 zh-CN 覆盖率从 100% 拉下来（见 tooling/checks/__tests__/dict.test.ts
+				// 的「中文是完整词典」断言）。未命中即保留英文，这才是正确做法
+				// GitHub 基础方案区块
+				"Current GitHub base plan",
+				"Compare base plans",
+				"Upgrade to GitHub Pro",
+				"The basics for all developers",
+				// 「包含」清单（带数量的四条由 rules 覆盖，见 core/rules.jsonc 的
+				// settings/licensing-*；「Community support」「Web-based support」由 pages/marketing 提供）
+				"Unlimited public/private repos",
+				"Unlimited collaborators",
+				// 「不包含」清单（「Not included」是清单上方的小标题，独立成节点；
+				// 带链接的两行拆成「片段 + 链接文本」两个节点）
+				"Not included:",
+				"Free Codespaces usage per organization",
+				"Increase Codespaces",
+				"spend limits",
+				"Required status checks",
+				"Pages for static website hosting",
+				// 「Community support」等功能清单文案在定价页由 pages/marketing 提供，但那条路由是
+				// ^/(features|pricing)，在本页不生效——故本模块必须各来一份（译文与定价页保持一致）
+				"Community support",
+				"Web-based support",
+				"Code owners",
+				"Required reviewers",
+				"Multiple reviewers in pull requests",
+				"Protected branches",
+				// 清单底部的对比入口
+				"See all features and compare plans"
 			]
 		},
 		{

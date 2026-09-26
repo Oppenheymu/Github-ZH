@@ -153,6 +153,47 @@
 		"Yes": "是",
 		"budget": "预算",
 		// 行尾溢出菜单按钮的无障碍名
-		"Budget options": "预算选项"
+		"Budget options": "预算选项",
+		// —— 许可页（/settings/billing/licensing）——
+		// 键来自 2026-09 的实机截图逐行誊录（页面需登录，未进开发者模式导出），
+		// 节点边界见 src/content/__tests__/settings-billing.test.ts 的 LICENSING_NODES。
+		// 页面标题「Licensing」沿用 pages/settings 的「许可」；「GitHub Copilot」「GitHub Free」
+		// 这类纯专名与「Copilot」一样不收录（未命中即保留英文）；「Community support」等
+		// 功能清单文案由 pages/marketing 提供，不在此重复登记。
+		// Copilot 区块
+		"Upgrade Individual Plan": "升级个人方案",
+		"Upgrade to Business": "升级到商业版",
+		"Active subscription": "生效中的订阅",
+		"Copilot Free": "Copilot 免费版",
+		// 链接前后的片段各成节点（"…Check out this " + 链接 + " for more details."）；
+		// 链接文本「documentation」是 …/docs 的域名式词条，中文界面里没有不同于键的写法
+		// （global 的「Documentation」是另一条键、大小写不同），故按「译文不得与键同形」
+		// 的门禁不收录，未命中保留英文
+		"You can upgrade to Copilot Pro at any time. Check out this": "你可以随时升级到 Copilot Pro。详情请查阅",
+		// GitHub 基础方案区块
+		"Current GitHub base plan": "当前 GitHub 基础方案",
+		"Compare base plans": "对比基础方案",
+		"Upgrade to GitHub Pro": "升级到 GitHub Pro",
+		"The basics for all developers": "面向所有开发者的基础功能",
+		// 「包含」清单（带数量的四条由 core/rules.jsonc 的 settings/licensing-* 覆盖）
+		"Unlimited public/private repos": "不限数量的公开 / 私有仓库",
+		"Unlimited collaborators": "不限数量的协作者",
+		// 「不包含」清单
+		"Not included:": "不包含",
+		"Free Codespaces usage per organization": "每个组织的免费代码空间用量",
+		"Increase Codespaces": "提高代码空间",
+		"spend limits": "支出限额",
+		"Required status checks": "必需的状态检查",
+		"Pages for static website hosting": "用于静态网站托管的 Pages",
+		// 功能清单文案：定价页由 pages/marketing 提供同键译文，本页路由不命中它，故这里各来一份
+		// （译文逐字与定价页保持一致，避免同一句在不同页面读起来不一样）
+		"Community support": "社区支持",
+		"Web-based support": "网页端支持",
+		"Code owners": "代码所有者",
+		"Required reviewers": "必需的审查者",
+		"Multiple reviewers in pull requests": "拉取请求中的多名审查者",
+		"Protected branches": "受保护的分支",
+		// 清单底部的对比入口
+		"See all features and compare plans": "查看所有功能并对比各方案"
 	}
 }
