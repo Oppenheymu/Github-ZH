@@ -14,7 +14,29 @@ const TRANSLATABLE_ATTRS = [
 	"aria-label",
 	"placeholder",
 	"alt",
+	// 按钮类 <input> 的可见文案就在 value 上（Rails 表单：
+	// `<input type="submit" value="Save Trending settings" data-disable-with="…">`），
+	// 不放进来这类按钮结构上永远翻不了。仅限按钮类，见 isButtonInputValue。
+	"value",
+	// Rails 提交期间把 value 换成 data-disable-with 的内容，同一句文案再来一份
+	"data-disable-with",
 ] as const;
+
+/** 只对按钮类 <input> 翻 value；文本输入框的 value 是用户内容 */
+const BUTTON_INPUT_TYPES = new Set([
+	"submit",
+	"button",
+	"reset",
+]);
+
+/** 该元素是否是「value 即可见文案」的按钮类 <input> */
+function isButtonInputValue(element: Element): boolean {
+	if (element.tagName !== "INPUT") return false;
+	const type = (
+		element.getAttribute("type") ?? "text"
+	).toLowerCase();
+	return BUTTON_INPUT_TYPES.has(type);
+}
 
 /**
  * 查词：先按 DOM 文本直查当前语言词典，未命中再走上游改名映射
@@ -95,13 +117,26 @@ function applyAttrs(
 	view: DictView,
 ): void {
 	for (const name of TRANSLATABLE_ATTRS) {
+		if (
+			(name === "value" || name === "data-disable-with") &&
+			!isButtonInputValue(element)
+		) {
+			continue;
+		}
 		const value = element.getAttribute(name);
 		if (value === null) continue;
 		if (!isTranslatableText(value)) continue;
 		const mapped = lookup(view, normalizeKey(value));
 		if (mapped === undefined) {
-			// 未命中词条的属性值：开发者模式下记录（属性不应用正则规则，只会因缺词条漏翻）
-			recordAttr(name, normalizeKey(value));
+			// 未命中词条的属性值：开发者模式下记录（属性不应用正则规则，只会因缺词条漏翻）。
+			// value / data-disable-with 是按钮文案，归到 aria-label 一类（MissKind 是
+			// 开发者日志的维度，不为按钮文案单开一类，避免 storage 结构跟着变）
+			recordAttr(
+				name === "value" || name === "data-disable-with"
+					? "aria-label"
+					: name,
+				normalizeKey(value),
+			);
 			continue;
 		}
 		const lead = value.slice(
@@ -109,7 +144,10 @@ function applyAttrs(
 			value.length - value.trimStart().length,
 		);
 		const trail = value.slice(value.trimEnd().length);
-		element.setAttribute(name, `${lead}${mapped}${trail}`);
+		const next = `${lead}${mapped}${trail}`;
+		// 与文本节点同理：写回同值也会触发 attribute 变更记录，跳过以免自我触发
+		if (next === value) continue;
+		element.setAttribute(name, next);
 	}
 }
 

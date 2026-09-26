@@ -147,6 +147,9 @@ describe("translateTree 的同值写入守卫", () => {
 		getAttribute(name: string): string | null {
 			return this.attrs.get(name) ?? null;
 		}
+		setAttribute(name: string, value: string): void {
+			this.attrs.set(name, value);
+		}
 		closest(selector: string): StubElement | null {
 			const parts = selector
 				.split(",")
@@ -250,5 +253,128 @@ describe("translateTree 的同值写入守卫", () => {
 			translateTree(root as unknown as Node, view),
 		).toBe(0);
 		expect(node.writes).toHaveLength(1);
+	});
+
+	// —— 按钮类 <input> 的 value 翻译（Rails 表单按钮的可见文案在 value 上）——
+	const buttonView: DictView = {
+		entries: new Map([
+			["Save Trending settings", "保存趋势设置"],
+			["Update contact information", "更新联系信息"],
+		]),
+		aliases: new Map(),
+		rules: [],
+	};
+
+	/** 造一个 <input>，复刻 `<input type="submit" value="…">` 的形态 */
+	function makeInput(
+		attrs: Record<string, string>,
+	): StubElement {
+		const element = new StubElement("input");
+		for (const [name, value] of Object.entries(attrs)) {
+			element.setAttribute(name, value);
+		}
+		return element;
+	}
+
+	it("translates value on button-like inputs", () => {
+		const element = makeInput({
+			type: "submit",
+			name: "commit",
+			value: "Save Trending settings",
+			"data-disable-with": "Save Trending settings",
+			class: "btn",
+		});
+		translateTree(element as unknown as Node, buttonView);
+		expect(element.getAttribute("value")).toBe(
+			"保存趋势设置",
+		);
+		// Rails 提交期间会把 value 换成 data-disable-with 的内容，同样要翻
+		expect(element.getAttribute("data-disable-with")).toBe(
+			"保存趋势设置",
+		);
+		// 其余属性原样保留
+		expect(element.getAttribute("name")).toBe("commit");
+		expect(element.getAttribute("class")).toBe("btn");
+	});
+
+	it("leaves text input values untouched", () => {
+		const element = makeInput({
+			type: "text",
+			name: "user[blog]",
+			value: "Save Trending settings",
+		});
+		translateTree(element as unknown as Node, buttonView);
+		expect(element.getAttribute("value")).toBe(
+			"Save Trending settings",
+		);
+	});
+
+	it("leaves value alone when the input has no type", () => {
+		const element = makeInput({
+			value: "Save Trending settings",
+		});
+		translateTree(element as unknown as Node, buttonView);
+		expect(element.getAttribute("value")).toBe(
+			"Save Trending settings",
+		);
+	});
+
+	it("leaves unknown button labels alone", () => {
+		const element = makeInput({
+			type: "submit",
+			value: "Not in the dictionary",
+		});
+		translateTree(element as unknown as Node, buttonView);
+		expect(element.getAttribute("value")).toBe(
+			"Not in the dictionary",
+		);
+	});
+});
+
+describe("引擎的属性观察加固", () => {
+	it("observes value attributes so a rewritten label gets retranslated", async () => {
+		// 记录 observe 的配置：value 文案来自属性，页面（Turbo 快照 /
+		// data-disable-with）改回英文时必须能再次触发翻译
+		const calls: MutationObserverInit[] = [];
+		const g = globalThis as unknown as Record<
+			string,
+			unknown
+		>;
+		const previous = g["MutationObserver"];
+		g["MutationObserver"] = class {
+			constructor(_callback: unknown) {
+				void _callback;
+			}
+			observe(
+				_root: unknown,
+				options: MutationObserverInit,
+			) {
+				calls.push(options);
+			}
+			disconnect() {}
+		};
+		try {
+			const { TranslationEngine } = await import(
+				"../engine.ts"
+			);
+			const engine = new TranslationEngine({
+				getView: () => ({
+					entries: new Map(),
+					aliases: new Map(),
+					rules: [],
+				}),
+				isEnabled: () => false,
+			});
+			engine.start({} as unknown as Node);
+			expect(calls).toHaveLength(1);
+			expect(calls[0]?.attributes).toBe(true);
+			expect(calls[0]?.attributeFilter).toEqual([
+				"value",
+				"data-disable-with",
+			]);
+			expect(calls[0]?.characterData).toBe(true);
+		} finally {
+			g["MutationObserver"] = previous;
+		}
 	});
 });

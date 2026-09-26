@@ -31,6 +31,12 @@ export class TranslationEngine {
 			childList: true,
 			subtree: true,
 			characterData: true,
+			// 属性只观察 value / data-disable-with：按钮类 <input> 的可见文案就在
+			// 这两个属性上（见 walker.ts 的 isButtonInputValue）。不加 attributes 的话，
+			// 页面把 value 改回英文（Turbo 快照 / data-disable-with）后我们不会重翻。
+			// 用 attributeFilter 把噪音压到最小：只有这两个属性变化才产生记录。
+			attributes: true,
+			attributeFilter: ["value", "data-disable-with"],
 		});
 		this.#enqueue(root);
 	}
