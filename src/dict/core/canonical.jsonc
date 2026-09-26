@@ -199,6 +199,7 @@
 				"Link to social profile 2",
 				"Link to social profile 3",
 				"Link to social profile 4",
+				"You can @mention other users and organizations to link to them.",
 				"Company",
 				"You can @mention your company’s GitHub organization to link it.",
 				"Location",
@@ -219,16 +220,31 @@
 				"Profile settings",
 				"Show Achievements on my profile",
 				"Your achievements will be shown on your profile.",
+				"Update preferences",
 				// —— GitHub Developer Program ——
 				"GitHub Developer Program",
 				"Building an application, service, or tool that integrates with GitHub? Join the GitHub Developer Program, or read more about it at our GitHub developer program.",
+				// 说明句被「GitHub Docs」链接拆成两个节点，链接前后各自成词条
+				"GitHub Docs",
+				"has guides, API and webhook references, information about creating GitHub Apps and other resources for building applications that integrate with GitHub. Make sure your contact information is up-to-date below. Thanks for being a member!",
+				"Support email address",
+				"An email address where GitHub users can contact you for support.",
+				"Product or company website",
+				"The URL for the product, company, or service that integrates with GitHub.",
+				"Update contact information",
+				"Leave the program",
+				// 邮箱行尾的「移除」按钮（表单内通用动作）
+				"Remove",
 				// —— 求职资料与趋势偏好 ——
 				"Jobs profile",
 				"Available for hire",
+				"Save jobs profile",
 				"Trending settings",
 				"Preferred spoken language",
 				"Chinese",
-				"We'll use this language preference to filter the trending repository lists on our Trending Repositories page."
+				"We'll use this language preference to filter the trending repository lists on",
+				"our Trending Repositories page",
+				"Save Trending settings"
 			]
 		},
 		{

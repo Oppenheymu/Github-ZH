@@ -31,6 +31,7 @@
 		"Link to social profile 2": "社交资料链接 2",
 		"Link to social profile 3": "社交资料链接 3",
 		"Link to social profile 4": "社交资料链接 4",
+		"You can @mention other users and organizations to link to them.": "你可以 @提及其他用户和组织来链接他们。",
 		"Company": "公司",
 		"You can @mention your company’s GitHub organization to link it.": "你可以 @提及公司的 GitHub 组织来链接它。",
 		"Location": "位置",
@@ -54,15 +55,31 @@
 		"Profile settings": "资料设置",
 		"Show Achievements on my profile": "在个人资料中显示成就",
 		"Your achievements will be shown on your profile.": "你的成就将显示在个人资料中。",
+		"Update preferences": "更新偏好设置",
 		// —— GitHub Developer Program ——
 		"GitHub Developer Program": "GitHub 开发者计划",
 		"Building an application, service, or tool that integrates with GitHub? Join the GitHub Developer Program, or read more about it at our GitHub developer program.": "正在构建与 GitHub 集成的应用、服务或工具？加入 GitHub 开发者计划，或进一步了解我们的 GitHub 开发者计划。",
+		// 说明句被「GitHub Docs」链接拆成两个节点：链接前片段 + 链接文本 + 链接后整段
+		"GitHub Docs": "GitHub 文档",
+		"has guides, API and webhook references, information about creating GitHub Apps and other resources for building applications that integrate with GitHub. Make sure your contact information is up-to-date below. Thanks for being a member!": "其中包含指南、API 与 webhook 参考、创建 GitHub Apps 的说明，以及构建与 GitHub 集成的应用所需的其他资源。请确认下方你的联系信息是最新的。感谢你成为会员！",
+		"Support email address": "支持电子邮件地址",
+		"An email address where GitHub users can contact you for support.": "供 GitHub 用户联系你寻求支持时使用的电子邮箱地址。",
+		"Product or company website": "产品或公司网站",
+		"The URL for the product, company, or service that integrates with GitHub.": "与 GitHub 集成的产品、公司或服务的 URL。",
+		"Update contact information": "更新联系信息",
+		"Leave the program": "退出计划",
+		// 邮箱行尾的「移除」按钮
+		"Remove": "移除",
 		// —— 求职资料与趋势偏好 ——
 		"Jobs profile": "求职资料",
 		"Available for hire": "可接受雇佣",
+		"Save jobs profile": "保存求职资料",
 		"Trending settings": "趋势设置",
 		"Preferred spoken language": "首选语言",
 		"Chinese": "中文",
-		"We'll use this language preference to filter the trending repository lists on our Trending Repositories page.": "我们将使用此语言偏好来筛选「趋势仓库」页面上的趋势仓库列表。"
+		// 说明句被「Trending Repositories」链接拆开：链接前以 on 结尾，链接文本单独成条
+		"We'll use this language preference to filter the trending repository lists on": "我们将使用此语言偏好来筛选趋势仓库列表，见",
+		"our Trending Repositories page": "我们的「趋势仓库」页面",
+		"Save Trending settings": "保存趋势设置"
 	}
 }
