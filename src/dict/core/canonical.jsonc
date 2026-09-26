@@ -202,11 +202,17 @@
 				"Link to social profile 3",
 				"Link to social profile 4",
 				"You can @mention other users and organizations to link to them.",
+				// `<strong>@mention</strong>` 把整句切成四段（You can / @mention /
+				// other users and / organizations to link to them.），各段单独成条。
+				// 这种「加粗碎片」是最难啃的形态：整句条目永远对不上，只有碎片条目能覆盖
+				"You can",
+				"other users and",
+				"organizations to link to them.",
 				"Company",
 				"You can @mention your company’s GitHub organization to link it.",
-				// 「组织名」若渲染成链接，整句按链接前 / 链接后两段各收一条
-				"You can @mention your company’s GitHub organization",
-				"to link it.",
+				// 公司提示句的第三段（@mention 之后）。键不得含首尾空白——引擎匹配前会
+				// normalizeKey（trim + 折叠空白），原节点的前导空格由 walker 保留拼接
+				"your company’s GitHub organization to link it.",
 				"Location",
 				"Display current local time",
 				"Other users will see the time difference from their local time.",
