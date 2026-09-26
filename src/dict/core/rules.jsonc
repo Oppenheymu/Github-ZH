@@ -651,7 +651,8 @@
 			"rules": [
 				// 跨页面通用正则规则：相对时间与计数等动态文本
 				// 语义：pattern 对整段已 trim 文本 test，命中即 replace（首条命中生效）
-				// 硬性约束：replacement 必须含 CJK（防观察器翻译循环）；规则无 flags 字段，故 g / y 不可能出现
+				// 硬性约束：模板（locales/<语言>/rules.jsonc）必须含目标语言的文字系统（防观察器翻译循环）；
+				// 规则无 flags 字段，故 g / y 不可能出现
 				// JSONC 转义：正则 \d 在此写作 \\d（写漏一层 Bun 直接报 Syntax Error，不会静默变义）
 				// 全站通用规则集合（global 兜底，页面模块规则先于它生效）
 				// 相对时间：<relative-time> 渲染的英文文本，单复数通吃

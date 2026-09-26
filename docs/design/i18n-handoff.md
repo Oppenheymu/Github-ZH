@@ -156,3 +156,29 @@ src/dict/
 - 提交前 `bun run check` 必须全绿；`git add -A` 后提交到 `main`
 - 不要为「可能将来有用」而增加抽象；先做能验证的最小改动
 - 遇到与本文档记载不符的事实，**以实测为准并更新文档**——本文档里的数字都是实测的，我（上一会话）曾在注释行数与扫描覆盖率上算错过一次并已修正，请对任何数字保持怀疑
+
+---
+
+## 实施记录（本轮已做完）
+
+上面「形状无关的 5 项」与数据形态迁移、门禁、等价性验证、文档更新都已落地，提交序列：
+
+| 提交 | 内容 |
+| --- | --- |
+| `6226b21` | `src/dict/locales.ts` 语言元数据表；`hasCJK` → `hasNonLatinLetter`（语言无关）；译文按语言声明校验；新增「译文≠键」「替换产物不再命中规则」两条防循环门禁 |
+| `bb2dbb1` | 品牌中性化（`__MSG_*__` + `public/_locales/{en,zh_CN,ja}`）；popup UI 文案外置；verify-live 改用身份标记认扩展（原坑 6）；`check:manifest` 增加 `_locales` 断言 |
+| `954d5bb` | 数据迁到 `core/` + `locales/zh-CN/`（稀疏化）+ ja 样例；加载层 / 运行时按语言汇总；`locale` 存储与 popup 语言选择器；`verify --locale`（原坑 7） |
+| （本轮收尾） | `AGENTS.md` 硬性约束 2 与已知坑、`docs/guides/development.md`、README、设计文档结论 |
+
+核实与修正（与本文档记载不符者）：
+
+- 词典数据紧凑 JSON 实测 **131218 字节**（口径：entries + rules），不是 97978；迁移后含规则 id / 模块名 / 别名表为 **144273 字节**，content.js 168616 → **194649 字节**；
+- 迁移等价性：27 条路径的合并视图 SHA256 迁移前后**逐字节相同**（`7f6a2891c8673ab34cfbaaea6f376ee81cbe36eb5a08f2966373824e2349d8a5c`），比「词条级比对」更强；
+- 实机基线：`bun run verify --pages .zcode/pages-smoke.txt` 迁移前后均为 **482 条漏翻**（本文档记的 485 是更早的一次观测，GitHub 页面内容本身在变）；`--locale ja` 探针 `translated=true`，脚本字符数 26 / 84。
+
+尚未做（有意留待后续）：
+
+- **命名捕获组**：门禁已支持并校验 `$N` 与 `$<name>` 的引用完整性，但现有 207 条规则仍是位置引用。转换是纯数据改动，可用「去掉 `?<name>` 后 pattern 源串必须与旧串相同」+「合成捕获值渲染结果相同」做机械验证；
+- 包体策略：N=2 维持全量打包；N≥4 时再评估 `registerContentScripts` 按 locale 注册（需 background + `scripting` 权限）；
+- 复数语法分歧（俄语 / 阿拉伯语）：一个 pattern 一个模板，无法表达复数类别。
+
