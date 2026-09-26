@@ -1,11 +1,19 @@
 # 交接提示词：为 Github-ZH 引入多语言（i18n）
 
+> ⚠️ **本文写于改名之前**：仓库现名 **Github-i18n**（旧名 Github-ZH，
+> 本地目录 `C:\Dev\Tool-Dev\Github-i18n`，远端 `https://github.com/Oppenheymu/Github-i18n.git`）。
+> 下文出现的 `Github-ZH` 路径与地址都是当时的事实，保留不改以存历史。
+
 > 本文件是**可直接整段粘贴到新会话的提示词**，也是本项目的设计决策记录。
 > 写它的原因是上一会话上下文耗尽。新会话请先全文读完，再动手。
+>
+> 本文所述任务**已全部完成**（见文末「实施记录」）；后续的 C / D / F 三项见
+> `docs/design/i18n-next-handoff.md`。
 
 ---
 
 你正在接手仓库 `C:\Dev\Tool-Dev\Github-ZH`（远端 `https://github.com/Oppenheymu/Github-ZH.git`，主分支 `main`）。
+> 若你被带进上面这个路径：那是**改名前的旧路径**，现在仓库在 `C:\Dev\Tool-Dev\Github-i18n`。
 请先读 `AGENTS.md`（项目常驻指令，含硬性约束）与 `docs/guides/development.md`，再读 `docs/design/multilingual-dict-shape.md`（多语言数据形态的设计请求）。
 
 ## 项目是什么

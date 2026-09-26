@@ -1,5 +1,10 @@
 # 交接提示词：C（合并视图 golden 门禁）、D（命名捕获组）、F（命名一致性）
 
+> ✅ **本轮已执行完毕**（2026 年，实施记录见文末第 6 节）。C / D / F 三项与顺带的图标
+> 残留清理都已完成并提交；"任务 B" 的前提也已失效（见第 0 节）。
+> 下文保留撰写时的原始提示词，**下面几处出题前提已被实测推翻，动手前先读第 6 节**：
+> 交互式提示里的「121 用例 / 9 文件」「任务 B 由另一会话完成」「远端仍是旧名」。
+>
 > 本文件是**可直接整段粘贴到新会话的提示词**，也是本轮的设计记录。
 > 上一份交接见 `docs/design/i18n-handoff.md`（i18n 架构落地，已完成并附实施记录）；
 > 本文件只覆盖尚未做的三项：C / D / F。新会话请先全文读完，再动手。
@@ -10,18 +15,27 @@
 
 - **仓库根目录是 `C:\Dev\Tool-Dev\Github-i18n`**。旧路径 `C:\Dev\Tool-Dev\Github-ZH` 已随改名消失；
   若你被带进旧路径，说明工作目录失效，请让用户在新目录重开会话，否则相对路径工具与 `cwd` 全不可用。
-- 远端仍是 `https://github.com/Oppenheymu/Github-ZH.git`，主分支 `main`，**本地领先 origin/main 若干提交（未推送）**。
+- 远端是 `https://github.com/Oppenheymu/Github-i18n.git`（**已随仓库改名更新**），主分支 `main`，
+  本地领先 origin/main 若干提交（未推送）。
 - 必读顺序：`AGENTS.md`（项目常驻指令与硬性约束）→ `docs/guides/development.md`（架构与词典维护）→
   `docs/design/multilingual-dict-shape.md` 第 8 节（形态定稿结论）→ `docs/design/i18n-handoff.md` 的「实施记录」。
-- 开工体检：`bun run check` 应全绿（本文件撰写时为 **121 用例 / 9 个文件**）。若变红先修红再谈新功能。
+- 开工体检：`bun run check` 应全绿（现在是 **129 用例 / 9 个文件**；本文件撰写时是 121 / 9）。
+  若变红先修红再谈新功能。
+
+### ⚠️ 关于「任务 B」：它已不是标签同步，别再找 `tooling/labels.ts`
+
+撰写时的前提已失效：`6e887cd feat(triage): 复刻 Koishi-CE 的 PR 路径打标与 issue 分诊流水线`
+**整个替换掉了**标签同步方案——删除了 `tooling/labels.ts`、`tooling/labels.test.ts`、
+`.github/labels.yml`、`.github/workflows/labels.yml`，改成 `.github/labeler.yml` +
+`.github/workflows/triage.yml`。所以：
+
+- 仓库里**没有** `tooling/labels.ts`，也没有 `labels.test.ts`；本文件下文提到的它们都已不存在；
+- 标签 / 分诊流水线**已完成、不在任何本轮范围**：不要改、不要重构、不要提交与之相关的任何东西；
+- `.github/labels.yml` 也已随同删除（若你看到「标签词表」之类的说法，那是更早的历史）。
 
 ### ⚠️ 这个仓库有并发会话在动，提交必须用显式路径
 
-上一轮我因为 `git add -A` 误提交了别人正在写的文件，只能 amend 摘出来。此后标签功能已被另一个会话提交
-（`feat(labels): 引入声明式标签词表与同步工作流` + `chore(labels): …`，含 `tooling/labels.ts`、
-`tooling/labels.test.ts`、`.github/labels.yml` 与 workflow；**按提交主题找，别记哈希——那边在 amend**），
-它**已完成、不在本轮范围**：不要改、不要重构、不要提交与之相关的任何东西。
-
+上一轮我因为 `git add -A` 误提交了别人正在写的文件，只能 amend 摘出来。
 一律用 `git add <明确路径>`；`git status` 里出现的意外文件（尤其未跟踪文件）先查清是谁的，再决定动不动。
 
 ### `.zcode/` 已归档删除
@@ -29,7 +43,8 @@
 `.zcode/` 是 gitignore 的草稿目录，现已被用户归档删除，里面的东西**都没了**：
 迁移生成器 `migrate-shape.ts`、等价性工具 `dump-view.ts`、迁移前后快照 `view-before/after.json`、
 探针页面清单 `pages-smoke.txt`、几个一次性诊断脚本。生产代码 / 数据 / 门禁 / 文档都在 git 里，无功能损失。
-**唯一实质损失就是任务 C 要补的东西**：合并视图的逐字节等价验证没有了可复跑手段，只剩提交信息里的 SHA 记录。
+**唯一实质损失就是任务 C 要补的东西**：合并视图的逐字节等价验证没有了可复跑手段，只剩提交信息里的 SHA 记录
+——这一项已由任务 C 的骨架门禁补上。
 
 ## 1. 现状事实（自足，不必翻历史）
 
@@ -50,13 +65,14 @@ src/dict/
 
 - 语言相关判定一律取自 `locales.ts`：`scripts: ["Han"]`（zh-CN）/ `["Han","Hiragana","Katakana"]`（ja）；
   `scripts: []` 表示拉丁语系目标（脚本守卫结构上失效，防循环只剩「译文≠键」结构门禁）。
-- 运行时：`src/content/pages.ts` 的 `buildView(pathname, dict, aliases)` 合并命中模块（词条先到先得、规则同序），
-  `viewForPath(pathname, locale)` 单槽缓存；`src/content/walker.ts` 的 `translateText` 先直查词条、
+- 运行时：`src/content/view.ts` 的 `buildView(pathname, dict, aliases)` 合并命中模块（词条先到先得、规则同序），
+  `src/content/pages.ts` 的 `viewForPath(pathname, locale)` 单槽缓存；`src/content/walker.ts` 的 `translateText` 先直查词条、
   未命中再查 `aliases` 换规范键重查，最后按序试规则。
-- 门禁：`tooling/checks/dict.ts`（`check:dict`）、`tooling/checks/manifest.ts`（`check:manifest`）；
-  实机探针 `tooling/verify-live.ts`（`bun run verify`，支持 `--locale <id>`）。
-- 实测数字（供判断，别当教条）：1618 规范键 / 207 共享规则 / 16 模块；zh-CN 覆盖率 100%、ja 50/1618（3.1%）；
-  content.js 194649 字节（`minify: false`），数据紧凑 JSON 144273 字节。
+- 门禁：`tooling/checks/dict.ts`（`check:dict`）、`tooling/checks/manifest.ts`（`check:manifest`）、
+  `tooling/checks/view.ts`（`check:view`，任务 C 新增）；实机探针 `tooling/verify-live.ts`
+  （`bun run verify`，支持 `--locale <id>`，浏览器可用 `GITHUB_I18N_BROWSER_PATH` 指定）。
+- 实测数字（供判断，别当教条）：1618 规范键 / 207 共享规则（其中 ≥2 组 72 条）/ 16 模块；
+  zh-CN 覆盖率 100%、ja 50/1618（3.1%）；content.js 194649 字节（`minify: false`），数据紧凑 JSON 144273 字节。
 
 ### 与本轮相关的已知坑
 
@@ -81,12 +97,14 @@ src/dict/
 
 ## 2. 任务 C：把「合并视图」补成正式门禁（优先级最高）
 
+> ✅ **已完成**（提交 `ae63d1e`）。实现与验收细节见第 6 节；下文保留原始设计。
+
 ### 2.1 为什么要做
 
 架构的正确性有一半靠「合并视图」的语义：模块顺序（具体页压过泛化页）、跨模块同键异译的先后、
 规则顺序（首条命中生效）、global 兜底必须在最后。这些语义**没有测试保护**——只有一次性验证
 （迁移前后 27 条路径的视图 SHA256 逐字节相同，`7f6a2891c8673ab34cfbaaea6f376ee81cbe36eb5a08f2966373824e2349d8a5c`）
-和 `src/content/__tests__/pages.test.ts` 里的几个通用用例。原 `dump-view.ts` 已随 `.zcode` 消失。
+和 `src/content/__tests__/pages.test.ts` 里的几个通用用例（该文件已随任务 C 改名为 `view.test.ts`）。原 `dump-view.ts` 已随 `.zcode` 消失。
 
 目标：把「视图骨架」固化成仓内 golden 快照 + 门禁，纳入 `bun run check`。
 
@@ -182,9 +200,13 @@ src/dict/
 
 ## 3. 任务 D：规则改用命名捕获组
 
+> ✅ **已完成**（提交 `fd3d6b3`）。实测 ≥2 组的规则是 **72 条**（不是下面写的 73），
+> 实现与三项机械验证见第 6 节；下文保留原始设计。
+
 ### 3.1 现状与目标
 
-`core/rules.jsonc` 的 207 条规则里，**73 条有 ≥2 个捕获组**，中文模板已经在重排位置引用它们，例如：
+`core/rules.jsonc` 的 207 条规则里，**72 条有 ≥2 个捕获组**（实测：2 组×42 / 3 组×17 / 4 组×12 / 6 组×1），
+中文模板已经在重排位置引用它们，例如：
 
 ```jsonc
 { "id": "global/short-date-jan", "pattern": "^Jan (\\d{1,2}), (\\d{4})$" }
@@ -246,10 +268,14 @@ src/dict/
 
 ## 4. 任务 F：命名一致性（本地目录已改名，其它地方还没跟上）
 
+> ✅ **已完成**（提交 `74ff85d` 图标残留清理 + `378d702` 标识改名）。
+> 用户的决定：远端已在 GitHub 改名并同步本地 remote；标识「全改」；四项清理全做。
+> 实现与验证见第 6 节；**下文 4.1 的清单是撰写时的实测结果，多数已不再成立**，保留以存历史。
+
 ### 4.1 现状（清单已实测，见下表的文件:行）
 
 - 本地目录：`C:\Dev\Tool-Dev\Github-i18n`（已是新名）
-- 远端 URL：`https://github.com/Oppenheymu/Github-ZH.git`（**仍是旧名**）
+- 远端 URL：`https://github.com/Oppenheymu/Github-i18n.git`（已由用户改名，本地 remote 已同步）
 - 跟踪文件里的旧名 / 旧定位残留（`git grep -in "github-zh"` 与 `git grep -in "汉化"` 的实测结果）：
 
 | 位置 | 残留内容 | 处置建议 |
@@ -314,8 +340,75 @@ src/dict/
 
 ## 5. 明确不做（本轮范围外）
 
-- **B：标签同步**（`tooling/labels.ts`、`tooling/labels.test.ts`、`.github/labels.yml` 与 workflow）——
-  已由另一个会话以 `feat(labels):` / `chore(labels):` 两次提交完成，别碰。
+- **B：标签同步**——**前提已失效**：`tooling/labels.ts` / `labels.test.ts` / `.github/labels.yml`
+  已被 `6e887cd feat(triage)` 整个删除，改成 `.github/labeler.yml` + `.github/workflows/triage.yml`
+  的 PR 打标与 issue 分诊流水线。该流水线已完成，不在本轮范围，别碰。
 - ja 词典覆盖率推进（翻译工作量，非工程任务）。
 - 包体按 locale 分发（N≥4 再说）、复数语法类别（一个 pattern 一个模板，结构上不支持）。
 - 任何「顺便重构一下」的冲动改动：本轮只做 C、D、F（外加 4.2 那处图标残留清理）。
+
+---
+
+## 6. 实施记录（本轮已完成）
+
+提交顺序：`ae63d1e` C → `fd3d6b3` D → `74ff85d` 图标残留 → `378d702` 标识改名 → 本文档更新。
+每一步都先跑 `bun run check` 全绿再提交；提交一律用显式路径（4 个提交都确认过没有夹带并发会话的文件）。
+最终：**129 用例 / 9 个文件**（撰写时 121 / 9，多出来的是 C 新增的 `tooling/checks/view.test.ts`）。
+
+### 6.1 任务 C（`ae63d1e`）
+
+- 抽出 `src/content/view.ts`：`matchModules` / `buildView` 是纯函数，数据全部由参数传入，
+  **不 import** `src/dict/index.ts`；`pages.ts` 只留 `viewForPath` + 单槽缓存；
+  `src/content/__tests__/pages.test.ts` 改名成 `view.test.ts` 并改成显式传数据。
+- 新增 `tooling/checks/view.ts` + `tooling/fixtures/view-skeleton.{zh-CN,ja}.json`，
+  `package.json` 加 `check:view` 并串进 `check`（在 `check:manifest` 之后、`test` 之前）。
+- 只锁语义骨架（模块顺序 / 每条路径的命中模块序列 / 赢家覆盖 / 生效规则 id 序列），
+  词条数是运行时打印、不进快照；错误只报首处差异 + 差异条数（一条路径的规则序列可达上百项）。
+- **实测发现的、设计里没写的一条**：只记「生效规则 id」的话，「往 `core/rules.jsonc` 加一条规则、
+  忘了给本语言模板」在视图里完全不可见（缺模板 = 规则不生效）。故加了 `notTranslated`
+  （该路径 core 声明了、本语言还没给模板的规则 id 序列）。这是查这项时真撞出来的。
+- 快照按语言逐份：zh-CN 有 16 处赢家覆盖，ja 0 处（ja 只译了 50/1618 键，跨模块同键不成立）。
+  `registry.ts` 原先手写注释列了 5 处，现在指向快照（快照更全）。
+- 三次故意破坏都验证过（试完 `git restore` 还原、未提交）：
+  (a) 交换 core 两个页面模块顺序（modules/canonical/rules 三处同步）→ 报「模块顺序变了——第 3 项…」；
+      另单独演示了「赢家变化」（把快照里 `Pages` 的胜出模块改成 global → 精准报出该键）；
+  (b) `global` 挪到最前 → **已知边界**：三个文件一起挪时 `load.ts` 先拦（模块顺序校验），
+      只挪 `modules.jsonc` 时 gate 报「词典无法严格编译」。global-last 这条硬约束由 `load.ts`
+      强制（`check:dict` 覆盖），骨架门禁到不了那一层；该分支保留 + 单元测试覆盖。
+      这个边界已如实写进提交信息，没有假装门禁报了。
+  (c) 往 `core/rules.jsonc` 插一条规则、不给模板 → 报「尚未翻译的规则 id 序列变了」。
+
+### 6.2 任务 D（`fd3d6b3`）
+
+- 实测 ≥2 组规则 **72 条**（2 组×42 / 3 组×17 / 4 组×12 / 6 组×1），不是 73；单组 123 条 + 无组 12 条不动。
+- 命名表见 `docs/guides/development.md`「加一条动态规则」；生成脚本按「规则 id → 组名数组」
+  逐条映射，改完自校验组数 / 组名合法性 / 唯一性，不成立就原地抛错不落盘。
+- 三项机械验证（一次性脚本，跑完删除，未进仓）：
+  1. pattern 等价：207 条「去掉所有 `?<name>`」后与旧源串逐字符相同；
+  2. 模板等价：同一套合成捕获值渲染新旧模板，207 条输出全同；
+  3. 行为抽样：1656 条样本（canonical 1584 + 合成 72）跑新旧视图，结果 0 条不同。
+     **实测坑**：canonical 里这 72 条多组规则**一个真实样本都没有**（它们命中运行时动态文案），
+     所以合成样本是必须的；合成器要处理转义 `\u00B7` 是「字面反斜杠」这件事，否则样例永远不命中。
+- 故意把两条模板的 `$<year>` 改成 `$<month>` → `check:dict` 报「未声明该命名组（已声明：day / year）」。
+- **快照逐字节未变**：骨架只记规则 id、不记 pattern 源串，C 与 D 成功解耦。
+
+### 6.3 任务 F（`74ff85d` + `378d702`）
+
+- 用户决定：远端已在 GitHub 改名（本地 `git remote set-url` + `git fetch` 验证通过）；
+  标识「全改」；四项清理全做（图标残留 / NOTICE 显示名 / 版权署名保留 + 曾用名一句 / 本文档更新）。
+- 改：`package.json` 的 name 与 description、`bun.lock` 的镜像包名（`bun install` 不会刷新这段，
+  需手改）、`pack.ts` 产物名、`EXTENSION_MARKER` 与 `EXTENSION_MARKER_KEY`、
+  环境变量 `GITHUB_I18N_BROWSER_PATH`（旧名 `GITHUB_ZH_BROWSER_PATH` 继续兜底，新名优先）、
+  各处文档的仓库名 / 目录树 / 产物名。
+- 刻意不改：导出 schema `github-zh-misses/1`、存储键、LICENSE 署名（在 NOTICE 里说明）。
+- 图标残留：交接列了 4 处，**实测还有 `README.md:42` 的 `bun run icons`**（漏了），一并清掉。
+- 验证：`check` 全绿 + `build` 成功 + dist 里确认新标记已内联 +
+  **实机探针真跑一次**（`bun run verify` 退出码 0、采集 1610 条漏翻），
+  确认改名后探针仍能认出扩展，而不是两边一起改成同一个错字造成的假绿。
+
+### 6.4 仍未做 / 遗留
+
+- 本地 `main` 领先 `origin/main` 若干提交（**未推送**）：需要用户决定何时推。
+- ja 覆盖率 50/1618（翻译工作，非工程任务）。
+- 骨架门禁的 `global`-last 分支实际不可达（由 `load.ts` 兜住），保留作为纵深防御。
+
