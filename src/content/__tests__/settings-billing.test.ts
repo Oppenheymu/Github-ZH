@@ -1163,3 +1163,63 @@ describe("付款历史页（/account/billing/history）的空态", () => {
 		).toBe("金额以美元显示");
 	});
 });
+
+/**
+ * 赞助订阅页（/settings/billing/subscriptions）的实机文本节点。
+ *
+ * 边界强度：按维护者 2026-09 的实机截图誊录，未取节点边界。该页仍在 /settings/billing/**
+ * 这一支（实测 302 存活），与 /account/billing/** 由同一条路由覆盖，故用默认视图即可。
+ */
+const SUBSCRIPTION_NODES: readonly string[] = [
+	"Sponsorships",
+	"Manage your organizations",
+	"Connect with the community that builds the tools you use",
+	"Start sponsoring",
+	"Learn more about GitHub Sponsors",
+];
+
+describe("赞助订阅页（/settings/billing/subscriptions）", () => {
+	it("translates every node the screenshot shows", () => {
+		for (const node of SUBSCRIPTION_NODES) {
+			const translated = translateText(node, view);
+			expect(
+				translated,
+				`未命中：${JSON.stringify(node)}`,
+			).not.toBeNull();
+			expect(translated ?? "").toMatch(/[\u4e00-\u9fff]/);
+		}
+	});
+
+	it("translates the organizations line through a rule", () => {
+		// 组织数随账号变化，只能做规则（两端 ^…$ 锚定，不做部分替换）
+		expect(
+			translateText(
+				"In addition to your personal account, you manage 5 organizations.",
+				view,
+			),
+		).toBe("除个人账户外，你还管理 5 个组织。");
+		expect(
+			translateText(
+				"In addition to your personal account, you manage 1 organization.",
+				view,
+			),
+		).toBe("除个人账户外，你还管理 1 个组织。");
+	});
+
+	it("covers both apostrophe shapes in the sponsoring empty state", () => {
+		// 截图无法判定撇号是直是弯：两种形态必须命中同一条规则，
+		// 且模板里不含撇号（不可能产出中英混杂的残句）
+		expect(
+			translateText(
+				"You're currently not sponsoring anyone.",
+				view,
+			),
+		).toBe("你目前没有赞助任何人。");
+		expect(
+			translateText(
+				"You\u2019re currently not sponsoring anyone.",
+				view,
+			),
+		).toBe("你目前没有赞助任何人。");
+	});
+});

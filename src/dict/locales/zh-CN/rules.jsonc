@@ -472,6 +472,10 @@
 		"settings/licensing-actions-minutes-per-month": "$<count> 分钟 Actions/月",
 		"settings/licensing-packages-storage": "$<count>$<unit> Packages 存储",
 		"settings/licensing-codespaces-compute": "每位开发者 $<count> 个代码空间核心小时",
-		"settings/licensing-codespaces-storage": "每位开发者 $<count>$<unit> 代码空间存储"
+		"settings/licensing-codespaces-storage": "每位开发者 $<count>$<unit> 代码空间存储",
+		// 赞助订阅页（/settings/billing/subscriptions）：$1 是组织数（动态）
+		"settings/manage-organizations": "除个人账户外，你还管理 $1 个组织。",
+		// 空态：模板里不含撇号，因此与 pattern 的直/弯撇号字符类互不干扰
+		"settings/sponsoring-none": "你目前没有赞助任何人。"
 	}
 }

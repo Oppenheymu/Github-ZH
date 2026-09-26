@@ -378,6 +378,14 @@
 		"Access": "访问权限",
 		"Licensing": "许可",
 		"Features": "功能",
-		"Usage": "用量"
+		"Usage": "用量",
+		// 教育权益页（/settings/education/benefits）。卡片标题「Education Benefits」是**大写 B**，
+		// 与设置侧栏的「Education benefits」（小写 b）是两个键，两条各有译文
+		"GitHub Education": "GitHub 教育",
+		"Free GitHub developer resources for students and teachers": "面向学生和教师的免费 GitHub 开发者资源",
+		"Get Copilot for free, 180 monthly Codespaces hours for cloud coding, unlimited private repositories with GitHub Pro or Team, and dozens of premium tools in the Student Developer Pack.": "免费使用 Copilot、每月 180 小时的 Codespaces 云端编码时长、GitHub Pro 或 Team 的不限私有仓库，以及学生开发者包中的数十种高级工具。",
+		"Education Benefits": "教育权益",
+		"Complete a teacher or student application to unlock tools and resources for your educational journey.": "完成教师或学生申请，解锁学习旅程所需的工具与资源。",
+		"Start an application": "开始申请"
 	}
 }

@@ -248,6 +248,13 @@
 		// 付款历史页（/account/billing/history）的空态：标题与币种说明各自是独立节点。
 		// 口吻与同模块的其它空态一致（「你尚未…」/「你当前没有…」），不用「您」
 		"You have not made any payments.": "你尚未进行任何付款。",
-		"Amounts shown in USD": "金额以美元显示"
+		"Amounts shown in USD": "金额以美元显示",
+		// 赞助订阅页（/settings/billing/subscriptions）：页面标题与仓库设置页的同名开关同译
+		//（「赞助」），避免同一个词两副面孔
+		"Sponsorships": "赞助",
+		"Manage your organizations": "管理你的组织",
+		"Connect with the community that builds the tools you use": "与构建你所使用工具的社区建立联系",
+		"Start sponsoring": "开始赞助",
+		"Learn more about GitHub Sponsors": "详细了解 GitHub Sponsors"
 	}
 }

@@ -994,6 +994,22 @@
 				{
 					"id": "settings/licensing-codespaces-storage",
 					"pattern": "^(?<count>[\\d.,]+)(?<unit>GB|MB|TB|KB) of Codespaces storage per developer$"
+				},
+				// —— 赞助订阅页（/settings/billing/subscriptions）——
+				// 顶部「除此之外你还管理 N 个组织」：数字随组织数变化，只能做规则，$1 是组织数。
+				// 若实机把数字渲染成**独立节点**（整句不成其为一个文本节点），这条规则不会命中，
+				// 届时必须改收碎片键——截图无法判定节点边界，首次实机复验时请留意这一句
+				{
+					"id": "settings/manage-organizations",
+					"pattern": "^In addition to your personal account, you manage (\\d+) organizations?\\.$"
+				},
+				// 空态「You’re currently not sponsoring anyone.」：截图无法确认撇号是直是弯
+				//（GitHub 两种都在用：本模块的优惠券空态是直撇号 `don't`，付款信息 tooltip 是
+				// 弯撇号 `We’ll`），故用字符类一次覆盖两种形态，而不是赌一个形态去收词条
+				// ——赌错就是永不命中的死键。模板里不含撇号，天然规避这个问题
+				{
+					"id": "settings/sponsoring-none",
+					"pattern": "^You['’]re currently not sponsoring anyone\\.$"
 				}
 			]
 		},

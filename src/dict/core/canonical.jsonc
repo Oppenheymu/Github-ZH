@@ -542,7 +542,19 @@
 				"Access",
 				"Licensing",
 				"Features",
-				"Usage"
+				"Usage",
+				// —— 教育权益页（/settings/education/benefits）——
+				// 按维护者 2026-09 的实机截图誊录（未取节点边界，边界强度低于本文件里带
+				// HTML 实证的条目；首次实机复验若发现漏翻，先按「采集实机渲染文本」重抓）。
+				// 「More」（实机译为「了解更多」）由既有词条覆盖，此处不重复登记。
+				// 卡片标题「Education Benefits」与设置侧栏的「Education benefits」**大小写不同**，
+				// 是两个键：侧栏那条在本模块别处登记，这条是卡片标题，两条都要有译文
+				"GitHub Education",
+				"Free GitHub developer resources for students and teachers",
+				"Get Copilot for free, 180 monthly Codespaces hours for cloud coding, unlimited private repositories with GitHub Pro or Team, and dozens of premium tools in the Student Developer Pack.",
+				"Education Benefits",
+				"Complete a teacher or student application to unlock tools and resources for your educational journey.",
+				"Start an application"
 			]
 		},
 		{
@@ -800,7 +812,19 @@
 				// h2 里的文本节点带 8 个前导空格与行尾缩进，引擎的 normalizeKey 会 trim 并折叠
 				// 连续空白，故键是不带空白的整句；两句各自成节点，**不要**合并成一条键
 				"You have not made any payments.",
-				"Amounts shown in USD"
+				"Amounts shown in USD",
+				// —— 赞助订阅页（/settings/billing/subscriptions）——
+				// 按维护者 2026-09 的实机截图誊录。该页仍挂在 /settings/billing/** 这一支
+				// （实测 302 存活），新路由 ^/(?:settings|account)/billing 同时覆盖新旧路径。
+				// 页面标题「Sponsorships」与仓库设置页的同名开关**不同路径、不会同屏**：后者由
+				// pages/repo-settings 提供（译「赞助」），这里保持同译，避免同一个词两副面孔。
+				// 顶部「除此之外你还管理 N 个组织」带动态数字，登记为规则而非词条
+				//（core/rules.jsonc 的 settings/manage-organizations）
+				"Sponsorships",
+				"Manage your organizations",
+				"Connect with the community that builds the tools you use",
+				"Start sponsoring",
+				"Learn more about GitHub Sponsors"
 			]
 		},
 		{
