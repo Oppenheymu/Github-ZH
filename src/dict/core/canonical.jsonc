@@ -1309,6 +1309,12 @@
 				"Created an issue in",
 				"Joined the",
 				"organization",
+				// —— 贡献动态底部的分页按钮与说明文案 ——
+				// 说明句的链接（GitHub profile guide）把整句劈成「前半句 + 链接 + 句点」，
+				// 句点是纯符号、按可翻译判定不会被翻，留作英文句点
+				"Show more activity",
+				"Seeing something unexpected? Take a look at the",
+				"GitHub profile guide",
 				// —— 贡献动态月份标题：月份与年份是两个节点（年份是纯数字、不译），
 				// 故月份名各自成词条，「September」+「2026」渲染为「9 月 2026」——
 				"January",

@@ -37,6 +37,11 @@
 		"Created an issue in": "创建了议题：",
 		"Joined the": "加入了",
 		"organization": "组织",
+		// —— 贡献动态底部的分页按钮与说明文案 ——
+		// 说明句被链接拆开：「前半句」+「GitHub profile guide」+ 英文句点
+		"Show more activity": "显示更多动态",
+		"Seeing something unexpected? Take a look at the": "看到意料之外的内容？请查看",
+		"GitHub profile guide": "GitHub 个人资料指南",
 		// —— 贡献动态月份标题（月份与年份是两个节点，年份保持数字不译）——
 		"January": "1 月",
 		"February": "2 月",
