@@ -1,55 +1,17 @@
-// 路由解析：按 location.pathname 合并命中的模块（含 global 兜底）
-// buildView / matchModules 为纯函数；viewForPath 用单槽缓存热路径
+// 运行时视图入口：取当前语言的数据 + 语言无关的别名映射，按「路径 + 语言」单槽缓存。
+//
+// 合并语义本身在 view.ts（纯函数，数据由参数传入）——那边不 import 词典，
+// 门禁才能在不碰软失败的 index.ts 的前提下复用同一份合并逻辑（见 view.ts 顶部说明）。
 
 import { dictCore, dictForLocale } from "../dict/index.ts";
 import type { LocaleId } from "../dict/locales.ts";
-import type {
-	DictView,
-	LocaleDict,
-	ModuleDict,
-	Rule,
-} from "../shared/types.ts";
+import type { DictView } from "../shared/types.ts";
+import { buildView } from "./view.ts";
 
 /** 语言无关的上游改名映射：所有语言共用一份，构建视图时直接挂上 */
 const aliasMap: ReadonlyMap<string, string> = new Map(
 	Object.entries(dictCore.aliases),
 );
-
-/** 纯函数：返回所有 route 命中 pathname 的模块（保持 core 里的顺序） */
-export function matchModules(
-	pathname: string,
-	modules: readonly ModuleDict[],
-): ModuleDict[] {
-	return modules.filter((dict) =>
-		dict.route.test(pathname),
-	);
-}
-
-/**
- * 纯函数：构建合并视图。
- * 词条「先到先得」——模块顺序即优先级（具体页在前、global 兜底在后），
- * 因此具体页词条压过泛化页，页面词条压过 global；规则同序合并，运行时首条命中生效。
- */
-export function buildView(
-	pathname: string,
-	dict: LocaleDict,
-	aliases: ReadonlyMap<string, string> = aliasMap,
-): DictView {
-	const entries = new Map<string, string>();
-	const rules: Rule[] = [];
-	for (const module of matchModules(
-		pathname,
-		dict.modules,
-	)) {
-		for (const [key, value] of Object.entries(
-			module.entries,
-		)) {
-			if (!entries.has(key)) entries.set(key, value);
-		}
-		rules.push(...module.rules);
-	}
-	return { entries, aliases, rules };
-}
 
 // 单槽缓存：Turbo 导航改路径或用户改目标语言时才重建视图
 let cachedKey: string | null = null;

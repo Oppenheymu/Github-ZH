@@ -22,6 +22,10 @@
 //   "Pages"        pages/repo-settings「页面」（GitHub Pages）压 global「页码」（分页）
 //   "Write"        pages/repo-settings「写入」（权限级别）压 global「编写」
 //   "GitHub Apps"  pages/repo-settings「GitHub 应用」压 pages/marketing「GitHub 应用程序」
+//                 （marketing 路由 ^/(features|pricing) 与 repo-settings 永不共存，故顺序不影响结果）
+// 这里只是常见几条的索引，**完整清单以 tooling/fixtures/view-skeleton.<语言>.json 为准**：
+// 视图骨架门禁会记录每条探针路径上所有「被 ≥2 个命中模块提供」的键及其胜出模块，
+// 顺序或词条一变就报错（现在是 16 处，比上面这份手写清单更全）。
 
 import aliasesRaw from "./core/aliases.jsonc";
 import modulesRaw from "./core/modules.jsonc";

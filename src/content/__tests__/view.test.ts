@@ -1,10 +1,18 @@
 import { describe, expect, it } from "bun:test";
-import { dictForLocale } from "../../dict/index.ts";
+import {
+	dictCore,
+	dictForLocale,
+} from "../../dict/index.ts";
 import { LOCALES } from "../../dict/locales.ts";
 import type { LocaleDict } from "../../shared/types.ts";
-import { buildView, matchModules } from "../pages.ts";
+import { buildView, matchModules } from "../view.ts";
 
 const zh = dictForLocale("zh-CN");
+
+/** 语言无关的别名映射：运行时与门禁都从 core 的数据里取，这里同样显式传入 */
+const aliases: ReadonlyMap<string, string> = new Map(
+	Object.entries(dictCore.aliases),
+);
 
 const routes = (pathname: string) =>
 	matchModules(pathname, zh.modules).map(
@@ -61,21 +69,29 @@ describe("matchModules", () => {
 
 describe("buildView", () => {
 	it("falls back to global entries on any path", () => {
-		const view = buildView("/owner/repo", zh);
+		const view = buildView("/owner/repo", zh, aliases);
 		expect(view.entries.get("Skip to content")).toBe(
 			"跳到主要内容",
 		);
 	});
 
 	it("only merges entries from matching page modules", () => {
-		const issues = buildView("/owner/repo/issues", zh);
+		const issues = buildView(
+			"/owner/repo/issues",
+			zh,
+			aliases,
+		);
 		expect(issues.entries.get("Close issue")).toBe(
 			"关闭议题",
 		);
 		expect(
 			issues.entries.get("Conversation"),
 		).toBeUndefined();
-		const pulls = buildView("/owner/repo/pull/3", zh);
+		const pulls = buildView(
+			"/owner/repo/pull/3",
+			zh,
+			aliases,
+		);
 		expect(pulls.entries.get("Files changed")).toBe(
 			"文件变更",
 		);
@@ -85,9 +101,9 @@ describe("buildView", () => {
 	});
 
 	it("keeps dashboard entries off repo pages", () => {
-		const dashboard = buildView("/", zh);
+		const dashboard = buildView("/", zh, aliases);
 		expect(dashboard.entries.get("Home")).toBe("主页");
-		const repo = buildView("/owner/repo", zh);
+		const repo = buildView("/owner/repo", zh, aliases);
 		expect(repo.entries.get("Home")).toBeUndefined();
 		expect(repo.entries.get("Code")).toBe("代码");
 	});
@@ -112,18 +128,19 @@ describe("buildView", () => {
 				},
 			],
 		};
-		const onA = buildView("/a", dict);
+		const onA = buildView("/a", dict, aliases);
 		expect(onA.entries.get("Base")).toBe("页面优先");
 		expect(onA.rules[0]?.replacement).toBe("页面X");
-		const elsewhere = buildView("/b", dict);
+		const elsewhere = buildView("/b", dict, aliases);
 		expect(elsewhere.entries.get("Base")).toBe("全局兜底");
 		expect(elsewhere.entries.get("OnlyA")).toBeUndefined();
 		expect(elsewhere.rules).toHaveLength(1);
 	});
 
 	it("exposes the alias map on every view", () => {
-		const view = buildView("/owner/repo", zh);
+		const view = buildView("/owner/repo", zh, aliases);
 		expect(view.aliases).toBeInstanceOf(Map);
+		expect(view.aliases).toBe(aliases);
 	});
 
 	it("covers every declared locale with a dictionary", () => {
