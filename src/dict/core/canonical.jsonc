@@ -466,7 +466,85 @@
 				"Save content preferences",
 				"Save hovercard preferences",
 				"Save editor settings",
-				"Save assistive technology hint preferences"
+				"Save assistive technology hint preferences",
+				// —— 通知设置（/settings/notifications）——
+				// 键逐字抄自开发者模式导出的实机文本节点（2026-09 该页会话）。本页长说明句
+				// 多数被链接拆开：链接前 / 链接后的片段各成一条（整句键在实机永不命中的不收录）。
+				// 纯专名链接（GitHub Actions）与纯缩写（CLI）不收录——译文必须含中文字系，
+				// 收录必被门禁拒；未命中即保留英文，这是正确做法而不是漏译。
+				// 节点边界与拼接结果见 src/content/__tests__/settings-notifications.test.ts。
+				"Notification Settings",
+				"Default notifications email",
+				"Choose where you'd like emails to be sent. You can add more email addresses. Use custom routes to specify different email addresses to be used for individual organizations.",
+				"Custom routing",
+				"Subscriptions",
+				"Notifications for all repositories, teams, or conversations you're watching.",
+				"View watched repositories",
+				"Participating, @mentions and custom",
+				"Notifications for the conversations you are participating in, or if someone cites you with an @mention. Also for all activity when subscribed to specific events.",
+				"Customize email updates",
+				"Choose which additional events you'll receive emails for when participating or watching.",
+				"Reviews, Pushes, Comments",
+				"Ignored repositories",
+				"You'll never be notified.",
+				"View ignored repositories",
+				"System",
+				// 本页的区块标题是 GitHub Actions（不是「操作」）——同键在 pages/repo 里译作
+				// 「操作」，本模块在前，故 /settings 子树压过它（有意同键异译，见 registry.ts）
+				"Actions",
+				// 实机边界：`Notifications … set up with <a>GitHub Actions</a>.`——
+				// 链接在句尾，链接后的节点只有纯符号 "."，故中文只能整句压在链接之前
+				"Notifications for workflow runs on repositories set up with",
+				"Dependabot alerts: New vulnerabilities",
+				// 实机边界：`When you're given access to <a>Dependabot alerts</a> automatically receive …`
+				"When you're given access to",
+				"automatically receive notifications when a new vulnerability is found in one of your dependencies.",
+				"Dependabot alerts",
+				"Dependabot alerts: Email digest",
+				"Email a regular summary of Dependabot alerts for up to 10 of your repositories.",
+				"Security campaign emails",
+				"Receive email notifications about security campaigns in repositories where you have access to security alerts.",
+				"Agent sessions",
+				"Notifications for agent sessions that you started.",
+				"'Deploy key' alert email",
+				"When you are given admin permissions to an organization, automatically receive notifications when a new deploy key is added.",
+				"In-product messages",
+				"Get tips, solutions and exclusive offers from GitHub about products, services and events we think you might find interesting.",
+				// —— 通知渠道控件（摘要行 / 下拉 / 弹窗）——
+				// 摘要行是「Notify me:」+「on <渠道列表>」两个节点拼成，渠道顺序恒为
+				// GitHub → Email → CLI，故三种渠道的组合各收一条（实机见到前两种，
+				// 其余按同一模板补齐）；单独的 "on CLI" 译文无法含中文，故不收录。
+				"Notify me:",
+				"on GitHub",
+				"on Email",
+				"on GitHub, Email",
+				"on GitHub, CLI",
+				"on Email, CLI",
+				"on GitHub, Email, CLI",
+				"Failed workflows only",
+				"Select notification channels",
+				"On GitHub",
+				"Email",
+				"Only notify for failed workflows",
+				"Don't send",
+				"Send weekly",
+				"Send daily",
+				// —— 设置页外壳（左侧栏与设置范围切换器，同一次采集的实机节点）——
+				"User settings",
+				"Switch",
+				"context",
+				"settings",
+				"Menu",
+				"Type",
+				"AI usage",
+				"Cloud agent",
+				"Credentials",
+				"Moderation",
+				"Sessions",
+				"Access",
+				"Licensing",
+				"Features",
+				"Usage"
 			]
 		},
 		{
@@ -1861,6 +1939,9 @@
 				"forward slash",
 				"g then n",
 				"g then d",
+				// 设置页侧栏的快捷跳转提示（与上面两条同模板：按键名保留英文，只译连词）
+				"g then i",
+				"g then p",
 				"Open menu",
 				"Open user navigation menu",
 				"You have no unread notifications",

@@ -295,6 +295,91 @@
 		"Save content preferences": "保存内容偏好设置",
 		"Save hovercard preferences": "保存悬停卡片偏好设置",
 		"Save editor settings": "保存编辑器设置",
-		"Save assistive technology hint preferences": "保存辅助技术提示偏好设置"
+		"Save assistive technology hint preferences": "保存辅助技术提示偏好设置",
+		// —— 通知设置（/settings/notifications）——
+		// 键逐字抄自开发者模式导出的实机文本节点（2026-09 该页会话），节点边界见
+		// src/content/__tests__/settings-notifications.test.ts。本页说明句多被链接拆开，
+		// 拆分片段必须能直接拼接（walker 保留原节点首尾空白，译文里不要再自带首尾空格）。
+		"Notification Settings": "通知设置",
+		"Default notifications email": "默认通知邮箱",
+		"Choose where you'd like emails to be sent. You can add more email addresses. Use custom routes to specify different email addresses to be used for individual organizations.": "选择你希望把邮件发送到哪里。你可以添加更多电子邮箱地址。使用自定义路由，可以为各个组织指定不同的电子邮箱地址。",
+		"Custom routing": "自定义路由",
+		"Subscriptions": "订阅",
+		// 「View watched repositories」是链接 → 与说明句分属两个节点，各自成条
+		"Notifications for all repositories, teams, or conversations you're watching.": "你正在关注的所有仓库、团队或会话的通知。",
+		"View watched repositories": "查看已关注的仓库",
+		"Participating, @mentions and custom": "参与、@提及和自定义",
+		"Notifications for the conversations you are participating in, or if someone cites you with an @mention. Also for all activity when subscribed to specific events.": "你所参与的会话的通知，或者有人在 @提及中引用你时的通知。订阅特定事件后，这些事件的所有动态也会通知你。",
+		// 「Customize email updates」是展开更多邮件偏好的入口；中文取「邮件通知」比直译「邮件更新」更贴近它的作用
+		"Customize email updates": "自定义邮件通知",
+		"Choose which additional events you'll receive emails for when participating or watching.": "选择在参与或关注时，你还希望收到哪些事件的邮件通知。",
+		// 实机里是「Customize email updates」旁已选事件的摘要串（顺序固定，整串一个节点）
+		"Reviews, Pushes, Comments": "审查、推送、评论",
+		"Ignored repositories": "已忽略的仓库",
+		"You'll never be notified.": "你永远不会收到通知。",
+		"View ignored repositories": "查看已忽略的仓库",
+		"System": "系统",
+		// 区块标题是 GitHub Actions；pages/repo 的同键译文是「操作」（在那里指的是别的含义），
+		// 本模块在前，故 /settings 子树里显示「Actions 工作流」而不是「操作」
+		"Actions": "Actions 工作流",
+		// 实机边界：`… set up with <a>GitHub Actions</a>.`——链接后只剩纯符号 "."（翻不了），
+		// 中文语序只能把「的仓库…通知」整段压在链接之前，故末段以「已设置」收尾
+		"Notifications for workflow runs on repositories set up with": "工作流运行通知：仓库需已设置",
+		"Dependabot alerts: New vulnerabilities": "Dependabot 警报：新漏洞",
+		// 实机边界：`When you're given access to <a>Dependabot alerts</a> automatically receive …`
+		"When you're given access to": "获得",
+		"automatically receive notifications when a new vulnerability is found in one of your dependencies.": "的访问权限后，当你的某个依赖中发现新漏洞时，你会自动收到通知。",
+		// 「Dependabot alerts」在上一句里是链接，单独成节点；纯专名保留 Dependabot 原文
+		"Dependabot alerts": "Dependabot 警报",
+		"Dependabot alerts: Email digest": "Dependabot 警报：邮件摘要",
+		"Email a regular summary of Dependabot alerts for up to 10 of your repositories.": "定期通过邮件为你最多 10 个仓库发送 Dependabot 警报摘要。",
+		"Security campaign emails": "安全活动邮件",
+		"Receive email notifications about security campaigns in repositories where you have access to security alerts.": "在你拥有安全警报访问权限的仓库中，通过邮件接收安全活动通知。",
+		"Agent sessions": "代理会话",
+		"Notifications for agent sessions that you started.": "你启动的代理会话的通知。",
+		// 部署密钥的引号：原文是单引号，中文改用书名号式的直角引号
+		"'Deploy key' alert email": "「部署密钥」警报邮件",
+		"When you are given admin permissions to an organization, automatically receive notifications when a new deploy key is added.": "当你获得某个组织的管理员权限后，如果有新的部署密钥被添加，你会自动收到通知。",
+		"In-product messages": "产品内消息",
+		"Get tips, solutions and exclusive offers from GitHub about products, services and events we think you might find interesting.": "获取 GitHub 提供的技巧、解决方案与独家优惠，内容涉及我们认为你可能会感兴趣的产品、服务和活动。",
+		// —— 通知渠道控件（摘要行 / 下拉 / 弹窗）——
+		// 摘要行 = "Notify me:" + "on <渠道列表>" 两个节点。渠道顺序恒为 GitHub → Email → CLI，
+		// 故组合各收一条；单独的 "on CLI" 译文无法含中文（门禁要求），不收录，保留英文即可
+		"Notify me:": "通知我：",
+		"on GitHub": "在 GitHub 上",
+		"on Email": "电子邮件",
+		"on GitHub, Email": "在 GitHub 上、电子邮件",
+		"on GitHub, CLI": "在 GitHub 上、CLI",
+		"on Email, CLI": "电子邮件、CLI",
+		"on GitHub, Email, CLI": "在 GitHub 上、电子邮件、CLI",
+		// 渠道弹窗里勾选「只对失败的 workflow 通知」时，摘要行末尾追加的括注
+		"Failed workflows only": "仅失败的工作流",
+		"Select notification channels": "选择通知渠道",
+		"On GitHub": "在 GitHub 上",
+		// 「Email」是渠道勾选框文案；CLI 是纯缩写，保留原文
+		"Email": "电子邮件",
+		"Only notify for failed workflows": "仅对失败的工作流发送通知",
+		// Dependabot 邮件摘要的频率下拉
+		"Don't send": "不发送",
+		"Send weekly": "每周发送",
+		"Send daily": "每天发送",
+		// —— 设置页外壳：设置范围切换器与左侧栏（同一次采集的实机节点）——
+		// 这些短标签是设置页共用的导航文案，键本身无歧义；与 pages/repo-settings 的
+		// 同键译文保持一致（Access / Moderation / Cloud agent / Type / Features）
+		"User settings": "用户设置",
+		"Switch": "切换",
+		"context": "上下文",
+		"settings": "设置",
+		"Menu": "菜单",
+		"Type": "类型",
+		"AI usage": "AI 用量",
+		"Cloud agent": "云端代理",
+		"Credentials": "凭据",
+		"Moderation": "审核",
+		"Sessions": "会话",
+		"Access": "访问权限",
+		"Licensing": "许可",
+		"Features": "功能",
+		"Usage": "用量"
 	}
 }

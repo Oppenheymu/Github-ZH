@@ -31,6 +31,9 @@
 		"forward slash": "正斜杠",
 		"g then n": "g 然后 n",
 		"g then d": "g 然后 d",
+		// 设置页侧栏的快捷跳转提示（同模板：按键名保留英文，只译连词）
+		"g then i": "g 然后 i",
+		"g then p": "g 然后 p",
 		"Open menu": "打开菜单",
 		"Open user navigation menu": "打开用户导航菜单",
 		"You have no unread notifications": "你没有未读通知",
