@@ -544,7 +544,76 @@
 				"Access",
 				"Licensing",
 				"Features",
-				"Usage"
+				"Usage",
+				// —— 账单页外壳（/settings/billing）——
+				// 键逐字抄自开发者模式导出的实机文本节点（2026-09 该页会话）。本页是
+				// 账单总览：产品用量卡片 + 时间范围下拉 + 计费说明句，节点边界见
+				// src/content/__tests__/settings-billing.test.ts。
+				// 纯专名（Copilot / Spark / GitHub / GitHub Models / Packages / Git LFS）、
+				// 纯泛化短词（per / month / items / usage）与用户内容（仓库名、@用户名、
+				// 头像 alt）**一律不收录**：前者的译文必然与键同形（自触发循环，门禁直接拒），
+				// 后者会导致误伤，未命中即保留英文，这是正确做法而不是漏译。
+				"Billing Overview",
+				// 计费金额与账期
+				"Manage subscriptions",
+				"Next payment due",
+				"Current metered usage",
+				"Current included usage",
+				"Metered usage",
+				"Included usage",
+				"Billable usage",
+				"Included usage limits reset in",
+				"Gross amount",
+				"Minus",
+				"discounts",
+				"consumed usage",
+				"Total billable usage after subtracting discounts from consumed usage",
+				"Manage budgets",
+				"View details",
+				// 时间范围下拉的当前值与备选项（另外两项是「本月」所在的同一组）
+				"Current month",
+				"Last month",
+				"Last year (2025)",
+				"This year (2026)",
+				// 产品用量区块
+				"Usage by products",
+				"Usage by repository",
+				"Additional usage",
+				"Top two repositories this month",
+				"Products selector",
+				"Products selector navigation",
+				"Open repository usage options",
+				"User navigation",
+				// 金额与用量的说明句（含完整日期区间的整句形态）。区间本身是动态的，由
+				// core/rules.jsonc 的 settings/usage-range-* 覆盖；这里保留整句键是因为
+				// 说明句与区间常被拆成两个节点（见 src/content/__tests__/settings-billing.test.ts）
+				"Total gross spend on Copilot for the selected timeframe including licenses and AI Credits.",
+				"Gross metered usage for September 1 - September 30, 2026.",
+				"Included usage discounts for September 1 - September 30, 2026.",
+				"Gross metered usage for September 1 - September 29, 2026.",
+				"Included usage discounts for September 1 - September 29, 2026.",
+				"Based on 0 additional AI credits beyond your included usage.",
+				"Cost calculated based on 0 Spark AI credits that exceed the AI credits usage included with your Copilot licenses.",
+				"Cost calculated based on additional 0 token units",
+				// 各产品的计费说明（Billable spend for …）
+				"Billable spend for Git LFS for the selected timeframe. Applicable discounts cover included usage for Git LFS bandwidth and storage.",
+				"Billable spend for Packages for the selected timeframe. Applicable discounts cover Packages usage in public repositories and included usage for Packages data transfer and storage.",
+				"Billable spend for Sandbox for the selected timeframe.",
+				"Billable spend for Actions and Actions Runners for the selected timeframe. Applicable discounts cover Actions usage in public repositories and included usage for Actions minutes and storage.",
+				"Billable spend for Codespaces for the selected timeframe.",
+				// 用量明细行（Actions / Git LFS / Packages 三组额度）
+				"Copilot usage",
+				"About Copilot AI credits",
+				"About GitHub Models rate limits",
+				"About GitHub Actions storage billing",
+				"Actions minutes",
+				"Actions storage",
+				"Git LFS bandwidth",
+				"Git LFS storage",
+				"Packages data transfer",
+				"Packages storage",
+				"Models",
+				"Spark AI credits"
 			]
 		},
 		{

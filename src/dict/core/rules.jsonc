@@ -80,6 +80,621 @@
 				{
 					"id": "settings/owner-organizations",
 					"pattern": "^Your account is currently an owner in these organizations:(?: (.+))?$"
+				},
+				// 账单页（/settings/billing）的用量表格：说明句与时间范围常被拆成两个节点
+				// （"Gross metered usage for " + 区间），区间本身又是动态的，故按月全展开：
+				// 12 条同月 + 132 条跨月，与 insights/range-long-* 同一形态。之所以逐组合
+				// 写死月份，是因为替换模板不支持函数映射——把英文月名捕获进模板，中文里
+				// 就会渲染出 September（见 src/content/__tests__/settings-billing.test.ts）。
+				//
+				// 顺序即语义：同月的 12 条以月份字面量锚定，先吃掉「September 1 - September
+				// 30, 2026」这类；跨月的 132 条各自写死起止月份，收尾的 (?:\\.)? 同时覆盖
+				// 「裸区间」与「带句号」，故两类互不顶替。
+				//
+				// 另注意：裸区间必须排在 global 的 long-date-* 之前 —— 那些规则以 ^ 锚定
+				// 但未以 $ 收尾，会给「September 1 - September 30, 2026」做部分替换，
+				// 产出中英混合的残句。
+				{
+					"id": "settings/usage-range-same-month-jan",
+					"pattern": "^January (?<startDay>\\d{1,2}) - January (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-same-month-feb",
+					"pattern": "^February (?<startDay>\\d{1,2}) - February (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-same-month-mar",
+					"pattern": "^March (?<startDay>\\d{1,2}) - March (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-same-month-apr",
+					"pattern": "^April (?<startDay>\\d{1,2}) - April (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-same-month-may",
+					"pattern": "^May (?<startDay>\\d{1,2}) - May (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-same-month-jun",
+					"pattern": "^June (?<startDay>\\d{1,2}) - June (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-same-month-jul",
+					"pattern": "^July (?<startDay>\\d{1,2}) - July (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-same-month-aug",
+					"pattern": "^August (?<startDay>\\d{1,2}) - August (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-same-month-sep",
+					"pattern": "^September (?<startDay>\\d{1,2}) - September (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-same-month-oct",
+					"pattern": "^October (?<startDay>\\d{1,2}) - October (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-same-month-nov",
+					"pattern": "^November (?<startDay>\\d{1,2}) - November (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-same-month-dec",
+					"pattern": "^December (?<startDay>\\d{1,2}) - December (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jan-feb",
+					"pattern": "^January (?<startDay>\\d{1,2}) - February (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jan-mar",
+					"pattern": "^January (?<startDay>\\d{1,2}) - March (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jan-apr",
+					"pattern": "^January (?<startDay>\\d{1,2}) - April (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jan-may",
+					"pattern": "^January (?<startDay>\\d{1,2}) - May (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jan-jun",
+					"pattern": "^January (?<startDay>\\d{1,2}) - June (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jan-jul",
+					"pattern": "^January (?<startDay>\\d{1,2}) - July (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jan-aug",
+					"pattern": "^January (?<startDay>\\d{1,2}) - August (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jan-sep",
+					"pattern": "^January (?<startDay>\\d{1,2}) - September (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jan-oct",
+					"pattern": "^January (?<startDay>\\d{1,2}) - October (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jan-nov",
+					"pattern": "^January (?<startDay>\\d{1,2}) - November (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jan-dec",
+					"pattern": "^January (?<startDay>\\d{1,2}) - December (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-feb-jan",
+					"pattern": "^February (?<startDay>\\d{1,2}) - January (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-feb-mar",
+					"pattern": "^February (?<startDay>\\d{1,2}) - March (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-feb-apr",
+					"pattern": "^February (?<startDay>\\d{1,2}) - April (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-feb-may",
+					"pattern": "^February (?<startDay>\\d{1,2}) - May (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-feb-jun",
+					"pattern": "^February (?<startDay>\\d{1,2}) - June (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-feb-jul",
+					"pattern": "^February (?<startDay>\\d{1,2}) - July (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-feb-aug",
+					"pattern": "^February (?<startDay>\\d{1,2}) - August (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-feb-sep",
+					"pattern": "^February (?<startDay>\\d{1,2}) - September (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-feb-oct",
+					"pattern": "^February (?<startDay>\\d{1,2}) - October (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-feb-nov",
+					"pattern": "^February (?<startDay>\\d{1,2}) - November (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-feb-dec",
+					"pattern": "^February (?<startDay>\\d{1,2}) - December (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-mar-jan",
+					"pattern": "^March (?<startDay>\\d{1,2}) - January (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-mar-feb",
+					"pattern": "^March (?<startDay>\\d{1,2}) - February (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-mar-apr",
+					"pattern": "^March (?<startDay>\\d{1,2}) - April (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-mar-may",
+					"pattern": "^March (?<startDay>\\d{1,2}) - May (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-mar-jun",
+					"pattern": "^March (?<startDay>\\d{1,2}) - June (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-mar-jul",
+					"pattern": "^March (?<startDay>\\d{1,2}) - July (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-mar-aug",
+					"pattern": "^March (?<startDay>\\d{1,2}) - August (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-mar-sep",
+					"pattern": "^March (?<startDay>\\d{1,2}) - September (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-mar-oct",
+					"pattern": "^March (?<startDay>\\d{1,2}) - October (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-mar-nov",
+					"pattern": "^March (?<startDay>\\d{1,2}) - November (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-mar-dec",
+					"pattern": "^March (?<startDay>\\d{1,2}) - December (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-apr-jan",
+					"pattern": "^April (?<startDay>\\d{1,2}) - January (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-apr-feb",
+					"pattern": "^April (?<startDay>\\d{1,2}) - February (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-apr-mar",
+					"pattern": "^April (?<startDay>\\d{1,2}) - March (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-apr-may",
+					"pattern": "^April (?<startDay>\\d{1,2}) - May (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-apr-jun",
+					"pattern": "^April (?<startDay>\\d{1,2}) - June (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-apr-jul",
+					"pattern": "^April (?<startDay>\\d{1,2}) - July (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-apr-aug",
+					"pattern": "^April (?<startDay>\\d{1,2}) - August (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-apr-sep",
+					"pattern": "^April (?<startDay>\\d{1,2}) - September (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-apr-oct",
+					"pattern": "^April (?<startDay>\\d{1,2}) - October (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-apr-nov",
+					"pattern": "^April (?<startDay>\\d{1,2}) - November (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-apr-dec",
+					"pattern": "^April (?<startDay>\\d{1,2}) - December (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-may-jan",
+					"pattern": "^May (?<startDay>\\d{1,2}) - January (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-may-feb",
+					"pattern": "^May (?<startDay>\\d{1,2}) - February (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-may-mar",
+					"pattern": "^May (?<startDay>\\d{1,2}) - March (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-may-apr",
+					"pattern": "^May (?<startDay>\\d{1,2}) - April (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-may-jun",
+					"pattern": "^May (?<startDay>\\d{1,2}) - June (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-may-jul",
+					"pattern": "^May (?<startDay>\\d{1,2}) - July (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-may-aug",
+					"pattern": "^May (?<startDay>\\d{1,2}) - August (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-may-sep",
+					"pattern": "^May (?<startDay>\\d{1,2}) - September (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-may-oct",
+					"pattern": "^May (?<startDay>\\d{1,2}) - October (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-may-nov",
+					"pattern": "^May (?<startDay>\\d{1,2}) - November (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-may-dec",
+					"pattern": "^May (?<startDay>\\d{1,2}) - December (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jun-jan",
+					"pattern": "^June (?<startDay>\\d{1,2}) - January (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jun-feb",
+					"pattern": "^June (?<startDay>\\d{1,2}) - February (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jun-mar",
+					"pattern": "^June (?<startDay>\\d{1,2}) - March (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jun-apr",
+					"pattern": "^June (?<startDay>\\d{1,2}) - April (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jun-may",
+					"pattern": "^June (?<startDay>\\d{1,2}) - May (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jun-jul",
+					"pattern": "^June (?<startDay>\\d{1,2}) - July (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jun-aug",
+					"pattern": "^June (?<startDay>\\d{1,2}) - August (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jun-sep",
+					"pattern": "^June (?<startDay>\\d{1,2}) - September (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jun-oct",
+					"pattern": "^June (?<startDay>\\d{1,2}) - October (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jun-nov",
+					"pattern": "^June (?<startDay>\\d{1,2}) - November (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jun-dec",
+					"pattern": "^June (?<startDay>\\d{1,2}) - December (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jul-jan",
+					"pattern": "^July (?<startDay>\\d{1,2}) - January (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jul-feb",
+					"pattern": "^July (?<startDay>\\d{1,2}) - February (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jul-mar",
+					"pattern": "^July (?<startDay>\\d{1,2}) - March (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jul-apr",
+					"pattern": "^July (?<startDay>\\d{1,2}) - April (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jul-may",
+					"pattern": "^July (?<startDay>\\d{1,2}) - May (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jul-jun",
+					"pattern": "^July (?<startDay>\\d{1,2}) - June (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jul-aug",
+					"pattern": "^July (?<startDay>\\d{1,2}) - August (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jul-sep",
+					"pattern": "^July (?<startDay>\\d{1,2}) - September (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jul-oct",
+					"pattern": "^July (?<startDay>\\d{1,2}) - October (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jul-nov",
+					"pattern": "^July (?<startDay>\\d{1,2}) - November (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-jul-dec",
+					"pattern": "^July (?<startDay>\\d{1,2}) - December (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-aug-jan",
+					"pattern": "^August (?<startDay>\\d{1,2}) - January (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-aug-feb",
+					"pattern": "^August (?<startDay>\\d{1,2}) - February (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-aug-mar",
+					"pattern": "^August (?<startDay>\\d{1,2}) - March (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-aug-apr",
+					"pattern": "^August (?<startDay>\\d{1,2}) - April (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-aug-may",
+					"pattern": "^August (?<startDay>\\d{1,2}) - May (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-aug-jun",
+					"pattern": "^August (?<startDay>\\d{1,2}) - June (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-aug-jul",
+					"pattern": "^August (?<startDay>\\d{1,2}) - July (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-aug-sep",
+					"pattern": "^August (?<startDay>\\d{1,2}) - September (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-aug-oct",
+					"pattern": "^August (?<startDay>\\d{1,2}) - October (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-aug-nov",
+					"pattern": "^August (?<startDay>\\d{1,2}) - November (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-aug-dec",
+					"pattern": "^August (?<startDay>\\d{1,2}) - December (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-sep-jan",
+					"pattern": "^September (?<startDay>\\d{1,2}) - January (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-sep-feb",
+					"pattern": "^September (?<startDay>\\d{1,2}) - February (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-sep-mar",
+					"pattern": "^September (?<startDay>\\d{1,2}) - March (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-sep-apr",
+					"pattern": "^September (?<startDay>\\d{1,2}) - April (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-sep-may",
+					"pattern": "^September (?<startDay>\\d{1,2}) - May (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-sep-jun",
+					"pattern": "^September (?<startDay>\\d{1,2}) - June (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-sep-jul",
+					"pattern": "^September (?<startDay>\\d{1,2}) - July (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-sep-aug",
+					"pattern": "^September (?<startDay>\\d{1,2}) - August (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-sep-oct",
+					"pattern": "^September (?<startDay>\\d{1,2}) - October (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-sep-nov",
+					"pattern": "^September (?<startDay>\\d{1,2}) - November (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-sep-dec",
+					"pattern": "^September (?<startDay>\\d{1,2}) - December (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-oct-jan",
+					"pattern": "^October (?<startDay>\\d{1,2}) - January (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-oct-feb",
+					"pattern": "^October (?<startDay>\\d{1,2}) - February (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-oct-mar",
+					"pattern": "^October (?<startDay>\\d{1,2}) - March (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-oct-apr",
+					"pattern": "^October (?<startDay>\\d{1,2}) - April (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-oct-may",
+					"pattern": "^October (?<startDay>\\d{1,2}) - May (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-oct-jun",
+					"pattern": "^October (?<startDay>\\d{1,2}) - June (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-oct-jul",
+					"pattern": "^October (?<startDay>\\d{1,2}) - July (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-oct-aug",
+					"pattern": "^October (?<startDay>\\d{1,2}) - August (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-oct-sep",
+					"pattern": "^October (?<startDay>\\d{1,2}) - September (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-oct-nov",
+					"pattern": "^October (?<startDay>\\d{1,2}) - November (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-oct-dec",
+					"pattern": "^October (?<startDay>\\d{1,2}) - December (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-nov-jan",
+					"pattern": "^November (?<startDay>\\d{1,2}) - January (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-nov-feb",
+					"pattern": "^November (?<startDay>\\d{1,2}) - February (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-nov-mar",
+					"pattern": "^November (?<startDay>\\d{1,2}) - March (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-nov-apr",
+					"pattern": "^November (?<startDay>\\d{1,2}) - April (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-nov-may",
+					"pattern": "^November (?<startDay>\\d{1,2}) - May (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-nov-jun",
+					"pattern": "^November (?<startDay>\\d{1,2}) - June (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-nov-jul",
+					"pattern": "^November (?<startDay>\\d{1,2}) - July (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-nov-aug",
+					"pattern": "^November (?<startDay>\\d{1,2}) - August (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-nov-sep",
+					"pattern": "^November (?<startDay>\\d{1,2}) - September (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-nov-oct",
+					"pattern": "^November (?<startDay>\\d{1,2}) - October (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-nov-dec",
+					"pattern": "^November (?<startDay>\\d{1,2}) - December (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-dec-jan",
+					"pattern": "^December (?<startDay>\\d{1,2}) - January (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-dec-feb",
+					"pattern": "^December (?<startDay>\\d{1,2}) - February (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-dec-mar",
+					"pattern": "^December (?<startDay>\\d{1,2}) - March (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-dec-apr",
+					"pattern": "^December (?<startDay>\\d{1,2}) - April (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-dec-may",
+					"pattern": "^December (?<startDay>\\d{1,2}) - May (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-dec-jun",
+					"pattern": "^December (?<startDay>\\d{1,2}) - June (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-dec-jul",
+					"pattern": "^December (?<startDay>\\d{1,2}) - July (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-dec-aug",
+					"pattern": "^December (?<startDay>\\d{1,2}) - August (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-dec-sep",
+					"pattern": "^December (?<startDay>\\d{1,2}) - September (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-dec-oct",
+					"pattern": "^December (?<startDay>\\d{1,2}) - October (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-cross-dec-nov",
+					"pattern": "^December (?<startDay>\\d{1,2}) - November (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				// 计费周期后缀（账单卡片的「/month」「/year」单价）。锚定收尾，避免误伤
+				// 含「/month」的其它文案
+				{
+					"id": "settings/per-month",
+					"pattern": "^/month$"
+				},
+				{
+					"id": "settings/per-year",
+					"pattern": "^/year$"
+				},
+				{
+					"id": "settings/per-day",
+					"pattern": "^/day$"
+				},
+				// 额度摘要「N GB used / N GB included」「N min used / N min included」：
+				// 数字随用量变化。实机上是独立节点，故键不在静态词条里。
+				// 两处单位恒相同，故只声明一个命名组 —— JS 正则不允许多个同名的命名组
+				// （「Duplicate capture group name」），模板里引用同一个 $<unit> 两次即可
+				{
+					"id": "settings/storage-used-included",
+					"pattern": "^(?<used>[\\d.,]+) (?<unit>GB|MB|TB|KB) used / (?<included>[\\d.,]+) \\k<unit> included$"
+				},
+				{
+					"id": "settings/minutes-used-included",
+					"pattern": "^(?<used>[\\d.,]+) min used / (?<included>[\\d.,]+) min included$"
 				}
 			]
 		},
