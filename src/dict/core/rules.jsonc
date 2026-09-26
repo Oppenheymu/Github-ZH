@@ -80,7 +80,12 @@
 				{
 					"id": "settings/owner-organizations",
 					"pattern": "^Your account is currently an owner in these organizations:(?: (.+))?$"
-				},
+				}
+			]
+		},
+		{
+			"name": "pages/settings-billing",
+			"rules": [
 				// 账单页（/settings/billing）的用量表格：说明句与时间范围常被拆成两个节点
 				// （"Gross metered usage for " + 区间），区间本身又是动态的，故按月全展开：
 				// 12 条同月 + 132 条跨月，与 insights/range-long-* 同一形态。之所以逐组合
@@ -695,6 +700,54 @@
 				{
 					"id": "settings/minutes-used-included",
 					"pattern": "^(?<used>[\\d.,]+) min used / (?<included>[\\d.,]+) min included$"
+				},
+				// —— 「More details」弹窗（所含用量与点数明细）——
+				// 弹窗行是「<数量> included <产品> <资源>」，数量随额度变化；产品与资源名
+				// 固定，故按资源逐条锚定。折扣列（"~$12.00 off*"）与金额无需翻译。
+				{
+					"id": "settings/included-actions-minutes",
+					"pattern": "^(?<count>[\\d,]+) included Actions minutes$"
+				},
+				{
+					"id": "settings/included-actions-storage",
+					"pattern": "^(?<count>[\\d.,]+) (?<unit>GB|MB|TB|KB) included Actions storage$"
+				},
+				{
+					"id": "settings/included-git-lfs-bandwidth",
+					"pattern": "^(?<count>[\\d.,]+) (?<unit>GB|MB|TB|KB) included Git LFS bandwidth$"
+				},
+				{
+					"id": "settings/included-git-lfs-storage",
+					"pattern": "^(?<count>[\\d.,]+) (?<unit>GB|MB|TB|KB) included Git LFS storage$"
+				},
+				{
+					"id": "settings/included-packages-transfer",
+					"pattern": "^(?<count>[\\d.,]+) (?<unit>GB|MB|TB|KB) included Packages data transfer$"
+				},
+				{
+					"id": "settings/included-packages-storage",
+					"pattern": "^(?<count>[\\d.,]+) (?<unit>GB|MB|TB|KB) included Packages storage$"
+				},
+				{
+					"id": "settings/included-codespaces-storage",
+					"pattern": "^(?<count>[\\d.,]+) (?<unit>GB|MB|TB|KB) included Codespaces storage$"
+				},
+				{
+					"id": "settings/included-codespaces-core-hours",
+					"pattern": "^(?<count>[\\d,]+) included Codespaces core hours$"
+				},
+				// 折扣列：「~$12.00 off」→「约 12.00 抵扣」。金额原样保留，只把 off 译出
+				// （纯金额节点翻不了也不必翻）。刻意不给「~」单独开捕获组：可选组未参与
+				// 匹配时，模板里的 $<name> 会被当成字面量原样输出（引擎语义），
+				// 故用两支把前缀写死进模板。也不吞掉行尾的「*」——它是注解标记，
+				// 在实机里常独立成节点，留给它自己更稳
+				{
+					"id": "settings/discount-approx",
+					"pattern": "^~\\$(?<amount>[\\d.,]+) off\\*?$"
+				},
+				{
+					"id": "settings/discount-exact",
+					"pattern": "^\\$(?<amount>[\\d.,]+) off\\*?$"
 				}
 			]
 		},

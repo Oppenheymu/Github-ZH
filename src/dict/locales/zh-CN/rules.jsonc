@@ -396,6 +396,21 @@
 		"global/files-count": "$1 个文件",
 		"global/forks-count": "$1 个复刻",
 		"global/comments-count": "$1 条评论",
-		"global/copyright-year": "© $1 年 GitHub, Inc."
+		"global/copyright-year": "© $1 年 GitHub, Inc.",
+		// —— 「More details」弹窗（所含用量与点数明细，模块 pages/settings-billing）——
+		// 行是「<数量> included <产品> <资源>」，数量随额度变化，故按资源逐条锚定
+		"settings/included-actions-minutes": "包含 $<count> 分钟 Actions 用量",
+		"settings/included-actions-storage": "包含 $<count> $<unit> Actions 存储",
+		"settings/included-git-lfs-bandwidth": "包含 $<count> $<unit> Git LFS 带宽",
+		"settings/included-git-lfs-storage": "包含 $<count> $<unit> Git LFS 存储",
+		"settings/included-packages-transfer": "包含 $<count> $<unit> Packages 数据传输",
+		"settings/included-packages-storage": "包含 $<count> $<unit> Packages 存储",
+		"settings/included-codespaces-storage": "包含 $<count> $<unit> 代码空间存储",
+		"settings/included-codespaces-core-hours": "包含 $<count> 个代码空间核心小时",
+		// 折扣列：金额原样保留（不带 $，保留原有呈现），只译 off；带「~」的形态另有一条。
+		// 模板刻意写成「约 $<amount> 抵扣」而不是「约抵扣 $<amount>」——后者需要字面量 $
+		// 紧跟捕获组（`$$<amount>`），而 `$$` 会被引擎折叠、导致组引用原样输出（实测）
+		"settings/discount-approx": "约 $<amount> 抵扣",
+		"settings/discount-exact": "$<amount> 抵扣"
 	}
 }

@@ -40,6 +40,8 @@ const BILLING_NODES: readonly string[] = [
 	"Billing Overview",
 	"User navigation",
 	"Manage subscriptions",
+	// 卡片右上角入口（原导出里 count 21，当时的会话漏收，导致点开后整块英文）
+	"More details",
 	// —— 账期与金额 ——
 	"Next payment due",
 	"Current metered usage",
@@ -289,5 +291,112 @@ describe("账单页的实机节点边界", () => {
 				view,
 			),
 		).toContain("Spark AI 点数");
+	});
+});
+
+/**
+ * 「More details」弹窗的实机文本节点。
+ *
+ * 这份清单的边界比页身弱一档：弹窗只在点开后才渲染，**没进开发者模式导出**，
+ * 节点原文按截图逐行誊录（GitHub 的弹窗每行自成一个文本节点），未经 DevTools 复核。
+ * 若实机出现漏翻，第一步是把弹窗里的节点原文抓下来，按此处格式替换。
+ */
+const PANEL_NODES: readonly string[] = [
+	"More details",
+	"Included usage and credits",
+	"Showing currently applied usage and credits for your account.",
+	"Current usage for Sep 1 - Sep 30, 2026. Monthly quota resets in 5 day(s).",
+	"Included usage*",
+	"2,000 included Actions minutes",
+	"~$12.00 off*",
+	".5 GB included Actions storage",
+	"~$0.125 off*",
+	"10 GB included Git LFS bandwidth",
+	"~$0.875 off*",
+	"10 GB included Git LFS storage",
+	"~$0.70 off*",
+	"1 GB included Packages data transfer",
+	"~$0.50 off*",
+	".5 GB included Packages storage",
+	"~$0.125 off*",
+	"Free usage**",
+	"100% off per month",
+	"15 GB included Codespaces storage",
+	"~$1.05 off*",
+	"120 included Codespaces core hours",
+	"~$10.80 off*",
+	"* Included usage is an approximate amount based on current pricing.",
+];
+
+describe("「More details」弹窗的实机节点边界", () => {
+	it("translates every panel row", () => {
+		for (const node of PANEL_NODES) {
+			for (const variant of withWhitespace(node)) {
+				const translated = translateText(variant, view);
+				// 弹窗里每一行都含英文词，「翻不了」在实机上就等于整块漏翻
+				expect(
+					translated,
+					`未命中：${JSON.stringify(variant)}`,
+				).not.toBeNull();
+				expect(translated ?? "").toMatch(/[\u4e00-\u9fff]/);
+			}
+		}
+	});
+
+	it("keeps the quota rows dynamic", () => {
+		expect(
+			translateText("2,000 included Actions minutes", view),
+		).toBe("包含 2,000 分钟 Actions 用量");
+		expect(
+			translateText(
+				"15 GB included Codespaces storage",
+				view,
+			),
+		).toBe("包含 15 GB 代码空间存储");
+		expect(
+			translateText(
+				"120 included Codespaces core hours",
+				view,
+			),
+		).toBe("包含 120 个代码空间核心小时");
+		// 数量变化不影响匹配
+		expect(
+			translateText("20 GB included Git LFS storage", view),
+		).toBe("包含 20 GB Git LFS 存储");
+	});
+
+	it("translates the discount column", () => {
+		expect(translateText("~$12.00 off*", view)).toBe(
+			"约 12.00 抵扣",
+		);
+		expect(translateText("$0.125 off*", view)).toBe(
+			"0.125 抵扣",
+		);
+		expect(translateText("~$10.80 off", view)).toBe(
+			"约 10.80 抵扣",
+		);
+	});
+
+	it("renders the panel footnote with its inline link", () => {
+		// 实机边界：末行含内联链接「Free use of GitHub Actions」——
+		// 链接前片 + 链接文本两个节点；链接后的句点是纯符号节点（翻不了，保持英文句点）
+		expect(
+			renderNodes([
+				"GitHub Packages usage is free for public packages. For details on free Actions usage, see ",
+				"Free use of GitHub Actions",
+				".",
+			]),
+		).toBe(
+			"公共软件包的 GitHub Packages 用量免费。免费 Actions 用量的详情见 免费使用 GitHub Actions.",
+		);
+	});
+
+	it("leaves bare amounts untouched", () => {
+		for (const raw of ["$0.72", "$0", "$12.00"]) {
+			expect(
+				translateText(raw, view),
+				`不应被翻译：${JSON.stringify(raw)}`,
+			).toBeNull();
+		}
 	});
 });

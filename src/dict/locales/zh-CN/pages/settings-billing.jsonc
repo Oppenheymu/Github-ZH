@@ -1,0 +1,84 @@
+// 账单页模块：/settings/billing 的账单总览与「所含用量与点数」面板
+//
+// 为什么单开一个子模块而不是塞进 pages/settings：本页的动态规则数量很大
+// （日期区间按月全展开：12 条同月 + 132 条跨月），若挂在 pages/settings 下，
+// 每个设置页的探针都会背上一百多条本页永不使用的规则 id（视图骨架快照随之膨胀）。
+// 路由 ^/settings/billing 比 ^/settings 更具体，按 core/modules.jsonc 的顺序排在
+// pages/settings 之后，因而**继承**它提供的设置页外壳词条，只叠加账单专属内容。
+// 简体中文 · 模块 pages/settings-billing（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
+{
+	"$schema": "../../../types/dict.schema.json",
+	"entries": {
+		// —— 账单总览 ——
+		"Billing Overview": "账单概览",
+		"Manage subscriptions": "管理订阅",
+		"Next payment due": "下次付款到期日",
+		"Current metered usage": "当前按量计费用量",
+		"Current included usage": "当前所含用量",
+		"Metered usage": "按量计费用量",
+		"Included usage": "所含用量",
+		"Billable usage": "计费用量",
+		"Included usage limits reset in": "所含用量限额将在",
+		"Gross amount": "毛额",
+		"Minus": "减去",
+		"discounts": "折扣",
+		"consumed usage": "已消耗用量",
+		"Total billable usage after subtracting discounts from consumed usage": "已消耗用量扣除折扣后的计费用量合计",
+		"Manage budgets": "管理预算",
+		"View details": "查看详情",
+		"Current month": "本月",
+		"Last month": "上个月",
+		"Last year (2025)": "去年（2025）",
+		"This year (2026)": "今年（2026）",
+		"Usage by products": "按产品查看用量",
+		"Usage by repository": "按仓库查看用量",
+		"Additional usage": "额外用量",
+		"Top two repositories this month": "本月用量最高的两个仓库",
+		"Products selector": "产品选择器",
+		"Products selector navigation": "产品选择器导航",
+		"Open repository usage options": "打开仓库用量选项",
+		"User navigation": "用户导航",
+		"Copilot usage": "Copilot 用量",
+		"About Copilot AI credits": "关于 Copilot AI 点数",
+		"About GitHub Models rate limits": "关于 GitHub Models 速率限制",
+		"About GitHub Actions storage billing": "关于 GitHub Actions 存储计费",
+		"Actions minutes": "Actions 分钟数",
+		"Actions storage": "Actions 存储",
+		"Git LFS bandwidth": "Git LFS 带宽",
+		"Git LFS storage": "Git LFS 存储",
+		"Packages data transfer": "Packages 数据传输",
+		"Packages storage": "Packages 存储",
+		"Models": "模型",
+		"Spark AI credits": "Spark AI 点数",
+		// —— 金额与用量的说明句（整句形态；区间动态时由 rules 覆盖）——
+		// 「毛」在中文里单用不成词（「总毛支出」很别扭），故不逐字对译 gross，改用
+		// 「总支出」+ 括号说明包含项；两者语义相同且不丢信息
+		"Total gross spend on Copilot for the selected timeframe including licenses and AI Credits.": "所选时间段内 Copilot 的总支出（含许可证与 AI 点数）。",
+		"Gross metered usage for September 1 - September 30, 2026.": "2026 年 9 月 1 日 – 9 月 30 日的毛按量计费用量。",
+		"Included usage discounts for September 1 - September 30, 2026.": "2026 年 9 月 1 日 – 9 月 30 日的所含用量折扣。",
+		"Gross metered usage for September 1 - September 29, 2026.": "2026 年 9 月 1 日 – 9 月 29 日的毛按量计费用量。",
+		"Included usage discounts for September 1 - September 29, 2026.": "2026 年 9 月 1 日 – 9 月 29 日的所含用量折扣。",
+		"Based on 0 additional AI credits beyond your included usage.": "基于超出所含用量的 0 个额外 AI 点数。",
+		"Cost calculated based on 0 Spark AI credits that exceed the AI credits usage included with your Copilot licenses.": "费用按超出 Copilot 许可证所含 AI 点数的 0 个 Spark AI 点数计算。",
+		"Cost calculated based on additional 0 token units": "费用按额外的 0 个 token 单位计算",
+		// —— 各产品的计费说明（Billable spend for …）——
+		"Billable spend for Git LFS for the selected timeframe. Applicable discounts cover included usage for Git LFS bandwidth and storage.": "所选时间段内 Git LFS 的计费支出。适用折扣可抵扣 Git LFS 带宽与存储的所含用量。",
+		"Billable spend for Packages for the selected timeframe. Applicable discounts cover Packages usage in public repositories and included usage for Packages data transfer and storage.": "所选时间段内 Packages 的计费支出。适用折扣可抵扣公共仓库中的 Packages 用量，以及 Packages 数据传输与存储的所含用量。",
+		"Billable spend for Sandbox for the selected timeframe.": "所选时间段内 Sandbox 的计费支出。",
+		"Billable spend for Actions and Actions Runners for the selected timeframe. Applicable discounts cover Actions usage in public repositories and included usage for Actions minutes and storage.": "所选时间段内 Actions 与 Actions 运行器的计费支出。适用折扣可抵扣公共仓库中的 Actions 用量，以及 Actions 分钟数与存储的所含用量。",
+		"Billable spend for Codespaces for the selected timeframe.": "所选时间段内代码空间的计费支出。",
+		// —— 「More details」弹窗：所含用量与点数明细 ——
+		// 截图确认的渲染文本（弹窗只在点开后渲染，未进开发者模式导出；节点边界见
+		// src/content/__tests__/settings-billing.test.ts 的 PANEL_NODES）
+		"More details": "更多详情",
+		"Included usage and credits": "所含用量与点数",
+		"Showing currently applied usage and credits for your account.": "显示你的账户当前生效的用量与点数。",
+		"Current usage for Sep 1 - Sep 30, 2026. Monthly quota resets in 5 day(s).": "当前用量区间为 2026 年 9 月 1 日 – 9 月 30 日。每月额度将在 5 天后重置。",
+		"Included usage*": "所含用量 *",
+		"Free usage**": "免费用量 **",
+		"100% off per month": "每月 100% 折扣",
+		"GitHub Packages usage is free for public packages. For details on free Actions usage, see": "公共软件包的 GitHub Packages 用量免费。免费 Actions 用量的详情见",
+		"Free use of GitHub Actions": "免费使用 GitHub Actions",
+		"* Included usage is an approximate amount based on current pricing.": "* 所含用量是按当前价格估算的近似金额。"
+	}
+}

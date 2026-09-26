@@ -48,6 +48,7 @@ import zhRepoRaw from "./locales/zh-CN/pages/repo.jsonc";
 import zhRepoSettingsRaw from "./locales/zh-CN/pages/repo-settings.jsonc";
 import zhSearchRaw from "./locales/zh-CN/pages/search.jsonc";
 import zhSettingsRaw from "./locales/zh-CN/pages/settings.jsonc";
+import zhSettingsBillingRaw from "./locales/zh-CN/pages/settings-billing.jsonc";
 import zhWikiRaw from "./locales/zh-CN/pages/wiki.jsonc";
 import zhRulesRaw from "./locales/zh-CN/rules.jsonc";
 import type { LocaleId } from "./locales.ts";
@@ -81,6 +82,7 @@ export const localeRawDicts: readonly LocaleRaw[] = [
 			["pages/issues", zhIssuesRaw],
 			["pages/pulls", zhPullsRaw],
 			["pages/settings", zhSettingsRaw],
+			["pages/settings-billing", zhSettingsBillingRaw],
 			["pages/repo-settings", zhRepoSettingsRaw],
 			["pages/actions", zhActionsRaw],
 			["pages/agents", zhAgentsRaw],

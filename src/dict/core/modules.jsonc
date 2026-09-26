@@ -21,6 +21,10 @@
 			"route": "^/settings"
 		},
 		{
+			"name": "pages/settings-billing",
+			"route": "^/settings/billing"
+		},
+		{
 			"name": "pages/repo-settings",
 			"route": "^/[^/]+/[^/]+/settings"
 		},
