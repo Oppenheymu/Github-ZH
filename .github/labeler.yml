@@ -1,0 +1,47 @@
+# PR 自动打标配置（actions/labeler v5，由 triage workflow 消费）。
+#
+# 仅覆盖「范围」与「文档」两个维度：类型 label 由 issue 模板自带，状态维度由
+# 维护者手动维护。glob 未命中时不出 label；sync-labels 关闭，只增不减，手动
+# 摘除不会被后续 push 加回。
+#
+# 前导 / 锚定仓库根级文件（否则会匹配到各子目录里的同名文件）。
+#
+# 这里只写规则、不定义标签：标签本身只存在于 GitHub 仓库设置里，改本文件前先
+# 确认标签已建好——引用不存在的名字会让整条规则报 label not found（响亮失败，
+# 但只在 PR 页面上可见，容易漏看）。
+
+"范围:词典":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/dict/**"
+
+"范围:翻译引擎":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/content/**"
+
+"范围:弹窗与设置":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "src/popup/**"
+          - "src/shared/**"
+
+"范围:扩展清单与资源":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "public/**"
+
+"范围:构建与工具链":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "tooling/**"
+          - ".github/**"
+          - "/*.json*"
+          - "/bun.lock"
+          - "/.editorconfig"
+
+"类型:文档":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "docs/**"
+          - "**/*.md"

@@ -24,7 +24,6 @@
 5. **content script 产物必须是经典脚本（IIFE）**：MV3 的 `content_scripts` 不支持 `type: "module"`，`tooling/build.ts` 用 Bun.build `format: "iife"` 产出，勿改回 esm。
 6. **排除清单优先**：代码块 / 用户内容可能出现的容器，先加进 `src/content/filters.ts` 的排除选择器，再考虑词典侧回避；**不得为覆盖 UI 词条而放宽排除**。
 7. **dist/ 是构建产物**：不入 git；商店发布一律使用 `bun run pack` 产出的 zip。
-8. **标签纪律**：仓库标签只在 `.github/labels.yml` 声明（`维度:值` 四维：类型 / 范围 / 语言 / 状态），改完跑 `bun run labels` 或等 labels workflow 落地；**不要在网页上直接改标签**——下次同步会按词表覆盖回去，`--prune` 还会把没登记的标签一并删掉。GitHub 自带的 10 个英文默认标签已清理；收尾类标签用到时在「状态」维度下新增，不要单建。
 
 ## 门禁与工作流
 
@@ -41,8 +40,6 @@ bun run build                   # 构建 dist/（Bun.build IIFE ×2 + 拷贝 pub
 bun run watch                   # 构建并监听（改 src 自动重建，扩展需手动重载）
 bun run icons                   # 从 assets/icon.svg 重新生成 public/icons（系统浏览器无头 CDP 栅格化）
 bun run pack                    # dist/ 打 zip（Chrome Web Store / Edge Add-ons 通用）
-bun run labels                  # 同步标签：.github/labels.yml（词表）→ 仓库（默认不删除）
-bun run labels -- --dry-run     # 只看差异不落盘；--prune 额外删除词表外的标签
 ```
 
 - 提交前 `bun run check` 必须全绿；实机验证：构建后在 `chrome://extensions`（Edge 为 `edge://extensions`）开发者模式加载 `dist/` 目录。
@@ -71,7 +68,6 @@ bun run labels -- --dry-run     # 只看差异不落盘；--prune 额外删除�
 - **`.jsonc` 的重复键归 Biome 管**：`biome check .` 会扫 `.jsonc`，`noDuplicateObjectKeys` 对加引号 / 裸键两种写法都报，故 `check:dict` 不再扫源码。编辑器侧另有 `src/dict/dict.schema.json`（`$schema` 只对编辑器生效，CI 不读它；它用 `oneOf` 覆盖六种数据形状）。
 - **扩展自身 UI 文案走 `public/_locales/`**：manifest 的 `name` / `description` / `action.default_title` 用 `__MSG_*__`，popup 文案用 `data-i18n` + `chrome.i18n.getMessage`；门禁强制「各语言消息键集合一致」与「引用的键都存在」。**探针不能用 `manifest.name` 认扩展**（它随浏览器语言变化），改用 content script 写下的身份标记（`src/shared/identity.ts`）。
 - **`bun run verify --locale <id>`**：探针既写 storage 也决定锚点与字系统计数，判据不得再硬编码某种语言的译文。
-- **标签同步默认不删**：`bun run labels` 只新增 / 更新，删标签必须显式 `--prune`（workflow 里是手动 dispatch 的布尔入参，push 触发永远不删）。另注意 GitHub 的标签名大小写不敏感（`Bug` 与 `bug` 是同一个），脚本按归一化名配对，大小写不一致按「改名」处理，否则 `gh label create` 会在生产上报 already exists。**`good first issue` / `help wanted` 想恢复仓库首页的 Contribute 入口**，只需把这两个英文名按原样加回词表——GitHub 靠名字完全匹配渲染，改名或加维度前缀都不认。
 
 ## git 提交流程
 
