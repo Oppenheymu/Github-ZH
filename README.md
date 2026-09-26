@@ -35,11 +35,10 @@
 
 ```bash
 bun install        # 安装依赖
-bun run check      # 全量门禁：lint + typecheck + check:dict + check:manifest + test
+bun run check      # 全量门禁：lint + typecheck + check:dict + check:manifest + check:view + test
 bun run build      # 构建 dist/
 bun run watch      # 监听重建（扩展需在浏览器手动重载）
 bun run verify     # 实机探针：无头浏览器逐页收集漏翻（--locale 切换目标语言）
-bun run icons      # 从 assets/icon.svg 重新生成 public/icons
 bun run pack       # dist/ 打 zip（商店上传用）
 ```
 

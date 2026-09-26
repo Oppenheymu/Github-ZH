@@ -39,7 +39,6 @@ bun run check:view              # 视图骨架门禁（模块顺序 / 命中序�
 bun test                        # 全量用例（bun test）
 bun run build                   # 构建 dist/（Bun.build IIFE ×2 + 拷贝 public/）
 bun run watch                   # 构建并监听（改 src 自动重建，扩展需手动重载）
-bun run icons                   # 从 assets/icon.svg 重新生成 public/icons（系统浏览器无头 CDP 栅格化）
 bun run pack                    # dist/ 打 zip（Chrome Web Store / Edge Add-ons 通用）
 ```
 
@@ -56,7 +55,7 @@ bun run pack                    # dist/ 打 zip（Chrome Web Store / Edge Add-on
 
 - **biome.json 里不能写注释**：出现 `//` 会让 Biome **静默丢弃整个 `overrides` 数组**。
 - **Bun.build 没有 `outfile`**：产物命名靠 `naming` 模板，content 与 popup 按入口分别构建；iife 是硬约束（见硬性约束 5）。
-- **新版无头浏览器 `--screenshot` 不支持透明背景**（整图会被填成不透明底色）：`gen-icons.ts` 走 CDP（`Emulation.setDefaultBackgroundColorOverride` + `setDeviceMetricsOverride`）截图，勿改回 `--screenshot`。
+- **图标是静态资产，没有生成脚本**：`public/icons/` 下的 16/32/48/128 PNG 直接提交在仓库里，改图标就替换这四个文件（四个尺寸都要换）；`assets/icon.svg` 与 `tooling/gen-icons.ts` 已删除，`bun run icons` 不再存在（历史：曾用无头浏览器 CDP 栅格化 SVG，新版无头浏览器的 `--screenshot` 不支持透明背景，故当时必须走 CDP）。
 - **GitHub 正在渐进迁移 React 重写页面**：类名 / 结构变动导致漏翻或排除失灵属常态，修词条前先修对应排除选择器。
 - **防翻译循环现在是两件事**：脚本守卫（文本含非拉丁字母即视为已译文，语言无关，见 `src/content/filters.ts`）负责收敛，结构门禁（译文不得等于任何键、替换产物不得再命中规则）负责让循环的第二条件不可能成立。**拉丁语系目标语言只能靠后者**——它与源语言同字系，脚本守卫结构上失效。
 - **`core/canonical.jsonc` 不进 content 包**：它只被 `tooling/checks/dict.ts` import；一旦 `src/**` 也 import 它，1618 个键就会进包（约 20 KB）。

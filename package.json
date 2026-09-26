@@ -16,7 +16,6 @@
         "check:manifest": "bun tooling/checks/manifest.ts",
         "check:view": "bun tooling/checks/view.ts",
         "test": "bun test",
-        "icons": "bun tooling/gen-icons.ts",
         "verify": "bun tooling/verify-live.ts",
         "pack": "bun tooling/pack.ts"
     },

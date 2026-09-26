@@ -7,14 +7,12 @@
 ### 目录结构
 
 ```
-Github-ZH/
+Github-i18n/
 ├── public/                  # 静态资产，构建时原样拷入 dist/
 │   ├── manifest.json        # MV3：content_scripts + action.popup + storage 权限（name 走 __MSG_*__）
 │   ├── popup.html           # 开关弹窗（样式内联，文案用 data-i18n 占位）
 │   ├── _locales/            # 扩展自身 UI 文案（en / zh_CN / ja）——与「翻译目标语言」无关
-│   └── icons/               # 16/32/48/128 PNG（bun run icons 生成，勿手改）
-├── assets/
-│   └── icon.svg             # 图标唯一源文件（无头浏览器栅格化为 PNG）
+│   └── icons/               # 16/32/48/128 PNG（静态资产，改图标直接替换这四个文件）
 ├── src/
 │   ├── content/             # 翻译引擎（浏览器侧）
 │   │   ├── index.ts         # 入口：身份标记 + 语言解析 + 观察器启动 + storage 联动
@@ -44,7 +42,6 @@ Github-ZH/
 │   ├── build.ts             # Bun.build IIFE ×2 + 重命名 + 拷贝 public/ → dist/
 │   ├── checks/dict.ts       # 词典门禁（严格编译 + 交叉引用 + 覆盖率）
 │   ├── checks/manifest.ts   # manifest 门禁（MV3 字段 / _locales 一致性 / 资产与产物）
-│   ├── gen-icons.ts         # assets/icon.svg → public/icons（无头浏览器 CDP 栅格化）
 │   ├── verify-live.ts       # 实机验证：无头浏览器加载 dist/ 逐页收集漏翻 → JSON（bun run verify）
 │   └── pack.ts              # dist/ 压 zip（零依赖 store 模式）
 ├── *.test.ts                # 与源码同目录，bun:test
@@ -72,7 +69,7 @@ content script 以 `run_at: document_start` 注入：
 - **词条合并「先到先得」**：`core/modules.jsonc` 的顺序是优先级，`buildView` 先放具体页词条、后放 global 兜底，因此议题页词条能压过仓库泛化词条、页面词条能压过全站词条。已知有意的跨模块同键异译（如 `Actions` 在仓库页是「操作」、在设置页是「Actions 工作流」；`Pages` 在设置页是「页面」、在 global 是「页码」）正是靠这个顺序生效，**勿当重复键清理**；
 - **词典是 JSONC 数据，不是 TS 模块**：编辑器按 `dict.schema.json` 直接给红线与补全；脚本 / AI 能安全批量追加词条，不必重写 TS 对象字面量；重复键由 Biome 的 `noDuplicateObjectKeys` 原生覆盖。代价：正则从字面量降级成字符串，反斜杠必须双写，正则语法检查从编译期挪到门禁；
 - **词典数据两条消费路径**：`index.ts`（运行时）与 `tooling/checks/dict.ts`（门禁）都从 `registry.ts` 取原始数据、都走 `load.ts` 编译，只有失败策略不同——运行时单模块失败只跳过 + `console.error`，避免整站翻译失效；门禁严格报错并一次列全。**门禁不得 import `index.ts`**，否则坏数据被静默跳过后门禁反而变绿；
-- **图标**：`assets/icon.svg` 是图标的唯一源文件，`bun run icons` 用系统 Edge / Chrome 无头 CDP 栅格化出 `public/icons/` 四尺寸 PNG。已知坑：新版无头浏览器的 `--screenshot` 不支持透明背景，必须走 CDP 的 `Emulation.setDefaultBackgroundColorOverride`（`gen-icons.ts` 已封装）；找不到浏览器时可设 `GITHUB_ZH_BROWSER_PATH`。
+- **图标**：`public/icons/` 下的 16/32/48/128 PNG 是**直接提交在仓库里的静态资产**，改图标就替换这四个文件（四个尺寸都要换），没有生成脚本、也没有 `bun run icons`。历史原因：图标曾由 `assets/icon.svg` 经 `tooling/gen-icons.ts` 用系统浏览器无头 CDP 栅格化，新版无头浏览器的 `--screenshot` 不支持透明背景、必须走 `Emulation.setDefaultBackgroundColorOverride`；后来这条链路整体删除，SVG 源文件也不在仓库里了。
 
 ## 多语言词典形态
 
