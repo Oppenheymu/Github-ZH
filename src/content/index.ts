@@ -2,6 +2,10 @@
 // 产物为 IIFE 经典脚本（MV3 content_scripts 不支持 module）
 
 import {
+	EXTENSION_MARKER,
+	EXTENSION_MARKER_KEY,
+} from "../shared/identity.ts";
+import {
 	readDevMode,
 	readEnabled,
 	watchToggles,
@@ -12,6 +16,13 @@ import {
 } from "./collector.ts";
 import { TranslationEngine } from "./engine.ts";
 import { viewForPath } from "./pages.ts";
+
+// 在 isolated world 的全局上留下身份标记，供实机探针（bun run verify）识别本扩展上下文。
+// 必须同步执行、早于任何 await：探针在页面加载后立即求值，晚了会被判成「扩展未注入」。
+Object.defineProperty(globalThis, EXTENSION_MARKER_KEY, {
+	value: EXTENSION_MARKER,
+	configurable: true,
+});
 
 let enabled = false;
 let devMode = false;

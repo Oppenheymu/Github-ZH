@@ -11,7 +11,8 @@
 //
 // 实现要点（Edge / Chrome 153 实测）：
 // - CDP 打开的 chrome-extension:// 页面拿不到扩展 API，控制面走 content script
-//   的 isolated world（Runtime.enable 后按 manifest.name 匹配上下文）；
+//   的 isolated world（Runtime.enable 后按 src/shared/identity.ts 的身份标记匹配
+//   上下文——不能用 manifest.name，品牌走 __MSG_*__ 后它随浏览器语言变化）；
 // - devMode 写入触发 content script 整页刷新，刷新后必须重开会话再读日志；
 // - 收集器每 5 秒落盘，单页停留两轮落盘周期后再读。
 
@@ -26,6 +27,10 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+	EXTENSION_MARKER,
+	EXTENSION_MARKER_KEY,
+} from "../src/shared/identity.ts";
 import type {
 	MissItem,
 	MissKind,
@@ -323,11 +328,10 @@ interface IsolatedSession {
 
 /**
  * 连接页签的 CDP 会话，找到本扩展 content script 的 isolated world
- * （manifest.name 与 dist/manifest.json 一致的上下文），在其上串行求值。
+ * （全局上带有 EXTENSION_MARKER 的上下文），在其上串行求值。
  */
 async function openIsolatedSession(
 	wsUrl: string,
-	extName: string,
 ): Promise<IsolatedSession> {
 	const ws = new WebSocket(wsUrl);
 	await new Promise<void>((resolve, reject) => {
@@ -386,8 +390,7 @@ async function openIsolatedSession(
 
 	await send("Runtime.enable", {});
 
-	const probe =
-		"chrome.runtime && chrome.runtime.getManifest ? chrome.runtime.getManifest().name : null";
+	const probe = `globalThis[${JSON.stringify(EXTENSION_MARKER_KEY)}] ?? null`;
 	let contextId: number | null = null;
 	const deadline = Date.now() + CONTEXT_TIMEOUT_MS;
 	while (contextId === null && Date.now() < deadline) {
@@ -402,7 +405,7 @@ async function openIsolatedSession(
 						returnByValue: true,
 					}),
 				);
-				if (value === extName) {
+				if (value === EXTENSION_MARKER) {
 					contextId = context.id;
 					break;
 				}
@@ -480,11 +483,10 @@ const RELOAD_SETTLE_MS = 11000;
 async function probePage(input: {
 	port: number;
 	url: string;
-	extName: string;
 	dwell: number;
 	first: boolean;
 }): Promise<PageProbe> {
-	const { port, url, extName, dwell, first } = input;
+	const { port, url, dwell, first } = input;
 	const probe: PageProbe = {
 		url,
 		misses: [],
@@ -516,7 +518,6 @@ async function probePage(input: {
 			// 先开开发者模式（触发整页刷新），等刷新与两轮落盘后再读
 			const setup = await openIsolatedSession(
 				current.webSocketDebuggerUrl,
-				extName,
 			);
 			try {
 				await setup.evaluate(SET_TOGGLES);
@@ -528,7 +529,6 @@ async function probePage(input: {
 
 		const session = await openIsolatedSession(
 			current.webSocketDebuggerUrl,
-			extName,
 		);
 		try {
 			probe.misses = narrowMisses(
@@ -670,12 +670,6 @@ export async function runVerify(
 		throw new Error(
 			"dist/ 不存在或缺少 manifest.json，请先 bun run build",
 		);
-	const manifest = JSON.parse(
-		await readFile(manifestPath, "utf8"),
-	) as { name?: unknown };
-	const extName = manifest.name;
-	if (typeof extName !== "string")
-		throw new Error("dist/manifest.json 缺少 name 字段");
 
 	const browser = await resolveBrowser(options.browser);
 	const pages = options.pagesFile
@@ -717,7 +711,6 @@ export async function runVerify(
 				await probePage({
 					port,
 					url: pageUrl,
-					extName,
 					dwell: options.dwell,
 					first: index === 0,
 				}),

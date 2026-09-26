@@ -1,0 +1,54 @@
+{
+	"appName": {
+		"message": "GitHub UI ローカライズ",
+		"description": "扩展显示名（中性名：本扩展支持多种目标语言，不再自称「汉化」）"
+	},
+	"appDesc": {
+		"message": "内蔵辞書で GitHub の画面を端末内だけでローカライズします。通信もデータ収集も行いません。"
+	},
+	"statusOn": {
+		"message": "有効"
+	},
+	"statusOff": {
+		"message": "無効"
+	},
+	"statusLoading": {
+		"message": "読み込み中…"
+	},
+	"hintPrivacy": {
+		"message": "翻訳はすべて端末内で行われます。通信もデータ収集もありません。切り替えるとすぐに反映されます（ページが自動で再読み込みされます）。"
+	},
+	"devTitle": {
+		"message": "開発者モード"
+	},
+	"devHint": {
+		"message": "未翻訳のテキストを収集して端末内にのみ保存します。初期設定はオフで、オンにするまで何も収集しません。"
+	},
+	"devCount": {
+		"message": "$COUNT$ 件を収集",
+		"placeholders": {
+			"count": {
+				"content": "$1",
+				"example": "12"
+			}
+		}
+	},
+	"devCopy": {
+		"message": "コピー"
+	},
+	"devCopied": {
+		"message": "コピーしました"
+	},
+	"devCopyFailed": {
+		"message": "コピーに失敗しました"
+	},
+	"devClear": {
+		"message": "消去"
+	},
+	"devWarn": {
+		"message": "書き出した内容にはファイル名やリポジトリ名などのページ本文が含まれる場合があります。貼り付ける前にご確認ください。通信は一切行いません。"
+	},
+	"footer": {
+		"message": "辞書は随時拡充中です。翻訳の漏れや誤りはリポジトリでお知らせください。"
+	}
+}

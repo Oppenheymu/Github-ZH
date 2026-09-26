@@ -1,4 +1,9 @@
-// popup 逻辑：开关读写 + 状态文案 + 版本号回填 + 开发者模式漏翻面板
+// popup 逻辑：扩展自身 UI 文案（_locales）+ 开关读写 + 状态文案 + 版本号回填 +
+// 开发者模式漏翻面板
+//
+// 扩展自身 UI 与「翻译目标语言」是两条独立的轴：前者跟随浏览器界面语言，走
+// public/_locales/**（manifest 的 __MSG_*__ 也走同一套）；后者是用户在 popup 里
+// 选的词典语言，存在 chrome.storage.local，见 src/dict/locales.ts。
 
 import { serializeMisses } from "../content/collector.ts";
 import {
@@ -11,6 +16,24 @@ import {
 	writeMissLog,
 } from "../shared/storage.ts";
 import type { MissItem } from "../shared/types.ts";
+
+/**
+ * 取扩展 UI 文案；键不存在时返回空串（_locales 键集合一致性由
+ * tooling/checks/manifest.ts 门禁保证），故这里显式报错，避免静默空界面。
+ */
+function msg(
+	name: string,
+	substitutions?: string[],
+): string {
+	const text = chrome.i18n.getMessage(
+		name,
+		substitutions ?? [],
+	);
+	if (text.length === 0) {
+		throw new Error(`缺少扩展 UI 文案：${name}`);
+	}
+	return text;
+}
 
 /** 断言元素存在并收窄类型（闭包内不保留 || 链收窄，显式断言最稳） */
 function assertFound<T>(
@@ -61,7 +84,9 @@ let misses: readonly MissItem[] = [];
 /** 渲染开关与状态文案（与 popup.html 的 #status.on/.off 样式联动） */
 function render(enabled: boolean): void {
 	toggle.checked = enabled;
-	status.textContent = enabled ? "已启用" : "已停用";
+	status.textContent = msg(
+		enabled ? "statusOn" : "statusOff",
+	);
 	status.className = enabled ? "on" : "off";
 }
 
@@ -69,7 +94,9 @@ function render(enabled: boolean): void {
 function renderDev(devMode: boolean): void {
 	devToggle.checked = devMode;
 	devPanel.classList.toggle("hidden", !devMode);
-	devCount.textContent = `已收集 ${misses.length} 条`;
+	devCount.textContent = msg("devCount", [
+		String(misses.length),
+	]);
 }
 
 /** 复制按钮临时反馈文案，1.5 秒后还原 */
@@ -77,7 +104,7 @@ function flashCopyButton(text: string): void {
 	devCopy.textContent = text;
 	devCopy.disabled = true;
 	window.setTimeout(() => {
-		devCopy.textContent = "复制";
+		devCopy.textContent = msg("devCopy");
 		devCopy.disabled = false;
 	}, 1500);
 }
@@ -88,7 +115,22 @@ async function initDev(): Promise<void> {
 	renderDev(await readDevMode());
 }
 
+/** 把 popup.html 里所有 data-i18n 占位按浏览器界面语言回填 */
+function renderMessages(): void {
+	for (const element of document.querySelectorAll<HTMLElement>(
+		"[data-i18n]",
+	)) {
+		const key = element.dataset["i18n"];
+		if (key === undefined) continue;
+		element.textContent = msg(key);
+	}
+	document.title = msg("appName");
+	document.documentElement.lang =
+		chrome.i18n.getUILanguage();
+}
+
 function main(): void {
+	renderMessages();
 	version.textContent =
 		chrome.runtime.getManifest().version;
 	void readEnabled().then(render);
@@ -112,8 +154,8 @@ function main(): void {
 	devCopy.addEventListener("click", () => {
 		const json = serializeMisses(misses, new Date());
 		void navigator.clipboard.writeText(json).then(
-			() => flashCopyButton("已复制"),
-			() => flashCopyButton("复制失败"),
+			() => flashCopyButton(msg("devCopied")),
+			() => flashCopyButton(msg("devCopyFailed")),
 		);
 	});
 	devClear.addEventListener("click", () => {

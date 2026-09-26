@@ -1,0 +1,54 @@
+{
+	"appName": {
+		"message": "GitHub UI Localization",
+		"description": "扩展显示名（中性名：本扩展支持多种目标语言，不再自称「汉化」）"
+	},
+	"appDesc": {
+		"message": "Localize the GitHub interface with a built-in dictionary, entirely on your device. No network requests, no data collection."
+	},
+	"statusOn": {
+		"message": "Enabled"
+	},
+	"statusOff": {
+		"message": "Disabled"
+	},
+	"statusLoading": {
+		"message": "Loading…"
+	},
+	"hintPrivacy": {
+		"message": "Translation happens entirely on your device: no network requests, no data collection. Switching takes effect immediately (the page reloads)."
+	},
+	"devTitle": {
+		"message": "Developer mode"
+	},
+	"devHint": {
+		"message": "Collects untranslated text on GitHub pages and keeps it on this device only. Off by default: nothing is collected before you turn it on."
+	},
+	"devCount": {
+		"message": "Collected $COUNT$ items",
+		"placeholders": {
+			"count": {
+				"content": "$1",
+				"example": "12"
+			}
+		}
+	},
+	"devCopy": {
+		"message": "Copy"
+	},
+	"devCopied": {
+		"message": "Copied"
+	},
+	"devCopyFailed": {
+		"message": "Copy failed"
+	},
+	"devClear": {
+		"message": "Clear"
+	},
+	"devWarn": {
+		"message": "The export may contain page text such as file and repository names — review it before pasting. No network requests are made at any point."
+	},
+	"footer": {
+		"message": "The dictionary keeps growing. Reports of missed or wrong translations are welcome in the repository."
+	}
+}

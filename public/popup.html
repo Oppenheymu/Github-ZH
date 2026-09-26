@@ -1,8 +1,9 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<title>GitHub 汉化</title>
+		<!-- lang 与 title 由 popup.ts 按浏览器界面语言回填（见 data-i18n 机制） -->
+		<title>GitHub UI Localization</title>
 		<style>
 			:root {
 				color-scheme: dark;
@@ -160,43 +161,57 @@
 		</style>
 	</head>
 	<body>
+		<!-- 带 data-i18n 的元素内是默认语言（_locales/en）的兜底文案：
+		     popup.ts 启动时按浏览器界面语言整体回填，这里只为无脚本时的可读性与
+		     无障碍规则（标题 / label 必须有内容）保留。新增键后要同步两个门禁：
+		     check:manifest 校验 data-i18n 键在默认语言里存在。 -->
 		<header>
 			<img src="icons/icon-32.png" alt="" width="24" height="24" />
-			<h1>GitHub 汉化</h1>
+			<h1 data-i18n="appName">GitHub UI Localization</h1>
 			<span class="version">0.2.0</span>
 		</header>
 		<main>
 			<label class="switch-row">
-				<span id="status">加载中…</span>
+				<span id="status" data-i18n="statusLoading">Loading…</span>
 				<input type="checkbox" id="toggle" />
 				<span class="track"></span>
 			</label>
-			<p class="hint" id="hint">
-				翻译完全在本地进行，不联网、不收集任何数据。切换后立即生效（页面会自动刷新）。
+			<p class="hint" id="hint" data-i18n="hintPrivacy">
+				Translation happens entirely on your device: no
+				network requests, no data collection. Switching
+				takes effect immediately (the page reloads).
 			</p>
 			<hr class="divider" />
 			<section>
 				<label class="switch-row small">
-					<span class="dev-title">开发者模式</span>
+					<span class="dev-title" data-i18n="devTitle">Developer mode</span>
 					<input type="checkbox" id="dev-toggle" />
 					<span class="track"></span>
 				</label>
-				<p class="hint">
-					收集本站未翻译文本，仅存本地；默认关闭，开启前零收集。
+				<p class="hint" data-i18n="devHint">
+					Collects untranslated text on GitHub pages and
+					keeps it on this device only. Off by default:
+					nothing is collected before you turn it on.
 				</p>
 				<div id="dev-panel" class="hidden">
-					<span id="dev-count">已收集 0 条</span>
+					<span id="dev-count"></span>
 					<div class="dev-actions">
-						<button type="button" id="dev-copy">复制</button>
-						<button type="button" id="dev-clear">清空</button>
+						<button type="button" id="dev-copy" data-i18n="devCopy">Copy</button>
+						<button type="button" id="dev-clear" data-i18n="devClear">Clear</button>
 					</div>
-					<p class="hint">
-						导出内容可能含页面文本（文件名、仓库名等），复制后请自查再粘贴；全程无网络请求。
+					<p class="hint" data-i18n="devWarn">
+						The export may contain page text such as file
+						and repository names — review it before
+						pasting. No network requests are made at any
+						point.
 					</p>
 				</div>
 			</section>
 		</main>
-		<footer>词典持续扩充中，欢迎在仓库反馈漏翻与误伤。</footer>
+		<footer data-i18n="footer">
+			The dictionary keeps growing. Reports of missed or
+			wrong translations are welcome in the repository.
+		</footer>
 		<script src="popup.js"></script>
 	</body>
 </html>
