@@ -163,13 +163,15 @@
 		// Copilot 区块
 		"Upgrade Individual Plan": "升级个人方案",
 		"Upgrade to Business": "升级到商业版",
+		"Your AI pair programmer": "你的 AI 结对编程助手",
 		"Active subscription": "生效中的订阅",
 		"Copilot Free": "Copilot 免费版",
-		// 链接前后的片段各成节点（"…Check out this " + 链接 + " for more details."）；
-		// 链接文本「documentation」是 …/docs 的域名式词条，中文界面里没有不同于键的写法
-		// （global 的「Documentation」是另一条键、大小写不同），故按「译文不得与键同形」
-		// 的门禁不收录，未命中保留英文
+		// 实机 HTML 实测的节点边界：`…Check out this ` + 链接 + ` for more details.` 三段，
+		// 故首句与尾句各收一条；链接文本「documentation」是 …/docs 的域名式词条，
+		// 中文界面里没有不同于键的写法（global 的「Documentation」是另一条键、大小写不同），
+		// 按「译文不得与键同形」的门禁不收录，未命中保留英文
 		"You can upgrade to Copilot Pro at any time. Check out this": "你可以随时升级到 Copilot Pro。详情请查阅",
+		"for more details.": "了解更多详情。",
 		// GitHub 基础方案区块
 		"Current GitHub base plan": "当前 GitHub 基础方案",
 		"Compare base plans": "对比基础方案",
@@ -178,13 +180,16 @@
 		// 「包含」清单（带数量的四条由 core/rules.jsonc 的 settings/licensing-* 覆盖）
 		"Unlimited public/private repos": "不限数量的公开 / 私有仓库",
 		"Unlimited collaborators": "不限数量的协作者",
-		// 「不包含」清单
-		"Not included:": "不包含",
+		// 「不包含」清单：每行的删除图标带 alt="Not included"（截图里那串 "Not included"
+		// 其实是图标的 alt，不是清单小标题），照常翻译；「Protected branches on all repos」
+		// 是整行一个文本节点，故按整行收键
+		"Not included": "不包含",
 		"Free Codespaces usage per organization": "每个组织的免费代码空间用量",
 		"Increase Codespaces": "提高代码空间",
 		"spend limits": "支出限额",
 		"Required status checks": "必需的状态检查",
 		"Pages for static website hosting": "用于静态网站托管的 Pages",
+		"Protected branches on all repos": "所有仓库上的受保护分支",
 		// 功能清单文案：定价页由 pages/marketing 提供同键译文，本页路由不命中它，故这里各来一份
 		// （译文逐字与定价页保持一致，避免同一句在不同页面读起来不一样）
 		"Community support": "社区支持",
@@ -192,7 +197,6 @@
 		"Code owners": "代码所有者",
 		"Required reviewers": "必需的审查者",
 		"Multiple reviewers in pull requests": "拉取请求中的多名审查者",
-		"Protected branches": "受保护的分支",
 		// 清单底部的对比入口
 		"See all features and compare plans": "查看所有功能并对比各方案"
 	}

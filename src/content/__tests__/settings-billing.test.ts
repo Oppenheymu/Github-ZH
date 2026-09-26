@@ -825,10 +825,13 @@ describe("预算与提醒页的实机节点边界", () => {
 const LICENSING_NODES: readonly string[] = [
 	"Upgrade Individual Plan",
 	"Upgrade to Business",
+	"Your AI pair programmer",
 	"Active subscription",
 	"Copilot Free",
 	"You can upgrade to Copilot Pro at any time. Check out this",
-	// 链接节点「documentation」刻意不收录（译文必然与键同形），不在本清单里
+	// 实机 HTML 实测：说明句是「…Check out this 」「documentation」「 for more details.」三段
+	// 链接节点「documentation」刻意不收录（译文必然与键同形），故只收首尾两段
+	"for more details.",
 	"Current GitHub base plan",
 	"Compare base plans",
 	"Upgrade to GitHub Pro",
@@ -840,10 +843,12 @@ const LICENSING_NODES: readonly string[] = [
 	"120 core-hours of Codespaces compute per developer",
 	"15GB of Codespaces storage per developer",
 	"Community support",
-	"Not included:",
+	// 实机里这串是每行删除图标的 alt="Not included"（不是清单小标题）
+	"Not included",
 	"Free Codespaces usage per organization",
 	"Increase Codespaces",
 	"spend limits",
+	"Protected branches on all repos",
 	"Pages for static website hosting",
 	"See all features and compare plans",
 ];
@@ -937,25 +942,23 @@ describe("许可页的实机节点边界", () => {
 		).toBeNull();
 	});
 
-	it("reuses the marketing module for the shared feature list", () => {
-		// 「不包含」清单与左侧部分条目和定价页共用文案：跨模块复用正是不重复登记的理由
-		const expectations: readonly [string, string][] = [
-			["Community support", "社区支持"],
-			["Web-based support", "网页端支持"],
-			["Code owners", "代码所有者"],
-			["Required reviewers", "必需的审查者"],
-			[
-				"Multiple reviewers in pull requests",
-				"拉取请求中的多名审查者",
-			],
-			["Protected branches", "受保护的分支"],
-			["Licensing", "许可"],
-		];
-		for (const [raw, expected] of expectations) {
-			expect(
-				translateText(raw, licensingView),
-				`期望复用既有译文：${JSON.stringify(raw)}`,
-			).toBe(expected);
-		}
+	it("reuses the settings module for the page title", () => {
+		// 页面标题由 pages/settings 提供（模块更靠前），本模块不重复登记
+		expect(translateText("Licensing", licensingView)).toBe(
+			"许可",
+		);
+	});
+
+	it("renders the upgrade blurb around its docs link", () => {
+		// 实机 HTML 的节点边界：说明句 + 链接 + 尾句三段，链接文本保持英文
+		expect(
+			renderNodes([
+				"You can upgrade to Copilot Pro at any time. Check out this ",
+				"documentation",
+				" for more details.",
+			]),
+		).toBe(
+			"你可以随时升级到 Copilot Pro。详情请查阅 documentation 了解更多详情。",
+		);
 	});
 });

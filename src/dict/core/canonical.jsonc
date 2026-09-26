@@ -706,9 +706,13 @@
 				// Copilot 区块
 				"Upgrade Individual Plan",
 				"Upgrade to Business",
+				"Your AI pair programmer",
 				"Active subscription",
 				"Copilot Free",
 				"You can upgrade to Copilot Pro at any time. Check out this",
+				// 链接后的尾句（实机 HTML 实测：「…Check out this 」「documentation」「 for more details.」
+				// 三段，链接文本不在中间句里，故尾句必须单独收键）
+				"for more details.",
 				// 链接节点「documentation」（指向 /docs）与方案名「GitHub Free」都**不登记**：
 				// 中文界面里它们保持原样，译文必然与键同形（自触发循环，门禁会拒），
 				// 登记成死键只会把 zh-CN 覆盖率从 100% 拉下来（见 tooling/checks/__tests__/dict.test.ts
@@ -722,14 +726,20 @@
 				// settings/licensing-*；「Community support」「Web-based support」由 pages/marketing 提供）
 				"Unlimited public/private repos",
 				"Unlimited collaborators",
-				// 「不包含」清单（「Not included」是清单上方的小标题，独立成节点；
-				// 带链接的两行拆成「片段 + 链接文本」两个节点）
-				"Not included:",
+				// 「不包含」清单。实机 HTML 实测两件事：
+				//   1. 每行的删除图标带 `alt="Not included"`（截图里右侧那些 "Not included" 文字
+				//      其实是图标的 alt，不是清单上方的小标题）——它照常翻译，故键收不带冒号的形态；
+				//   2. 「Protected branches」在清单里带后缀（`Protected branches on all repos`），
+				//      整行是一个文本节点，故键按整行收，不再单收「Protected branches」
+				//      （那一条在定价页由 pages/marketing 提供，与本页的清单行不是同一个串）
+				// 带链接的两行拆成「片段 + 链接文本」两个节点
+				"Not included",
 				"Free Codespaces usage per organization",
 				"Increase Codespaces",
 				"spend limits",
 				"Required status checks",
 				"Pages for static website hosting",
+				"Protected branches on all repos",
 				// 「Community support」等功能清单文案在定价页由 pages/marketing 提供，但那条路由是
 				// ^/(features|pricing)，在本页不生效——故本模块必须各来一份（译文与定价页保持一致）
 				"Community support",
@@ -737,7 +747,6 @@
 				"Code owners",
 				"Required reviewers",
 				"Multiple reviewers in pull requests",
-				"Protected branches",
 				// 清单底部的对比入口
 				"See all features and compare plans"
 			]
