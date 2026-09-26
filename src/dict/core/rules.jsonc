@@ -802,6 +802,60 @@
 					"id": "settings/usage-range-short-same-month-dec",
 					"pattern": "^Dec (?<startDay>\\d{1,2}) - Dec (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
 				},
+				// —— 用量明细说明句（整节点：句子里带着区间）——
+				// 实机原文（Console 实测，2026-09）：`"Usage for Sep 1 - Sep 30, 2026. "` 整段
+				// 是一个文本节点（span.UsageTable-module__hintText__*），**不是**「片段 + 区间」
+				// 两节点——静态键「Usage for」与上面的裸区间规则都套不上，只能整句锚定。
+				// 区间随所选时间范围变化，故按月份逐条展开；句点在节点内，pattern 匹配它、
+				// 模板补回「。」（句点写在 year 组**之外**，否则会被渲染成「2026. 年」）。
+				{
+					"id": "settings/usage-hint-same-month-jan",
+					"pattern": "^Usage for Jan (?<startDay>\\d{1,2}) - Jan (?<endDay>\\d{1,2}), (?<year>\\d{4})\\.$"
+				},
+				{
+					"id": "settings/usage-hint-same-month-feb",
+					"pattern": "^Usage for Feb (?<startDay>\\d{1,2}) - Feb (?<endDay>\\d{1,2}), (?<year>\\d{4})\\.$"
+				},
+				{
+					"id": "settings/usage-hint-same-month-mar",
+					"pattern": "^Usage for Mar (?<startDay>\\d{1,2}) - Mar (?<endDay>\\d{1,2}), (?<year>\\d{4})\\.$"
+				},
+				{
+					"id": "settings/usage-hint-same-month-apr",
+					"pattern": "^Usage for Apr (?<startDay>\\d{1,2}) - Apr (?<endDay>\\d{1,2}), (?<year>\\d{4})\\.$"
+				},
+				{
+					"id": "settings/usage-hint-same-month-may",
+					"pattern": "^Usage for May (?<startDay>\\d{1,2}) - May (?<endDay>\\d{1,2}), (?<year>\\d{4})\\.$"
+				},
+				{
+					"id": "settings/usage-hint-same-month-jun",
+					"pattern": "^Usage for Jun (?<startDay>\\d{1,2}) - Jun (?<endDay>\\d{1,2}), (?<year>\\d{4})\\.$"
+				},
+				{
+					"id": "settings/usage-hint-same-month-jul",
+					"pattern": "^Usage for Jul (?<startDay>\\d{1,2}) - Jul (?<endDay>\\d{1,2}), (?<year>\\d{4})\\.$"
+				},
+				{
+					"id": "settings/usage-hint-same-month-aug",
+					"pattern": "^Usage for Aug (?<startDay>\\d{1,2}) - Aug (?<endDay>\\d{1,2}), (?<year>\\d{4})\\.$"
+				},
+				{
+					"id": "settings/usage-hint-same-month-sep",
+					"pattern": "^Usage for Sep (?<startDay>\\d{1,2}) - Sep (?<endDay>\\d{1,2}), (?<year>\\d{4})\\.$"
+				},
+				{
+					"id": "settings/usage-hint-same-month-oct",
+					"pattern": "^Usage for Oct (?<startDay>\\d{1,2}) - Oct (?<endDay>\\d{1,2}), (?<year>\\d{4})\\.$"
+				},
+				{
+					"id": "settings/usage-hint-same-month-nov",
+					"pattern": "^Usage for Nov (?<startDay>\\d{1,2}) - Nov (?<endDay>\\d{1,2}), (?<year>\\d{4})\\.$"
+				},
+				{
+					"id": "settings/usage-hint-same-month-dec",
+					"pattern": "^Usage for Dec (?<startDay>\\d{1,2}) - Dec (?<endDay>\\d{1,2}), (?<year>\\d{4})\\.$"
+				},
 				// —— 用量页的两个下拉 ——
 				// 未展开时是「标签: 当前值」，值的候选固定（分组：None / Repository / Product；
 				// 时间范围：本月 / 上个月 / 近 3 个月 / 近 6 个月 / 近 12 个月），逐值展开，

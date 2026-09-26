@@ -426,10 +426,13 @@ describe("「More details」弹窗的实机节点边界", () => {
 /**
  * 用量页（/settings/billing/usage）的实机文本节点。
  *
- * 这份清单比账单总览弱一档：用量页需要登录，**没进开发者模式导出**，节点原文按 2026-09
- * 的实机截图逐行誊录（每行 = 一个文本节点：标题、按钮、搜索框 placeholder 与两个下拉各
- * 自独立）。因此这里只断言「确实收录且译成中文」，不断言节点在实机上的确切边界；若实机
- * 出现漏翻，第一步是把用量页的漏翻 JSON 导出下来，按此处格式替换。
+ * 这份清单的边界强度分两档：
+ *   - **已实测**：说明句「Usage for Sep 1 - Sep 30, 2026. 」（span.UsageTable-module__hintText__）
+ *     由维护者在实机 Console 取回原文，节点边界确定；
+ *   - **按截图誊录**：其余行（标题、按钮、搜索框 placeholder、两个下拉、表头）取自 2026-09 的
+ *     实机截图，每行假定为一个独立文本节点，未经 Console 复核。
+ * 因此这里只断言「确实收录且译成中文」，不断言每个节点的确切边界；若实机出现漏翻，第一步是
+ * 把用量页的漏翻 JSON（popup 开发者模式）或 Console 取的节点原文贴回来，按此处格式替换。
  */
 const USAGE_NODES: readonly string[] = [
 	// —— 页头与工具条 ——
@@ -441,9 +444,10 @@ const USAGE_NODES: readonly string[] = [
 	//    静态词条「Metered usage」与 usage-range-same-month-* 规则覆盖，此处不重复列）——
 	"Usage",
 	// —— 用量明细区块 ——
-	// 说明句在实机里是三段：标签片段 + 账期区间 + 产品说明句（见下方 renderNodes 用例）
+	// 说明句在实机里是**一个整节点**（Console 实测，见下方 renderNodes 用例的注释）：
+	// 「Usage for <区间>.」，故这里列的是整句而不是「Usage for」片段
 	"Usage breakdown",
-	"Usage for",
+	"Usage for Sep 1 - Sep 30, 2026.",
 	"For license-based products, the price/unit is a prorated portion of the monthly price.",
 	"Date",
 	"Gross amount",
@@ -535,25 +539,45 @@ describe("用量页的实机节点边界", () => {
 		}
 	});
 
-	it("renders the usage breakdown blurb split around its date range", () => {
-		// 实机边界（截图实证）：说明句是「Usage for 」＋账期区间＋「For license-based
-		// products…」三段，整句键永不命中。片段键与区间规则都命中，整句才通顺
+	it("renders the usage breakdown blurb as GitHub actually renders it", () => {
+		// 实机原文（Console 实测，用户提供）：
+		//   "Usage for Sep 1 - Sep 30, 2026. " | SPAN UsageTable-module__hintText__BIrRL
+		// 关键：说明句与账期区间**在同一个文本节点里**，所以静态键「Usage for」与只匹配
+		// 裸区间的 usage-range-short-* 都套不上，必须由 settings/usage-hint-same-month-*
+		// 整句覆盖；句点在节点内，模板自带「。」，尾随空格由 walker 保留。
 		expect(
 			renderNodes([
-				"Usage for ",
-				"Sep 1 - Sep 30, 2026",
-				" ",
+				"Usage for Sep 1 - Sep 30, 2026. ",
 				"For license-based products, the price/unit is a prorated portion of the monthly price.",
 			]),
 		).toBe(
-			// 实机节点自带尾随空格（「Usage for 」），walker 会把它保留在译文之后，
-			// 故这里如实写出那个空格；渲染结果读作「用量统计： 2026 年 9 月 1 日 – 30 日」
-			"用量统计： 2026 年 9 月 1 日 – 30 日 对于基于许可证的产品，单价是按月价格折算后的部分金额。",
+			"用量统计：2026 年 9 月 1 日 – 30 日。 对于基于许可证的产品，单价是按月价格折算后的部分金额。",
 		);
-		// 标签片段去掉尾随空格也要命中（normalizeKey 折叠空白，实机形态可能两种都有）
+		// 不带尾随空格的形态（另一个渲染分支）同样命中，且句号不会丢
+		expect(
+			translateText(
+				"Usage for Sep 1 - Sep 30, 2026.",
+				usageView,
+			),
+		).toBe("用量统计：2026 年 9 月 1 日 – 30 日。");
+		// 其它月份也要命中有句点的整句形态
+		expect(
+			translateText(
+				"Usage for Oct 1 - Oct 31, 2026.",
+				usageView,
+			),
+		).toBe("用量统计：2026 年 10 月 1 日 – 31 日。");
+		// 「Usage for」被上游拆成独立节点的渲染分支：静态键兜底（收着不亏）
 		expect(translateText("Usage for", usageView)).toBe(
 			"用量统计：",
 		);
+		// 跨月区间仍是未收形态：必须原样保留，不得被区间规则截成半句
+		expect(
+			translateText(
+				"Usage for Sep 1 - Oct 1, 2026.",
+				usageView,
+			),
+		).toBeNull();
 	});
 
 	it("keeps the Cancel button on the global dictionary", () => {
