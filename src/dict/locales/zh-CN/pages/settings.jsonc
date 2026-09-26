@@ -16,9 +16,50 @@
 		"Developer settings": "开发者设置",
 		"Danger Zone": "危险区域",
 		"Update profile": "更新资料",
+		// —— 公开资料表单（/settings/profile）——
 		"Name": "姓名",
+		"Your name may appear around GitHub where you contribute or are mentioned. You can remove it at any time.": "你的姓名可能会出现在 GitHub 上你贡献或被提及的地方。你可以随时删除它。",
+		"Public email": "公开邮箱",
+		"You can manage verified email addresses in your email settings": "你可以在电子邮件设置中管理已验证的电子邮箱地址",
 		"Bio": "个人简介",
+		"Pronouns": "人称代词",
+		"Don't specify": "不指定",
+		"URL": "网址",
+		"Social accounts": "社交账号",
+		// 属性词条（aria-label）：社交账号输入框按序号各有一份
+		"Link to social profile 1": "社交资料链接 1",
+		"Link to social profile 2": "社交资料链接 2",
+		"Link to social profile 3": "社交资料链接 3",
+		"Link to social profile 4": "社交资料链接 4",
 		"Company": "公司",
-		"Location": "位置"
+		"You can @mention your company’s GitHub organization to link it.": "你可以 @提及公司的 GitHub 组织来链接它。",
+		"Location": "位置",
+		"Display current local time": "显示当前本地时间",
+		"Other users will see the time difference from their local time.": "其他用户将看到与其本地时间的时差。",
+		"Time zone": "时区",
+		"ORCID iD": "ORCID iD",
+		"ORCID provides a persistent identifier - an ORCID iD - that distinguishes you from other researchers. Learn more at ORCID.org.": "ORCID 提供一个持久标识符（ORCID iD），用于把你与其他研究者区分开。在 ORCID.org 了解更多。",
+		"All of the fields on this page are optional and can be deleted at any time, and by filling them out, you're giving us consent to share this data wherever your user profile appears. Please see our privacy statement to learn more about how we use this information.": "本页所有字段均为可选，且随时可以删除；填写这些字段即表示你同意我们在你的用户个人资料出现的任何位置分享这些数据。请查看我们的隐私声明，进一步了解我们如何使用这些信息。",
+		// —— 头像与「贡献与动态」——
+		"Profile picture": "头像",
+		"Contributions & activity": "贡献与动态",
+		"Make profile private and hide activity": "将个人资料设为私有并隐藏动态",
+		"Enabling this will hide your contributions and activity from your GitHub profile and from social features like followers, stars, feeds, leaderboards and releases.": "启用后，你的贡献和动态将从 GitHub 个人资料以及关注者、星标、动态流、排行榜和发布等社交功能中隐藏。",
+		"Include private contributions on my profile": "在个人资料中包含私有贡献",
+		"Your contribution graph, achievements, and activity overview will show your private contributions without revealing any repository or organization information. Read more.": "你的贡献图、成就和活动概览将显示你的私有贡献，但不会透露任何仓库或组织信息。阅读更多。",
+		// —— 资料设置（成就展示）——
+		"Profile settings": "资料设置",
+		"Show Achievements on my profile": "在个人资料中显示成就",
+		"Your achievements will be shown on your profile.": "你的成就将显示在个人资料中。",
+		// —— GitHub Developer Program ——
+		"GitHub Developer Program": "GitHub 开发者计划",
+		"Building an application, service, or tool that integrates with GitHub? Join the GitHub Developer Program, or read more about it at our GitHub developer program.": "正在构建与 GitHub 集成的应用、服务或工具？加入 GitHub 开发者计划，或进一步了解我们的 GitHub 开发者计划。",
+		// —— 求职资料与趋势偏好 ——
+		"Jobs profile": "求职资料",
+		"Available for hire": "可接受雇佣",
+		"Trending settings": "趋势设置",
+		"Preferred spoken language": "首选语言",
+		"Chinese": "中文",
+		"We'll use this language preference to filter the trending repository lists on our Trending Repositories page.": "我们将使用此语言偏好来筛选「趋势仓库」页面上的趋势仓库列表。"
 	}
 }

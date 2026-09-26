@@ -46,10 +46,26 @@ import type {
  * 译文与键完全相同时的显式例外（键 = 英文原文）。
  * 将来某语言需要原样保留英文术语（日语保留 Markdown / GitHub Actions 等）
  * 时按「语言 id → 允许的文本」加在这里，**不要**因此放弃这条检查。
+ *
+ * 进了这里也就一并豁免「值必须含目标语言文字系统」：两者是同一个事实
+ * ——该文本按约定原样保留。**只收官方专名**（当前只有 ORCID 的标识符名
+ * ORCID iD，大小写固定、中英日同形）。绝不用它绕过防翻译循环检查。
  */
 const IDENTICAL_ALLOWLIST: Readonly<
 	Record<string, readonly string[]>
-> = {};
+> = {
+	"zh-CN": ["ORCID iD"],
+};
+
+/** 该语言是否显式允许把这段文本原样保留（两条形态检查共用同一份清单） */
+function isIdenticalAllowed(
+	localeId: string,
+	text: string,
+): boolean {
+	return (IDENTICAL_ALLOWLIST[localeId] ?? []).includes(
+		text.trim(),
+	);
+}
 
 /** 一个字系一个正则；门禁调用量小，无需缓存池 */
 function scriptPattern(script: Script): RegExp {
@@ -208,7 +224,8 @@ export function validateEntries(
 		}
 		if (
 			locale.scripts.length > 0 &&
-			!hasAnyScript(value, locale.scripts)
+			!hasAnyScript(value, locale.scripts) &&
+			!isIdenticalAllowed(locale.id, value)
 		) {
 			errors.push(
 				`${label}：值必须含 ${locale.name} 的文字系统（${locale.scripts.join(" / ")}）`,
@@ -327,12 +344,11 @@ export function validateNoIdentity(
 	keys: ReadonlySet<string>,
 	localeId: string,
 ): string[] {
-	const allowed = IDENTICAL_ALLOWLIST[localeId] ?? [];
 	const errors: string[] = [];
 	for (const [key, value] of Object.entries(entries)) {
 		const trimmed = value.trim();
 		if (!keys.has(trimmed)) continue;
-		if (allowed.includes(trimmed)) continue;
+		if (isIdenticalAllowed(localeId, trimmed)) continue;
 		errors.push(
 			`${where} 词条 ${JSON.stringify(key)}：译文 ${JSON.stringify(trimmed)} 等于某个键（或别名源文本），会在下一轮被再翻一次（防循环）`,
 		);

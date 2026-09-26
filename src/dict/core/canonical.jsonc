@@ -184,10 +184,51 @@
 				"Developer settings",
 				"Danger Zone",
 				"Update profile",
+				// —— 公开资料表单 ——
 				"Name",
+				"Your name may appear around GitHub where you contribute or are mentioned. You can remove it at any time.",
+				"Public email",
+				"You can manage verified email addresses in your email settings",
 				"Bio",
+				"Pronouns",
+				"Don't specify",
+				// 社交账号列表：输入框的 aria-label 按序号各成一条（属性只走精确命中）
+				"URL",
+				"Social accounts",
+				"Link to social profile 1",
+				"Link to social profile 2",
+				"Link to social profile 3",
+				"Link to social profile 4",
 				"Company",
-				"Location"
+				"You can @mention your company’s GitHub organization to link it.",
+				"Location",
+				"Display current local time",
+				"Other users will see the time difference from their local time.",
+				"Time zone",
+				"ORCID iD",
+				"ORCID provides a persistent identifier - an ORCID iD - that distinguishes you from other researchers. Learn more at ORCID.org.",
+				"All of the fields on this page are optional and can be deleted at any time, and by filling them out, you're giving us consent to share this data wherever your user profile appears. Please see our privacy statement to learn more about how we use this information.",
+				// —— 头像与「贡献与动态」——
+				"Profile picture",
+				"Contributions & activity",
+				"Make profile private and hide activity",
+				"Enabling this will hide your contributions and activity from your GitHub profile and from social features like followers, stars, feeds, leaderboards and releases.",
+				"Include private contributions on my profile",
+				"Your contribution graph, achievements, and activity overview will show your private contributions without revealing any repository or organization information. Read more.",
+				// —— 资料设置（成就展示）——
+				"Profile settings",
+				"Show Achievements on my profile",
+				"Your achievements will be shown on your profile.",
+				// —— GitHub Developer Program ——
+				"GitHub Developer Program",
+				"Building an application, service, or tool that integrates with GitHub? Join the GitHub Developer Program, or read more about it at our GitHub developer program.",
+				// —— 求职资料与趋势偏好 ——
+				"Jobs profile",
+				"Available for hire",
+				"Trending settings",
+				"Preferred spoken language",
+				"Chinese",
+				"We'll use this language preference to filter the trending repository lists on our Trending Repositories page."
 			]
 		},
 		{

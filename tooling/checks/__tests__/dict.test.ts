@@ -316,6 +316,36 @@ describe("anti-loop gates", () => {
 		expect(errors[0]).toContain("等于某个键");
 	});
 
+	it("allows the whitelisted proper noun as is", () => {
+		const keys = new Set(["ORCID iD", "Markdown"]);
+		expect(
+			validateNoIdentity(
+				{ "ORCID iD": "ORCID iD" },
+				"测试",
+				keys,
+				"zh-CN",
+			),
+		).toEqual([]);
+		// 白名单同时豁免文字系统检查（同一个事实：按约定原样保留）
+		expect(
+			validateEntries(
+				{ "ORCID iD": "ORCID iD" },
+				"测试",
+				ZH,
+				keys,
+			),
+		).toEqual([]);
+		// 但别的英文原文照旧报错，白名单不能当通用后门
+		expect(
+			validateNoIdentity(
+				{ Markdown: "Markdown" },
+				"测试",
+				keys,
+				"zh-CN",
+			),
+		).toHaveLength(1);
+	});
+
 	it("flags a template that another rule would translate again", () => {
 		const defs: RuleDef[] = [
 			{
