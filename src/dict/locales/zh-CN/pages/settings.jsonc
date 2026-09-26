@@ -33,16 +33,19 @@
 		"Link to social profile 2": "社交资料链接 2",
 		"Link to social profile 3": "社交资料链接 3",
 		"Link to social profile 4": "社交资料链接 4",
-		// `<strong>@mention</strong>` 切分：You can / @mention / other users and /
-		// organizations to link to them.；@mention 由 global 词条接管
-		"You can": "你可以 ",
-		"other users and": "其他用户和",
-		"organizations to link to them.": "组织来链接他们。",
+		// `<strong>@mention</strong>` 切分：You can / @mention / 其余；
+		// 第三段含源码换行缩进，整段一条（@mention 本身保持英文）。
+		// 译文末尾**不要**带空格：walker 会保留原节点的前导空格，自带空格会变成双空格
+		"You can": "你可以",
+		"other users and organizations to link to them.": "其他用户和组织来链接他们。",
 		"You can @mention other users and organizations to link to them.": "你可以 @提及其他用户和组织来链接他们。",
 		"Company": "公司",
-		// 公司提示句同样被 `<strong>@mention</strong>` 切开，末段单独成条
+		// 公司提示句同样被 `<strong>@mention</strong>` 切开（You can / @mention / 末段）。
+		// 末段在源码里可能带缩进换行，故「末段」与「@mention 之后全长」各收一条，
+		// 译文以「公司」收尾，与链接/加粗节点衔接自然
 		"You can @mention your company’s GitHub organization to link it.": "你可以 @提及公司的 GitHub 组织来链接它。",
 		"your company’s GitHub organization to link it.": "的 GitHub 组织，以便链接它。",
+		"other your company’s GitHub organization to link it.": "其他公司的 GitHub 组织来链接它。",
 		"Location": "位置",
 		"Display current local time": "显示当前本地时间",
 		"Other users will see the time difference from their local time.": "其他用户将看到与其本地时间的时差。",
