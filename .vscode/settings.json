@@ -10,6 +10,9 @@
 	},
 	// Material Icon Theme
 	"material-icon-theme.folders.associations": {
+		// src
+		"dict": "resource",
+		"popup": "views",
 		// tooling
 		"checks": "guard",
 		// docs
@@ -20,8 +23,5 @@
 	},
 	"material-icon-theme.files.associations": {
 		"NOTICE": "certificate",
-		// templates
-		"env": "tune",
-		"gitignore": "git"
 	}
 }
