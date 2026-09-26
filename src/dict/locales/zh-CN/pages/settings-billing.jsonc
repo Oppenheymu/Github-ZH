@@ -198,6 +198,32 @@
 		"Required reviewers": "必需的审查者",
 		"Multiple reviewers in pull requests": "拉取请求中的多名审查者",
 		// 清单底部的对比入口
-		"See all features and compare plans": "查看所有功能并对比各方案"
+		"See all features and compare plans": "查看所有功能并对比各方案",
+		// —— 付款信息页（/settings/billing/payment_information）——
+		// 键来自 2026-09 的实机截图（页面需登录，未进开发者模式导出），节点边界见
+		// src/content/__tests__/settings-billing.test.ts 的 PAYMENT_NODES。
+		// 「First name」等表单标签在实机里通常与红星号分开成节点（见下方用例），
+		// 故键里不带「*」；国家/地区下拉的选项名一律不收录（表单值，改了会坏功能）
+		"Billing information": "账单信息",
+		"Add your information to show on every invoice": "添加显示在每张账单上的信息",
+		"First name": "名",
+		"Last name": "姓",
+		"Address (Street, P.O. box)": "地址（街道、邮政信箱）",
+		"Address line 2 (Apartment, suite, unit)": "地址第二行（公寓、套房、单元）",
+		"City": "城市",
+		"Country/Region": "国家/地区",
+		"Choose your country/region": "选择你的国家/地区",
+		"State/Province": "州/省",
+		// 括号里的说明是链向邮编格式文档的链接文字；中文界面里同样保留在括号内，
+		// 这样「9 位」这个关键信息不丢
+		"Postal/zip code (9-digit zip code for US)": "邮政编码（美国为 9 位 ZIP 码）",
+		"Required for certain countries": "某些国家/地区必填",
+		"VAT/GST ID": "增值税号（VAT/GST ID）",
+		"Save billing information": "保存账单信息",
+		"Coupon": "优惠券",
+		"Redeem a coupon": "兑换优惠券",
+		"You don't have an active coupon.": "你当前没有生效中的优惠券。",
+		"Add information": "添加信息",
+		"No additional information added to your receipts.": "尚未添加任何附加信息到你的收据。"
 	}
 }

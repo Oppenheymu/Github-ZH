@@ -748,7 +748,33 @@
 				"Required reviewers",
 				"Multiple reviewers in pull requests",
 				// 清单底部的对比入口
-				"See all features and compare plans"
+				"See all features and compare plans",
+				// —— 付款信息页（/settings/billing/payment_information）——
+				// 键逐字抄自 2026-09 的实机截图（页面需登录，未进开发者模式导出），
+				// 节点边界见 src/content/__tests__/settings-billing.test.ts 的 PAYMENT_NODES。
+				// 页面标题「Payment information」不在此登记：pages/settings 已提供同一键。
+				// 另注意：**国家/地区下拉的选项名一律不收录**——它们是随表单提交的表单值，
+				// 改了显示文案会改坏功能（且几百个国家名会撞用户内容）
+				"Billing information",
+				"Add your information to show on every invoice",
+				"First name",
+				"Last name",
+				"Address (Street, P.O. box)",
+				"Address line 2 (Apartment, suite, unit)",
+				"City",
+				"Country/Region",
+				"Choose your country/region",
+				"State/Province",
+				"Postal/zip code (9-digit zip code for US)",
+				// 州/省与邮编两行的说明：同一个键在两个字段下各渲染一次，收录一条即可
+				"Required for certain countries",
+				"VAT/GST ID",
+				"Save billing information",
+				"Coupon",
+				"Redeem a coupon",
+				"You don't have an active coupon.",
+				"Add information",
+				"No additional information added to your receipts."
 			]
 		},
 		{

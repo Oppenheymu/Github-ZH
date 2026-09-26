@@ -962,3 +962,101 @@ describe("许可页的实机节点边界", () => {
 		);
 	});
 });
+
+/**
+ * 付款信息页（/settings/billing/payment_information）的实机文本节点。
+ *
+ * 与许可页同档：**没进开发者模式导出**，节点原文按 2026-09 的实机截图逐行誊录。
+ * 该路由同样只命中 ^/settings/billing，故词条归 pages/settings-billing 模块；
+ * 页面标题「Payment information」由 pages/settings 提供（模块更靠前），不在此重复登记。
+ *
+ * 刻意不收录的内容：
+ *   - 国家/地区下拉**展开后的选项名**（几百个国家名）：它们是随表单提交的值，
+ *     改显示文案会坏功能，且必然撞用户内容；
+ *   - 「Save billing information」等按钮的**文案本身**要收，但按钮的 id/name 不动
+ *     （引擎只改文本节点与白名单属性）。
+ */
+const PAYMENT_NODES: readonly string[] = [
+	"Billing information",
+	"Add your information to show on every invoice",
+	// 表单标签：实机里标签与必填星号「*」各自成节点（星号是纯符号节点，翻不了也不该翻）
+	"First name",
+	"Last name",
+	"Address (Street, P.O. box)",
+	"Address line 2 (Apartment, suite, unit)",
+	"City",
+	"Country/Region",
+	"Choose your country/region",
+	"State/Province",
+	"Postal/zip code (9-digit zip code for US)",
+	"Required for certain countries",
+	"VAT/GST ID",
+	"Save billing information",
+	"Coupon",
+	"Redeem a coupon",
+	"You don't have an active coupon.",
+	"Add information",
+	"No additional information added to your receipts.",
+];
+
+/** 付款信息页命中的模块视图（与其它账单子页同一组模块） */
+const paymentView = buildView(
+	"/settings/billing/payment_information",
+	dictForLocale("zh-CN"),
+	new Map(Object.entries(dictCore.aliases)),
+);
+
+describe("付款信息页的实机节点边界", () => {
+	it("translates every text node GitHub actually renders", () => {
+		for (const node of PAYMENT_NODES) {
+			for (const variant of withWhitespace(node)) {
+				const translated = translateText(
+					variant,
+					paymentView,
+				);
+				expect(
+					translated,
+					`未命中：${JSON.stringify(variant)}`,
+				).not.toBeNull();
+				expect(translated ?? "").toMatch(/[\u4e00-\u9fff]/);
+			}
+		}
+	});
+
+	it("keeps the required-field asterisks and inert text as-is", () => {
+		// 必填星号是纯符号节点：可翻译判定要求含拉丁字母，故翻不了；也不该翻
+		for (const raw of ["*", "ID", "US"]) {
+			expect(
+				translateText(raw, paymentView),
+				`不应被翻译：${JSON.stringify(raw)}`,
+			).toBeNull();
+		}
+	});
+
+	it("leaves the country/region options untranslated", () => {
+		// 下拉选项名是表单值：翻了会改坏提交内容（这是**有意漏翻**，不是缺词条）
+		for (const raw of [
+			"China",
+			"United States of America",
+			"Hong Kong SAR China",
+		]) {
+			expect(
+				translateText(raw, paymentView),
+				`不应被翻译：${JSON.stringify(raw)}`,
+			).toBeNull();
+		}
+	});
+
+	it("renders the required-field label and the asterisk in order", () => {
+		// 实机渲染：标签节点 + 星号节点（星号保持原样，标签译出）
+		expect(renderNodes(["First name", " ", "*"])).toBe(
+			"名 *",
+		);
+	});
+
+	it("reuses the settings module for the page title", () => {
+		expect(
+			translateText("Payment information", paymentView),
+		).toBe("付款信息");
+	});
+});
