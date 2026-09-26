@@ -78,6 +78,13 @@
 		"Free usage**": "免费用量 **",
 		"100% off per month": "每月 100% 折扣",
 		"GitHub Packages usage is free for public packages. For details on free Actions usage, see": "公共软件包的 GitHub Packages 用量免费。免费 Actions 用量的详情见",
+		// 变体：若实机把 "see" 收进链接节点，句子节点就以 "usage," 收尾（尾随空格被
+		// normalizeKey 折叠，故键按无尾随空格的形态写）。两种边界都收，谁命中就谁生效
+		"GitHub Packages usage is free for public packages. For details on free Actions usage,": "公共软件包的 GitHub Packages 用量免费。免费 Actions 用量的详情见",
+		// 实机文本节点**自带脚注标记**（Console 实测：该行的节点原文以 "** " 开头，
+		// 与上一条的第一个 "* " 同理），而引擎是整节点精确匹配，故带标记的形态必须
+		// 单独收键——不带标记的那条留给标记独立成节点的渲染
+		"** GitHub Packages usage is free for public packages. For details on free Actions usage, see": "** 公共软件包的 GitHub Packages 用量免费。免费 Actions 用量的详情见",
 		"Free use of GitHub Actions": "免费使用 GitHub Actions",
 		"* Included usage is an approximate amount based on current pricing.": "* 所含用量是按当前价格估算的近似金额。"
 	}

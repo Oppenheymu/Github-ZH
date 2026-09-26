@@ -619,8 +619,12 @@
 				"Free usage**",
 				"100% off per month",
 				"GitHub Packages usage is free for public packages. For details on free Actions usage, see",
-				"Free use of GitHub Actions",
-				"* Included usage is an approximate amount based on current pricing."
+				"GitHub Packages usage is free for public packages. For details on free Actions usage,",
+				// 实机文本节点自带脚注标记（见 settings-billing 词条旁注释），故带标记的形态
+				// 也是独立键：文本节点精确匹配，标记必须一起收
+				"** GitHub Packages usage is free for public packages. For details on free Actions usage, see",
+				"* Included usage is an approximate amount based on current pricing.",
+				"Free use of GitHub Actions"
 			]
 		},
 		{

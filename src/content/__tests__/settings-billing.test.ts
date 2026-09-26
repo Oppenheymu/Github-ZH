@@ -378,8 +378,20 @@ describe("「More details」弹窗的实机节点边界", () => {
 	});
 
 	it("renders the panel footnote with its inline link", () => {
-		// 实机边界：末行含内联链接「Free use of GitHub Actions」——
-		// 链接前片 + 链接文本两个节点；链接后的句点是纯符号节点（翻不了，保持英文句点）
+		// 实机节点原文（Console 实测）：**脚注标记在同一个文本节点里**
+		// ——「** GitHub Packages usage is free for public packages. For details on free
+		// Actions usage, see」是整串，故带标记的形态必须单独收键（引擎是整节点精确匹配）。
+		// 链接后的句点是纯符号节点（翻不了，保持英文句点）
+		expect(
+			renderNodes([
+				"** GitHub Packages usage is free for public packages. For details on free Actions usage, see ",
+				"Free use of GitHub Actions",
+				".",
+			]),
+		).toBe(
+			"** 公共软件包的 GitHub Packages 用量免费。免费 Actions 用量的详情见 免费使用 GitHub Actions.",
+		);
+		// 标记若独立成节点（另一种渲染），不带标记的键顶上来
 		expect(
 			renderNodes([
 				"GitHub Packages usage is free for public packages. For details on free Actions usage, see ",
@@ -389,6 +401,13 @@ describe("「More details」弹窗的实机节点边界", () => {
 		).toBe(
 			"公共软件包的 GitHub Packages 用量免费。免费 Actions 用量的详情见 免费使用 GitHub Actions.",
 		);
+		// 脚注首行的单星标记同理
+		expect(
+			translateText(
+				"* Included usage is an approximate amount based on current pricing.",
+				view,
+			),
+		).toBe("* 所含用量是按当前价格估算的近似金额。");
 	});
 
 	it("leaves bare amounts untouched", () => {
