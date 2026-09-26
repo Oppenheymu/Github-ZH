@@ -7,9 +7,8 @@
 # + bun 直跑（见 AGENTS.md），同步逻辑落在 tooling/labels.ts 里且带用例，本地
 # `bun run labels -- --dry-run` 可以先看差异再落盘。
 #
-# prune 只在手动触发时可用且默认关闭：删除标签不可逆，而 `good first issue` /
-# `help wanted` 是 GitHub 按名字特殊渲染的标签（仓库首页 Contribute 入口），
-# 删掉即失去该入口。
+# prune 只在手动触发时可用且默认关闭：删除会把标签从所有已应用它的 issue /
+# PR 上摘掉且不可撤销，push 触发永远不删，避免一次误改词表就连带清掉历史。
 
 name: Labels
 
