@@ -50,6 +50,8 @@ const ACCESSIBILITY_NODES: readonly string[] = [
 	"Show link underlines",
 	"Hovercards",
 	"Hovercards preview information about other parts of GitHub.",
+	// 实机里「Hovercards」是链接（指向 docs 的 hover cards 文档），链接后的说明文本是独立节点
+	" preview information about other parts of GitHub.",
 	"Show hovercards",
 	"Editor settings",
 	"URL paste behavior",
@@ -199,6 +201,18 @@ describe("辅助功能设置页的实机节点边界", () => {
 		);
 		expect(rendered).toContain("以相反的方式粘贴链接。");
 		expect(rendered).toContain("control shift and V");
+	});
+
+	it("renders the hovercards blurb with the linked heading", () => {
+		// 实机里「Hovercards」是指向 docs 的链接，句子的其余部分是独立节点
+		const rendered = renderNodes([
+			"\n      ",
+			"Hovercards",
+			" preview information about other parts of GitHub.\n    ",
+		]);
+		expect(rendered).toContain(
+			"悬停卡片 可预览 GitHub 其他部分的信息。",
+		);
 	});
 
 	it("keeps the two URL paste options apart", () => {

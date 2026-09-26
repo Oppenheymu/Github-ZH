@@ -261,7 +261,10 @@
 		"Hide link underlines": "隐藏链接下划线",
 		"Show link underlines": "显示链接下划线",
 		"Hovercards": "悬停卡片",
+		// 实机边界：<a href="...using-hover-cards-on-github-docs">Hovercards</a> + preview information …
+		// 「Hovercards」既是链接文本又是区块标题（同形两用），链接之后的说明文本是独立节点。
 		"Hovercards preview information about other parts of GitHub.": "悬停卡片可预览 GitHub 其他部分的信息。",
+		"preview information about other parts of GitHub.": "可预览 GitHub 其他部分的信息。",
 		"Show hovercards": "显示悬停卡片",
 		// 实机边界：Enable previewing … using + <span class="sr-only">alt up</span>
 		//   + <kbd>Alt</kbd> + <kbd>↑</kbd> + .
