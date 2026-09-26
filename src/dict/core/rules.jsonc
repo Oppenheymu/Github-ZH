@@ -57,11 +57,11 @@
 				},
 				{
 					"id": "pulls/pull-request-title-with-number",
-					"pattern": "^(.+) \\u00B7 Pull Request #(\\d+) \\u00B7 ([^/]+\\/[^/]+) \\u00B7 GitHub$"
+					"pattern": "^(?<title>.+) \\u00B7 Pull Request #(?<number>\\d+) \\u00B7 (?<repo>[^/]+\\/[^/]+) \\u00B7 GitHub$"
 				},
 				{
 					"id": "pulls/pull-request-title-with-number-plain",
-					"pattern": "^(.+) \\u00B7 Pull Request #(\\d+) \\u00B7 ([^/]+\\/[^/]+)$"
+					"pattern": "^(?<title>.+) \\u00B7 Pull Request #(?<number>\\d+) \\u00B7 (?<repo>[^/]+\\/[^/]+)$"
 				}
 			]
 		},
@@ -117,7 +117,7 @@
 				// 数字在页面上是独立链接节点，句子会被切成「数字 + 尾段」，整句与尾段都收
 				{
 					"id": "repo-settings/entity-access-count",
-					"pattern": "^([\\d,]+) entit(y|ies) (?:has|have) access to this repository\\.?$"
+					"pattern": "^(?<count>[\\d,]+) entit(?<plural>y|ies) (?:has|have) access to this repository\\.?$"
 				},
 				{
 					"id": "repo-settings/entity-access",
@@ -125,7 +125,7 @@
 				},
 				{
 					"id": "repo-settings/user-team-access-count",
-					"pattern": "^([\\d,]+) users? and ([\\d,]+) teams? can access this repository through the organization\\.?$"
+					"pattern": "^(?<users>[\\d,]+) users? and (?<teams>[\\d,]+) teams? can access this repository through the organization\\.?$"
 				},
 				{
 					"id": "repo-settings/team-access",
@@ -173,15 +173,15 @@
 				// 运行时长：12s / 3m 40s / 1h 2m 3s（长格式在前，首条命中生效）
 				{
 					"id": "actions/duration-hms",
-					"pattern": "^([\\d,]+)h ([\\d,]+)m ([\\d,]+)s$"
+					"pattern": "^(?<hours>[\\d,]+)h (?<minutes>[\\d,]+)m (?<seconds>[\\d,]+)s$"
 				},
 				{
 					"id": "actions/duration-hm",
-					"pattern": "^([\\d,]+)h ([\\d,]+)m$"
+					"pattern": "^(?<hours>[\\d,]+)h (?<minutes>[\\d,]+)m$"
 				},
 				{
 					"id": "actions/duration-ms",
-					"pattern": "^([\\d,]+)m ([\\d,]+)s$"
+					"pattern": "^(?<minutes>[\\d,]+)m (?<seconds>[\\d,]+)s$"
 				},
 				{
 					"id": "actions/duration-s",
@@ -241,7 +241,7 @@
 				// 差异统计的读屏文本（含行数，单复数通吃）
 				{
 					"id": "commits/lines-changed",
-					"pattern": "^Lines changed: (\\d+) additions? & (\\d+) deletions?$"
+					"pattern": "^Lines changed: (?<additions>\\d+) additions? & (?<deletions>\\d+) deletions?$"
 				},
 				// 提交行 SHA 复制按钮的悬浮提示（tool-tip 文本节点，含短哈希）
 				{
@@ -256,51 +256,51 @@
 				// 提交列表按日期分组的标题（月份缩写逐月映射，同 global.jsonc）
 				{
 					"id": "commits/on-jan",
-					"pattern": "^Commits on Jan (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Commits on Jan (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "commits/on-feb",
-					"pattern": "^Commits on Feb (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Commits on Feb (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "commits/on-mar",
-					"pattern": "^Commits on Mar (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Commits on Mar (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "commits/on-apr",
-					"pattern": "^Commits on Apr (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Commits on Apr (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "commits/on-may",
-					"pattern": "^Commits on May (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Commits on May (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "commits/on-jun",
-					"pattern": "^Commits on Jun (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Commits on Jun (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "commits/on-jul",
-					"pattern": "^Commits on Jul (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Commits on Jul (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "commits/on-aug",
-					"pattern": "^Commits on Aug (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Commits on Aug (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "commits/on-sep",
-					"pattern": "^Commits on Sep (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Commits on Sep (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "commits/on-oct",
-					"pattern": "^Commits on Oct (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Commits on Oct (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "commits/on-nov",
-					"pattern": "^Commits on Nov (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Commits on Nov (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "commits/on-dec",
-					"pattern": "^Commits on Dec (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Commits on Dec (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				}
 			]
 		},
@@ -325,7 +325,7 @@
 				// 标签页标题（页面名与仓库名原样保留）
 				{
 					"id": "wiki/page-title",
-					"pattern": "^(.+) \\u00B7 ([^/]+\\/[^/]+) Wiki \\u00B7 GitHub$"
+					"pattern": "^(?<title>.+) \\u00B7 (?<repo>[^/]+\\/[^/]+) Wiki \\u00B7 GitHub$"
 				}
 			]
 		},
@@ -386,51 +386,51 @@
 				// Pulse 周期区间（全月名同月区间；跨月区间不命中保持原文）
 				{
 					"id": "insights/range-long-january",
-					"pattern": "^January (\\d{1,2}), (\\d{4}) \\u2013 January (\\d{1,2}), (\\d{4})$"
+					"pattern": "^January (?<startDay>\\d{1,2}), (?<startYear>\\d{4}) \\u2013 January (?<endDay>\\d{1,2}), (?<endYear>\\d{4})$"
 				},
 				{
 					"id": "insights/range-long-february",
-					"pattern": "^February (\\d{1,2}), (\\d{4}) \\u2013 February (\\d{1,2}), (\\d{4})$"
+					"pattern": "^February (?<startDay>\\d{1,2}), (?<startYear>\\d{4}) \\u2013 February (?<endDay>\\d{1,2}), (?<endYear>\\d{4})$"
 				},
 				{
 					"id": "insights/range-long-march",
-					"pattern": "^March (\\d{1,2}), (\\d{4}) \\u2013 March (\\d{1,2}), (\\d{4})$"
+					"pattern": "^March (?<startDay>\\d{1,2}), (?<startYear>\\d{4}) \\u2013 March (?<endDay>\\d{1,2}), (?<endYear>\\d{4})$"
 				},
 				{
 					"id": "insights/range-long-april",
-					"pattern": "^April (\\d{1,2}), (\\d{4}) \\u2013 April (\\d{1,2}), (\\d{4})$"
+					"pattern": "^April (?<startDay>\\d{1,2}), (?<startYear>\\d{4}) \\u2013 April (?<endDay>\\d{1,2}), (?<endYear>\\d{4})$"
 				},
 				{
 					"id": "insights/range-long-may",
-					"pattern": "^May (\\d{1,2}), (\\d{4}) \\u2013 May (\\d{1,2}), (\\d{4})$"
+					"pattern": "^May (?<startDay>\\d{1,2}), (?<startYear>\\d{4}) \\u2013 May (?<endDay>\\d{1,2}), (?<endYear>\\d{4})$"
 				},
 				{
 					"id": "insights/range-long-june",
-					"pattern": "^June (\\d{1,2}), (\\d{4}) \\u2013 June (\\d{1,2}), (\\d{4})$"
+					"pattern": "^June (?<startDay>\\d{1,2}), (?<startYear>\\d{4}) \\u2013 June (?<endDay>\\d{1,2}), (?<endYear>\\d{4})$"
 				},
 				{
 					"id": "insights/range-long-july",
-					"pattern": "^July (\\d{1,2}), (\\d{4}) \\u2013 July (\\d{1,2}), (\\d{4})$"
+					"pattern": "^July (?<startDay>\\d{1,2}), (?<startYear>\\d{4}) \\u2013 July (?<endDay>\\d{1,2}), (?<endYear>\\d{4})$"
 				},
 				{
 					"id": "insights/range-long-august",
-					"pattern": "^August (\\d{1,2}), (\\d{4}) \\u2013 August (\\d{1,2}), (\\d{4})$"
+					"pattern": "^August (?<startDay>\\d{1,2}), (?<startYear>\\d{4}) \\u2013 August (?<endDay>\\d{1,2}), (?<endYear>\\d{4})$"
 				},
 				{
 					"id": "insights/range-long-september",
-					"pattern": "^September (\\d{1,2}), (\\d{4}) \\u2013 September (\\d{1,2}), (\\d{4})$"
+					"pattern": "^September (?<startDay>\\d{1,2}), (?<startYear>\\d{4}) \\u2013 September (?<endDay>\\d{1,2}), (?<endYear>\\d{4})$"
 				},
 				{
 					"id": "insights/range-long-october",
-					"pattern": "^October (\\d{1,2}), (\\d{4}) \\u2013 October (\\d{1,2}), (\\d{4})$"
+					"pattern": "^October (?<startDay>\\d{1,2}), (?<startYear>\\d{4}) \\u2013 October (?<endDay>\\d{1,2}), (?<endYear>\\d{4})$"
 				},
 				{
 					"id": "insights/range-long-november",
-					"pattern": "^November (\\d{1,2}), (\\d{4}) \\u2013 November (\\d{1,2}), (\\d{4})$"
+					"pattern": "^November (?<startDay>\\d{1,2}), (?<startYear>\\d{4}) \\u2013 November (?<endDay>\\d{1,2}), (?<endYear>\\d{4})$"
 				},
 				{
 					"id": "insights/range-long-december",
-					"pattern": "^December (\\d{1,2}), (\\d{4}) \\u2013 December (\\d{1,2}), (\\d{4})$"
+					"pattern": "^December (?<startDay>\\d{1,2}), (?<startYear>\\d{4}) \\u2013 December (?<endDay>\\d{1,2}), (?<endYear>\\d{4})$"
 				},
 				// 图表轴刻度：年月（Aug 2026 → 2026 年 8 月）
 				{
@@ -534,7 +534,7 @@
 				// 双空格键经引擎空白归一后按单空格匹配）
 				{
 					"id": "insights/chart-x-axis-time",
-					"pattern": "^The chart has (\\d+) X ax(?:is|es) displaying Time\\. Data ranges from (.+) to (.+)\\.$"
+					"pattern": "^The chart has (?<axisCount>\\d+) X ax(?:is|es) displaying Time\\. Data ranges from (?<from>.+) to (?<to>.+)\\.$"
 				},
 				{
 					"id": "insights/chart-x-axis-navigator",
@@ -542,7 +542,7 @@
 				},
 				{
 					"id": "insights/chart-y-axis-contributions",
-					"pattern": "^The chart has (\\d+) Y ax(?:is|es) displaying Contributions\\. Data ranges from (-?[\\d.]+) to (-?[\\d.]+)\\.$"
+					"pattern": "^The chart has (?<axisCount>\\d+) Y ax(?:is|es) displaying Contributions\\. Data ranges from (?<from>-?[\\d.]+) to (?<to>-?[\\d.]+)\\.$"
 				},
 				{
 					"id": "insights/chart-y-axis-navigator",
@@ -568,7 +568,7 @@
 				},
 				{
 					"id": "insights/chart-navigator-series",
-					"pattern": "^Navigator (\\d+), series (\\d+) of (\\d+) with ([\\d,]+) data points\\. Y axis, (.+)\\. X axis, (.+)\\.$"
+					"pattern": "^Navigator (?<navigator>\\d+), series (?<series>\\d+) of (?<seriesCount>\\d+) with (?<points>[\\d,]+) data points\\. Y axis, (?<yAxis>.+)\\. X axis, (?<xAxis>.+)\\.$"
 				}
 			]
 		},
@@ -625,7 +625,7 @@
 				// 仓库列表分页说明
 				{
 					"id": "profile/showing-of-repos",
-					"pattern": "^Showing (\\d+) of ([\\d,]+) repositor(?:y|ies)$"
+					"pattern": "^Showing (?<count>\\d+) of (?<total>[\\d,]+) repositor(?:y|ies)$"
 				}
 			]
 		},
@@ -769,146 +769,146 @@
 				// 绝对日期（月份缩写）：Sep 25, 2026 → 2026 年 9 月 25 日
 				{
 					"id": "global/short-date-jan",
-					"pattern": "^Jan (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Jan (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/short-date-feb",
-					"pattern": "^Feb (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Feb (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/short-date-mar",
-					"pattern": "^Mar (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Mar (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/short-date-apr",
-					"pattern": "^Apr (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Apr (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/short-date-may",
-					"pattern": "^May (\\d{1,2}), (\\d{4})$"
+					"pattern": "^May (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/short-date-jun",
-					"pattern": "^Jun (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Jun (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/short-date-jul",
-					"pattern": "^Jul (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Jul (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/short-date-aug",
-					"pattern": "^Aug (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Aug (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/short-date-sep",
-					"pattern": "^Sep (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Sep (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/short-date-oct",
-					"pattern": "^Oct (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Oct (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/short-date-nov",
-					"pattern": "^Nov (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Nov (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/short-date-dec",
-					"pattern": "^Dec (\\d{1,2}), (\\d{4})$"
+					"pattern": "^Dec (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				// 绝对日期（月份全称，不带时刻）：October 5, 2026 → 2026 年 10 月 5 日
 				// （May 全称与缩写同形，沿用上方规则）
 				{
 					"id": "global/long-date-january",
-					"pattern": "^January (\\d{1,2}), (\\d{4})$"
+					"pattern": "^January (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/long-date-february",
-					"pattern": "^February (\\d{1,2}), (\\d{4})$"
+					"pattern": "^February (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/long-date-march",
-					"pattern": "^March (\\d{1,2}), (\\d{4})$"
+					"pattern": "^March (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/long-date-april",
-					"pattern": "^April (\\d{1,2}), (\\d{4})$"
+					"pattern": "^April (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/long-date-june",
-					"pattern": "^June (\\d{1,2}), (\\d{4})$"
+					"pattern": "^June (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/long-date-july",
-					"pattern": "^July (\\d{1,2}), (\\d{4})$"
+					"pattern": "^July (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/long-date-august",
-					"pattern": "^August (\\d{1,2}), (\\d{4})$"
+					"pattern": "^August (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/long-date-september",
-					"pattern": "^September (\\d{1,2}), (\\d{4})$"
+					"pattern": "^September (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/long-date-october",
-					"pattern": "^October (\\d{1,2}), (\\d{4})$"
+					"pattern": "^October (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/long-date-november",
-					"pattern": "^November (\\d{1,2}), (\\d{4})$"
+					"pattern": "^November (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				{
 					"id": "global/long-date-december",
-					"pattern": "^December (\\d{1,2}), (\\d{4})$"
+					"pattern": "^December (?<day>\\d{1,2}), (?<year>\\d{4})$"
 				},
 				// 绝对日期（月份全称 + 时刻）：November 27, 2014 16:57 → 2014 年 11 月 27 日 16:57
 				{
 					"id": "global/long-date-time-january",
-					"pattern": "^January (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+					"pattern": "^January (?<day>\\d{1,2}), (?<year>\\d{4}) (?<time>\\d\\d:\\d\\d)$"
 				},
 				{
 					"id": "global/long-date-time-february",
-					"pattern": "^February (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+					"pattern": "^February (?<day>\\d{1,2}), (?<year>\\d{4}) (?<time>\\d\\d:\\d\\d)$"
 				},
 				{
 					"id": "global/long-date-time-march",
-					"pattern": "^March (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+					"pattern": "^March (?<day>\\d{1,2}), (?<year>\\d{4}) (?<time>\\d\\d:\\d\\d)$"
 				},
 				{
 					"id": "global/long-date-time-april",
-					"pattern": "^April (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+					"pattern": "^April (?<day>\\d{1,2}), (?<year>\\d{4}) (?<time>\\d\\d:\\d\\d)$"
 				},
 				{
 					"id": "global/long-date-time-may",
-					"pattern": "^May (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+					"pattern": "^May (?<day>\\d{1,2}), (?<year>\\d{4}) (?<time>\\d\\d:\\d\\d)$"
 				},
 				{
 					"id": "global/long-date-time-june",
-					"pattern": "^June (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+					"pattern": "^June (?<day>\\d{1,2}), (?<year>\\d{4}) (?<time>\\d\\d:\\d\\d)$"
 				},
 				{
 					"id": "global/long-date-time-july",
-					"pattern": "^July (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+					"pattern": "^July (?<day>\\d{1,2}), (?<year>\\d{4}) (?<time>\\d\\d:\\d\\d)$"
 				},
 				{
 					"id": "global/long-date-time-august",
-					"pattern": "^August (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+					"pattern": "^August (?<day>\\d{1,2}), (?<year>\\d{4}) (?<time>\\d\\d:\\d\\d)$"
 				},
 				{
 					"id": "global/long-date-time-september",
-					"pattern": "^September (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+					"pattern": "^September (?<day>\\d{1,2}), (?<year>\\d{4}) (?<time>\\d\\d:\\d\\d)$"
 				},
 				{
 					"id": "global/long-date-time-october",
-					"pattern": "^October (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+					"pattern": "^October (?<day>\\d{1,2}), (?<year>\\d{4}) (?<time>\\d\\d:\\d\\d)$"
 				},
 				{
 					"id": "global/long-date-time-november",
-					"pattern": "^November (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+					"pattern": "^November (?<day>\\d{1,2}), (?<year>\\d{4}) (?<time>\\d\\d:\\d\\d)$"
 				},
 				{
 					"id": "global/long-date-time-december",
-					"pattern": "^December (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+					"pattern": "^December (?<day>\\d{1,2}), (?<year>\\d{4}) (?<time>\\d\\d:\\d\\d)$"
 				},
 				// 回应记录：用户名原样保留，多人以 and 连接由贪婪匹配一并覆盖
 				{

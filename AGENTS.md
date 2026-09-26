@@ -29,12 +29,13 @@
 
 ```bash
 bun install                     # 安装依赖（Bun，产出 bun.lock）
-bun run check                   # 全量门禁：lint + typecheck + check:dict + check:manifest + test
+bun run check                   # 全量门禁：lint + typecheck + check:dict + check:manifest + check:view + test
 bun run lint                    # biome check .（格式 + lint 唯一权威）
 bun run format                  # biome format --write .
 bun run typecheck               # 两条 tsc：src（浏览器侧）+ tooling（脚本侧）
 bun run check:dict              # 词典门禁（结构编译 / 交叉引用 / 译文形态 / 防循环 / 覆盖率报告）
 bun run check:manifest          # manifest 门禁（MV3 字段完整性、_locales 一致性、public 资产存在性）
+bun run check:view              # 视图骨架门禁（模块顺序 / 命中序列 / 同键异译赢家 / 规则 id 序列；--update 重生成快照）
 bun test                        # 全量用例（bun test）
 bun run build                   # 构建 dist/（Bun.build IIFE ×2 + 拷贝 public/）
 bun run watch                   # 构建并监听（改 src 自动重建，扩展需手动重载）

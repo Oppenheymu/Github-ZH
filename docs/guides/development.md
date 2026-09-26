@@ -109,7 +109,7 @@ content script 以 `run_at: document_start` 注入：
 
 于是「上游改一次文案」的代价是 O(1)：改 `pattern` 不必动任何语言的模板。**代价**：改 `id` 必须同步所有语言的模板（门禁会报「未知规则 id」）。
 
-模板用 `$1` 或 `$<name>` 引用捕获组，门禁对着 `pattern` 校验引用完整性（组数够不够、命名组有没有声明）。给一条规则命名捕获组的写法见「加一条动态规则」。
+模板用 `$1` 或 `$<name>` 引用捕获组，门禁对着 `pattern` 校验引用完整性（组数够不够、命名组有没有声明）。**≥2 组必须命名、单组保持 `$1`** 的约定见「加一条动态规则」。
 
 ### 规范键是稳定的身份
 
@@ -143,6 +143,17 @@ content script 以 `run_at: document_start` 注入：
 - 防循环：规则的替换产物不得再命中任何规则（实测现有数据命中数为 0）；
 - 覆盖率报告。
 
+`tooling/checks/view.ts`（`bun run check:view`）：
+
+- 校验对象是**合并视图的语义骨架**，golden 快照在 `tooling/fixtures/view-skeleton.<语言>.json`；
+- 锁住四件事：模块顺序（`core/modules.jsonc` 的顺序即优先级）与 `global` 兜底必须在最后、每条探针路径命中的模块名序列、**赢家覆盖**（同一键被 ≥2 个命中模块提供时最终胜出来源——这是「有意同键异译」的回归保护）、每条路径生效的规则 **id** 序列；
+- 另记 `notTranslated`：该路径 `core` 声明了、本语言还没给模板的规则 id。「往 `core/rules.jsonc` 加一条规则、忘了给模板」在视图里完全不可见（缺模板 = 规则不生效），只有它能把这种回归暴露出来；
+- **记 id 不记 pattern 源串**：只改 pattern（例如给已有规则加命名组）不会动快照，与「上游改文案」解耦；
+- 快照按语言逐份：同键异译是分语言的事实（某语言少译了被压过的那个键，跨模块同键就不成立）；
+- 失败时只报首处差异 + 差异条数（一条路径的规则序列可达上百项，整表打印会淹掉真正的信息）；
+- 改动确实有意时用 `bun run check:view --update` 重生成快照，并在提交信息里说明原因；
+- 与词典门禁一样走 `registry.ts` + `load.ts` 的严格路径，**不 import 软失败的 `src/dict/index.ts`**。
+
 ## 词典维护指南
 
 ### 归档规则（硬性约束）
@@ -166,15 +177,35 @@ content script 以 `run_at: document_start` 注入：
 ### 加一条动态规则
 
 1. 在 `core/rules.jsonc` 对应模块分组的 `rules` 里追加 `{ "id": "...", "pattern": "..." }`——**位置决定优先级**：带修饰语的规则排在泛化规则之前（首例：`^([\\d,]+)\\+ workflow runs?$` 必须排在其泛化形式之前）；
-2. id 全局唯一、形如 `<模块短名>/<语义>`（如 `global/minutes-ago`）；命名捕获组优先给多组规则用，便于翻译者分辨：
+2. id 全局唯一、形如 `<模块短名>/<语义>`（如 `global/minutes-ago`）；
+3. **捕获组命名约定**（`$1` 只有位置信息，译另一门语言的人必须回头读 pattern 才知道谁是谁）：
 
-   ```jsonc
-   { "id": "global/long-date-january", "pattern": "^January (?<day>\\d{1,2}), (?<year>\\d{4})$" }
-   ```
+   - **≥2 个捕获组必须用命名组**，模板里一律写 `$<name>`：
 
-   对应模板 `"$<year> 年 1 月 $<day> 日"`（原生 `$<name>`，不自造模板语法）。
-3. 在每种语言的 `locales/<语言>/rules.jsonc` 里加 `id → 模板`；模板必须含该语言的文字系统；
-4. 门禁会校验引用完整性（`$2` 超出组数、`$<month>` 未声明都会报错），`bun run check:dict` 通过后实机验证。
+     ```jsonc
+     { "id": "global/long-date-january", "pattern": "^January (?<day>\\d{1,2}), (?<year>\\d{4})$" }
+     ```
+
+     对应模板 `"$<year> 年 1 月 $<day> 日"`（原生 `$<name>`，**不要自造 `{name}` 模板语法**）。
+
+   - **单组规则保持 `$1`，不命名**：`$1` 没有歧义，命名只增加无意义的改动与噪音。
+
+   - 组名按语义取，同一 pattern 内必须唯一，且只允许 `[A-Za-z_$][A-Za-z0-9_$]*`（JS 规范）。现有词表：
+
+     | 语义 | 组名 |
+     | --- | --- |
+     | 日期 | `day` / `year` / `time` |
+     | 日期区间（同月） | `startDay` / `startYear` / `endDay` / `endYear` |
+     | 计数 | `count`（总量用 `total`；改动行数用 `additions` / `deletions`） |
+     | 计数 + 单复数后缀 | `count` / `plural`（`(?<plural>y\|ies)` 只为折叠单复数，模板通常不引用） |
+     | 时长 | `hours` / `minutes` / `seconds` |
+     | 仓库 / 用户 | `repo` / `owner` / `actor`；标题用 `title`、编号用 `number` |
+     | 图表 a11y | `navigator` / `series` / `seriesCount` / `points` / `yAxis` / `xAxis` / `axisCount` / `from` / `to` |
+
+4. 在每种语言的 `locales/<语言>/rules.jsonc` 里加 `id → 模板`；模板必须含该语言的文字系统；
+5. 门禁会校验引用完整性（`$2` 超出组数、`$<month>` 未声明都会报错），`bun run check:dict` 通过后实机验证。
+6. **只改 pattern 不必动任何语言的模板**（O(1)）；反过来说，**改 id 必须同步所有语言的 `rules.jsonc`**。
+   另外：视图骨架门禁记的是规则 **id**、不记 pattern 源串，所以给已有规则加命名组不会动快照。
 
 ### 上游改版时怎么办
 
