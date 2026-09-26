@@ -6,7 +6,7 @@
 // 2. 拼错即报——某语言词条的键不在本清单里即报错（旧结构下拼错键只会静默不翻）；
 // 3. 防循环门禁的「键集合」——任何语言的译文不得等于其中任何一个键。
 {
-	"$schema": "../../dict.schema.json",
+	"$schema": "../dict.schema.json",
 	"modules": [
 		{
 			"name": "pages/issues",

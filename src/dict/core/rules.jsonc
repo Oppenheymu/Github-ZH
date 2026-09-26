@@ -6,7 +6,7 @@
 // 规则不得带 flags 字段（g / y 的 lastIndex 会跨节点累积导致漏翻）。
 // JSONC 转义：正则 \d 在此写作 \\d（写漏一层 Bun 直接报 Syntax Error，不会静默变义）。
 {
-	"$schema": "../../dict.schema.json",
+	"$schema": "../dict.schema.json",
 	"modules": [
 		{
 			"name": "pages/issues",
@@ -656,7 +656,10 @@
 				// JSONC 转义：正则 \d 在此写作 \\d（写漏一层 Bun 直接报 Syntax Error，不会静默变义）
 				// 全站通用规则集合（global 兜底，页面模块规则先于它生效）
 				// 相对时间：<relative-time> 渲染的英文文本，单复数通吃
-				{ "id": "global/now", "pattern": "^now$" },
+				{
+					"id": "global/now",
+					"pattern": "^now$"
+				},
 				{
 					"id": "global/yesterday",
 					"pattern": "^yesterday$"
