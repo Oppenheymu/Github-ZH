@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
-import { localeRawDicts } from "../../src/dict/registry.ts";
-import type { ModuleDict } from "../../src/shared/types.ts";
+import { localeRawDicts } from "../../../src/dict/registry.ts";
+import type { ModuleDict } from "../../../src/shared/types.ts";
 import {
 	buildSkeleton,
 	diffSkeleton,
@@ -11,7 +11,7 @@ import {
 	probeName,
 	serializeSkeleton,
 	type ViewSkeleton,
-} from "./view.ts";
+} from "../view.ts";
 
 /** 合成模块：只需要 name / route / entries / rules 四个字段 */
 function moduleDict(input: {

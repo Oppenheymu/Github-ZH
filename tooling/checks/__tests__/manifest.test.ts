@@ -1,12 +1,12 @@
 import { describe, expect, it } from "bun:test";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import packageJson from "../../package.json";
-import manifestJson from "../../public/manifest.json";
+import packageJson from "../../../package.json";
+import manifestJson from "../../../public/manifest.json";
 import type {
 	LocaleMessages,
 	ManifestLike,
-} from "./manifest.ts";
+} from "../manifest.ts";
 import {
 	BUILD_OUTPUTS,
 	extractI18nKeys,
@@ -15,7 +15,7 @@ import {
 	readTextOrNull,
 	validateLocales,
 	validateManifest,
-} from "./manifest.ts";
+} from "../manifest.ts";
 
 const rootDir = join(import.meta.dir, "..", "..");
 const publicDir = join(rootDir, "public");

@@ -5,16 +5,16 @@ import {
 	buildModules,
 	buildReplacements,
 	buildRuleDefs,
-} from "../../src/dict/load.ts";
+} from "../../../src/dict/load.ts";
 import {
 	getLocaleMeta,
 	LOCALES,
-} from "../../src/dict/locales.ts";
+} from "../../../src/dict/locales.ts";
 import {
 	coreRawDict,
 	localeRawDicts,
-} from "../../src/dict/registry.ts";
-import type { RuleDef } from "../../src/shared/types.ts";
+} from "../../../src/dict/registry.ts";
+import type { RuleDef } from "../../../src/shared/types.ts";
 import {
 	buildCanonical,
 	buildCore,
@@ -29,7 +29,7 @@ import {
 	validateNoIdentity,
 	validateRulesRematch,
 	validateTemplate,
-} from "./dict.ts";
+} from "../dict.ts";
 
 /** 复数 zh / ja 的语言声明（校验逻辑必须靠声明，而不是硬编码汉字） */
 const ZH = getLocaleMeta("zh-CN");
