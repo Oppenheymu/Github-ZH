@@ -55,6 +55,8 @@ export const PROBE_PATHS: readonly string[] = [
 	// 账期选择器 + AI 点数单价脚注），自带一组只在该页出现的规则（settings/month-year-*），
 	// 故单独列一条探针——否则「规则加了却没生效」在这条路径上完全不可见
 	"/settings/billing/ai_usage",
+	// 预算与提醒页同理：同模块的第三个页面，自带 settings/budget-* 规则
+	"/settings/billing/budgets",
 	"/microsoft/vscode/actions",
 	"/microsoft/vscode/agents",
 	"/microsoft/vscode/commits",

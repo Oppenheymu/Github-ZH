@@ -463,6 +463,10 @@
 		"settings/month-year-nov": "$1 年 11 月",
 		"settings/month-year-dec": "$1 年 12 月",
 		// AI 用量页的 AI 点数单价脚注：金额（含美元符号）由捕获组带出，模板里不再另写 $
-		"settings/ai-credit-cost": "每个 GitHub AI 点数费用为 $<amount>。"
+		"settings/ai-credit-cost": "每个 GitHub AI 点数费用为 $<amount>。",
+		// 预算与提醒页的标题行计数与预算行金额（金额含美元符号，见上一条的说明）
+		"settings/budget-count": "$<count> 条账户预算",
+		"settings/budget-amount-spent": "已支出 $<amount>",
+		"settings/budget-amount-limit": "$<amount> 预算"
 	}
 }

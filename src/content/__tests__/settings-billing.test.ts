@@ -700,3 +700,115 @@ describe("AI 用量页的实机节点边界", () => {
 		).toBe("额外点数");
 	});
 });
+
+/**
+ * 预算与提醒页（/settings/billing/budgets）的实机文本节点。
+ *
+ * 边界强度与 AI 用量页同档：路由同样只命中 ^/settings/billing，页面需登录、
+ * **未进开发者模式导出**，节点原文按 2026-09 的实机截图逐行誊录。截图里
+ * 「账户」「代码空间」「软件包」「Actions 工作流」「预算与提醒（标题）」已经由既有词条译出，
+ * 故这里只收当时仍是英文的那些节点。
+ */
+const BUDGETS_NODES: readonly string[] = [
+	// 页面标题「Budgets and alerts」与表格里的「Account」「Name」由既有词条覆盖，不在此列
+	"New budget",
+	"Included usage alerts",
+	"Budgets let you set monthly usage limits for specific GitHub products or SKUs. If no budget is set, usage for that product is unlimited.",
+	"Learn more",
+	// 表格列名（SKU 按门禁不收录，保持原文）
+	"Name",
+	"Account",
+	"Product",
+	"Stop usage",
+	"budget",
+	// 预算行
+	"Yes",
+	"Codespaces",
+	"Packages",
+	"Actions",
+	// 标题行计数与预算行金额是动态文本，节点原文长这样
+	"5 Account budgets",
+	"$0 spent",
+	"$0 budget",
+];
+
+/** 预算页命中的模块视图（与账单页同一组模块） */
+const budgetsView = buildView(
+	"/settings/billing/budgets",
+	dictForLocale("zh-CN"),
+	new Map(Object.entries(dictCore.aliases)),
+);
+
+describe("预算与提醒页的实机节点边界", () => {
+	it("translates every text node GitHub actually renders", () => {
+		for (const node of BUDGETS_NODES) {
+			for (const variant of withWhitespace(node)) {
+				const translated = translateText(
+					variant,
+					budgetsView,
+				);
+				expect(
+					translated,
+					`未命中：${JSON.stringify(variant)}`,
+				).not.toBeNull();
+				expect(translated ?? "").toMatch(/[\u4e00-\u9fff]/);
+			}
+		}
+	});
+
+	it("keeps the generic English words the page would otherwise mangle", () => {
+		// 「SKU」是缩写、中文界面沿用原文：收录它必然让译文与键同形（门禁也拒），
+		// 正确做法是不收录——这里反向断言，防止后人「补」成死键或造出翻译循环
+		expect(translateText("SKU", budgetsView)).toBeNull();
+		// 预算归属是用户内容，必须原样保留
+		for (const raw of ["Oppenheymu", "@Oppenheymu"]) {
+			expect(
+				translateText(raw, budgetsView),
+				`不应被翻译：${JSON.stringify(raw)}`,
+			).toBeNull();
+		}
+	});
+
+	it("translates the budget count and amounts dynamically", () => {
+		// 标题行「N Account budgets」：数字随条数变化，单复数都要命中
+		expect(
+			translateText("5 Account budgets", budgetsView),
+		).toBe("5 条账户预算");
+		expect(
+			translateText("1 Account budget", budgetsView),
+		).toBe("1 条账户预算");
+		// 金额形态：美元符号由捕获组带出，模板不另写 $（见 core/rules.jsonc 的说明）
+		expect(translateText("$0 spent", budgetsView)).toBe(
+			"已支出 $0",
+		);
+		expect(translateText("$12.50 spent", budgetsView)).toBe(
+			"已支出 $12.50",
+		);
+		expect(translateText("$100 budget", budgetsView)).toBe(
+			"$100 预算",
+		);
+		// 非金额形态必须原样保留，不得被规则截成半句中文
+		expect(
+			translateText("0 spent", budgetsView),
+		).toBeNull();
+	});
+
+	it("falls through to the settings and repo modules for shared labels", () => {
+		// 标题、账户 / 名称列名与产品名来自更靠前的模块：跨模块复用正是不重复登记的理由。
+		// 「Name」在本路由由 pages/settings 胜出（「姓名」），不是仓库页的「名称」——
+		// 这正是视图骨架里「赢家覆盖」锁住的那类事实
+		const expectations: readonly [string, string][] = [
+			["Budgets and alerts", "预算与提醒"],
+			["Account", "账户"],
+			["Name", "姓名"],
+			["Codespaces", "代码空间"],
+			["Packages", "软件包"],
+		];
+		for (const [raw, expected] of expectations) {
+			expect(
+				translateText(raw, budgetsView),
+				`期望复用既有译文：${JSON.stringify(raw)}`,
+			).toBe(expected);
+		}
+	});
+});

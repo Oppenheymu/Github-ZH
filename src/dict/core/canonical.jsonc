@@ -678,7 +678,27 @@
 				"Included credits",
 				"Additional credits",
 				// 表脚注（AI 点数单价说明，金额随定价变化，故走规则）
-				"Each GitHub AI credit costs $0.01."
+				"Each GitHub AI credit costs $0.01.",
+				// —— 预算与提醒页（/settings/billing/budgets，账单侧栏「Budgets and alerts」进入）——
+				// 键逐字抄自 2026-09 的实机截图（页面需登录，未进开发者模式导出），节点边界见
+				// src/content/__tests__/settings-billing.test.ts 的 BUDGETS_NODES。
+				// 页面标题「Budgets and alerts」不在此登记：pages/settings 已提供同一键（模块更靠前）。
+				// 工具条与说明句
+				"New budget",
+				"Included usage alerts",
+				"Budgets let you set monthly usage limits for specific GitHub products or SKUs. If no budget is set, usage for that product is unlimited.",
+				// 表格列名与预算行（截图里可见的静态文案；「Name」「Account」复用既有词条）
+				"Product",
+				// 「SKU」不收录：它是缩写、中文界面里也没有可用译文，译文必然与键同形
+				// （自触发循环，门禁直接拒）——未命中即保留英文，这才是正确做法
+				"Stop usage",
+				"Yes",
+				"budget",
+				// 行尾溢出菜单按钮的无障碍名（账单页其它列表同样只暴露 aria-label）
+				"Budget options"
+				// 注意：金额与计数**不在此登记**（「$0 spent」「$0 budget」「5 Account budgets」
+				// 随数据变化），由 core/rules.jsonc 的 settings/budget-amount-spent /
+				// settings/budget-amount-limit 与 settings/budget-count 覆盖
 			]
 		},
 		{
