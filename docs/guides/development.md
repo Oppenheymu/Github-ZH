@@ -259,6 +259,7 @@ for (const p of probes) {
 | `settings-appearance.test.ts` | `/settings/appearance` | 外观设置页（下拉 / 分段控件的当前值本身是节点） |
 | `settings-accessibility.test.ts` | `/settings/accessibility` | 辅助功能设置页（按键名 + `kbd` + `sr-only` 拼接） |
 | `settings-notifications.test.ts` | `/settings/notifications` | 通知设置页（四处拼接必须成立） |
+| `settings-emails.test.ts` | `/settings/emails` | 电子邮件设置页（`<strong>` / `<a>` 把说明段切成三段、弹窗里邮箱是纯文本节点） |
 | `settings-billing.test.ts` | `/account/billing`、`/account/billing/usage` | 账单 / 用量页（含日期区间规则的顺序语义） |
 | `repo.test.ts` | `/owner/repo` 及子页 | 仓库页（导航、文件列表、README 与 README.md 的区分） |
 | `issues.test.ts` | `/owner/repo/issues` | 议题列表页 |

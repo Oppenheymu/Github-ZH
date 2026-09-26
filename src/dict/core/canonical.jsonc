@@ -555,7 +555,60 @@
 				"Get Copilot for free, 180 monthly Codespaces hours for cloud coding, unlimited private repositories with GitHub Pro or Team, and dozens of premium tools in the Student Developer Pack.",
 				"Education Benefits",
 				"Complete a teacher or student application to unlock tools and resources for your educational journey.",
-				"Start an application"
+				"Start an application",
+				// —— 电子邮件设置（/settings/emails）——
+				// 键逐字抄自两处实机证据（2026-09-26 该页会话）：开发者模式导出的漏翻节点清单
+				// （46 条）+ 维护者按固定起手式采集的「全部文本节点 + 六个可翻译属性 + 整理后
+				// HTML」，另与全页截图逐条对照。节点边界与拼接断言见
+				// src/content/__tests__/settings-emails.test.ts。
+				// 用户内容（邮箱地址、@用户名、头像 alt/title、noreply 地址）不收录：收了会误伤。
+				// 纯专名（GitHub / Google / Git）与纯缩写同样不收录——译文必须含中文字系，
+				// 收录必被门禁拒；未命中即保留英文，这是正确做法而不是漏译。
+				// 注意「Primary / Verified」是本模块新收的徽标键（此前只在页面里显示英文）；
+				// 若日后别的模块也收同键，本模块在前会胜出（有意同键异译的机制见 registry.ts）
+				"Email settings",
+				"Emails you can use to sign in to your account. Verified emails can be used as the author or committer addresses for web-based Git operations, e.g. edits and merges.",
+				// 顶部验证提醒：<p class="Banner-title"> 的单个文本节点（带源码缩进与换行）
+				"You have a single verified email associated with your GitHub account. Add an additional verified email address in case you lose access to your primary email.",
+				// 邮箱行：徽标各自成节点，默认通知说明是 <div class="note"> 里的单节点
+				"Primary",
+				"Verified",
+				"This email address is the default for GitHub notifications, such as replies to issues, pull requests, and similar activity.",
+				// 行末「…」菜单：两个节点——<tool-tip class="sr-only"> 的动作名（不含邮箱，
+				// 邮箱在关联 tooltip 里）与菜单项本身
+				"Manage email",
+				"Manage email preferences",
+				// 身份提供方徽标与菜单项、断开确认弹窗
+				"Connected to Google",
+				"Disconnect from Google",
+				"This will disconnect",
+				"Disconnect",
+				// 新增邮箱表单：标签（* 是独立的纯符号节点，翻不了也不收）、placeholder
+				"Add email address",
+				"Email address",
+				"Add",
+				// 主邮箱区块：标签 + 说明段 + 屏幕阅读器的下拉标签 + 选项值
+				"Primary email address",
+				"Select an email to be used for account-related notifications and can be used for password reset.",
+				"Select email to become primary",
+				// 备用邮箱区块（下拉的两个选项各自成节点）
+				"Backup email address",
+				"Your backup GitHub email address will be used as an additional destination for security-relevant account notifications and can also be used for password resets.",
+				"Allow all verified emails",
+				"Only allow primary email",
+				"Select email to become backup",
+				// 邮箱保密开关：标题 + 说明段被 <strong>（noreply 地址）与 <a>（Git 帮助链接）
+				// 切成三段，逐段收录；noreply 地址本身是用户内容，不收录
+				"Keep my email addresses private",
+				"We’ll remove your public profile email and use",
+				"when performing web-based Git operations (e.g. edits and merges) and sending email on your behalf. If you want command line Git operations to use your private email you must",
+				"set your email in Git",
+				"Previously authored commits associated with a public email will remain public.",
+				// 设置侧栏里长期保留英文的标签：同键在 pages/repo 另有译文「软件包」，
+				// 本模块在前且在 /settings 子树胜出（有意同键异译，已进视图骨架快照）。
+				// 同区右侧的「Copilot」**不收录**：纯专名不译是既有约定（pages/settings-billing
+				// 与 pages/settings 的教育页测试都反向断言它保持英文），未命中即保留英文。
+				"Packages"
 			]
 		},
 		{

@@ -1089,7 +1089,8 @@
 					"module": "pages/settings"
 				},
 				{ "key": "Appearance", "module": "pages/settings" },
-				{ "key": "Company", "module": "pages/settings" }
+				{ "key": "Company", "module": "pages/settings" },
+				{ "key": "Packages", "module": "pages/settings" }
 			],
 			"rules": [
 				"settings/export-available",
@@ -1396,7 +1397,8 @@
 					"module": "pages/settings"
 				},
 				{ "key": "Appearance", "module": "pages/settings" },
-				{ "key": "Company", "module": "pages/settings" }
+				{ "key": "Company", "module": "pages/settings" },
+				{ "key": "Packages", "module": "pages/settings" }
 			],
 			"rules": [
 				"settings/export-available",
@@ -1703,7 +1705,8 @@
 					"module": "pages/settings"
 				},
 				{ "key": "Appearance", "module": "pages/settings" },
-				{ "key": "Company", "module": "pages/settings" }
+				{ "key": "Company", "module": "pages/settings" },
+				{ "key": "Packages", "module": "pages/settings" }
 			],
 			"rules": [
 				"settings/export-available",
@@ -2010,7 +2013,8 @@
 					"module": "pages/settings"
 				},
 				{ "key": "Appearance", "module": "pages/settings" },
-				{ "key": "Company", "module": "pages/settings" }
+				{ "key": "Company", "module": "pages/settings" },
+				{ "key": "Packages", "module": "pages/settings" }
 			],
 			"rules": [
 				"settings/export-available",
@@ -2317,7 +2321,8 @@
 					"module": "pages/settings"
 				},
 				{ "key": "Appearance", "module": "pages/settings" },
-				{ "key": "Company", "module": "pages/settings" }
+				{ "key": "Company", "module": "pages/settings" },
+				{ "key": "Packages", "module": "pages/settings" }
 			],
 			"rules": [
 				"settings/export-available",
