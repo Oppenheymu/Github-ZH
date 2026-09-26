@@ -101,6 +101,12 @@
 		"Group by: None": "分组方式：无",
 		"Timeframe: Current month": "时间范围：本月",
 		"Usage breakdown": "用量明细",
+		// 说明句在实机里被拆成三段：本片段（「Usage for 」）＋ 账期区间节点 ＋ 下面的
+		// 「For license-based products…」。故本键必须收——日期那段由
+		// settings/usage-range-short-same-month-* 覆盖，两段都命中整句才通顺。
+		// 译文用冒号而不是保留尾随空格：中文里「用量统计：2026 年 9 月 1 日 – 30 日。」
+		// 比「用量统计 2026 年…」的衔接更清楚（尾随空格会被 normalizeKey 折叠，也留不住）
+		"Usage for": "用量统计：",
 		"For license-based products, the price/unit is a prorated portion of the monthly price.": "对于基于许可证的产品，单价是按月价格折算后的部分金额。",
 		"Date": "日期",
 		// 「Billed amount」与上面的「Gross amount」是同一张表的相邻两列，术语保持一致

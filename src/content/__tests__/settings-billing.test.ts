@@ -441,7 +441,9 @@ const USAGE_NODES: readonly string[] = [
 	//    静态词条「Metered usage」与 usage-range-same-month-* 规则覆盖，此处不重复列）——
 	"Usage",
 	// —— 用量明细区块 ——
+	// 说明句在实机里是三段：标签片段 + 账期区间 + 产品说明句（见下方 renderNodes 用例）
 	"Usage breakdown",
+	"Usage for",
 	"For license-based products, the price/unit is a prorated portion of the monthly price.",
 	"Date",
 	"Gross amount",
@@ -531,6 +533,27 @@ describe("用量页的实机节点边界", () => {
 				`不应被翻译：${JSON.stringify(raw)}`,
 			).toBeNull();
 		}
+	});
+
+	it("renders the usage breakdown blurb split around its date range", () => {
+		// 实机边界（截图实证）：说明句是「Usage for 」＋账期区间＋「For license-based
+		// products…」三段，整句键永不命中。片段键与区间规则都命中，整句才通顺
+		expect(
+			renderNodes([
+				"Usage for ",
+				"Sep 1 - Sep 30, 2026",
+				" ",
+				"For license-based products, the price/unit is a prorated portion of the monthly price.",
+			]),
+		).toBe(
+			// 实机节点自带尾随空格（「Usage for 」），walker 会把它保留在译文之后，
+			// 故这里如实写出那个空格；渲染结果读作「用量统计： 2026 年 9 月 1 日 – 30 日」
+			"用量统计： 2026 年 9 月 1 日 – 30 日 对于基于许可证的产品，单价是按月价格折算后的部分金额。",
+		);
+		// 标签片段去掉尾随空格也要命中（normalizeKey 折叠空白，实机形态可能两种都有）
+		expect(translateText("Usage for", usageView)).toBe(
+			"用量统计：",
+		);
 	});
 
 	it("keeps the Cancel button on the global dictionary", () => {

@@ -638,6 +638,9 @@
 				"Group by: None",
 				"Timeframe: Current month",
 				"Usage breakdown",
+				// 实机边界：说明句被拆成「Usage for 」＋ 账期区间 ＋「For license-based products…」，
+				// 故整句键在实机上永不命中，必须收这个片段（见 settings-billing.jsonc 旁注释）
+				"Usage for",
 				"For license-based products, the price/unit is a prorated portion of the monthly price.",
 				"Date",
 				"Billed amount",
