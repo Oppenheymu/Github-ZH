@@ -137,6 +137,29 @@
 		"Trending Repositories": "趋势仓库",
 		// —— 说明句被链接拆开后单独成节点的片段 ——
 		"email settings": "电子邮件设置",
-		"to learn more about how we use this information.": "以进一步了解我们如何使用这些信息。"
+		"to learn more about how we use this information.": "以进一步了解我们如何使用这些信息。",
+		// —— 账号管理（/settings/admin）——
+		"Change username": "更改用户名",
+		"Changing your username can have unintended side effects.": "更改用户名可能会带来意想不到的副作用。",
+		"Looking to manage account security settings? You can find them in the": "想管理账号安全设置？你可以在",
+		"Link Patreon account": "关联 Patreon 账户",
+		"Connect a Patreon account for": "为",
+		"to sponsor maintainers with. Get recognition on GitHub for sponsorships made on Patreon when the sponsored person has linked Patreon and GitHub, too, and has a public GitHub Sponsors profile.": "连接一个 Patreon 账户，用来赞助维护者。当被赞助者也关联了 Patreon 与 GitHub，并且有公开的 GitHub Sponsors 个人资料时，你可以在 GitHub 上获得通过 Patreon 提供的赞助的认可。",
+		"Export account data": "导出账户数据",
+		"Export all repositories and profile metadata for": "导出",
+		"Exports will be available for 7 days.": "导出数据将在 7 天内可用。",
+		"Successor settings": "账号继承设置",
+		"By clicking \"Add Successor\" below, I acknowledge that I am the owner of the": "点击下方的「添加继承者」，即表示我确认自己是",
+		"account, and am authorizing GitHub to transfer content within that account to my GitHub Successor, designated below, in the event of my death. I understand that this appointment of a successor does not override legally binding next-of-kin rules or estate laws of any relevant jurisdiction, and does not create a binding will.": "账户的所有者，并授权 GitHub 在我去世后，把该账户内的内容转移给下方指定的 GitHub 继承者。我理解，此项继承者的指定不能凌驾于任何相关司法管辖区的、具有法律约束力的近亲规则或遗产法，也不构成具有约束力的遗嘱。",
+		"Add successor": "添加继承者",
+		"Search by username, full name, or email address": "按用户名、全名或电子邮件地址搜索",
+		"You have not designated a successor.": "你尚未指定继承者。",
+		"Delete account": "删除账户",
+		"Your account is currently an owner in these organizations": "你的账户目前是以下组织的所有者",
+		"You must remove yourself from these organizations, transfer ownership, or delete these organizations before you can delete your user.": "你必须先从这些组织中移除自己、转移所有权或删除这些组织，然后才能删除你的用户。",
+		// —— 按钮 ——
+		"Connect with Patreon": "关联 Patreon",
+		"Start export": "开始导出",
+		"Delete your account": "删除你的账户"
 	}
 }

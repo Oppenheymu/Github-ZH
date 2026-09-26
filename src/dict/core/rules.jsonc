@@ -66,6 +66,23 @@
 			]
 		},
 		{
+			"name": "pages/settings",
+			"rules": [
+				// 导出数据的可用天数（天数会随上游设置变化，用捕获组接住）
+				{
+					"id": "settings/export-available",
+					"pattern": "^Exports will be available for (\\d+) days?\\.$"
+				},
+				// 删除账号区块：当前作为所有者的组织清单。清单随账号变化（组织名保留原文），
+				// 故整句连清单一起用捕获组接住。刻意不为「清单片段」单独收规则：
+				// 纯拉丁译文过不了门禁的防循环检查（规则模板必须含目标语言文字系统）
+				{
+					"id": "settings/owner-organizations",
+					"pattern": "^Your account is currently an owner in these organizations: (.+)$"
+				}
+			]
+		},
+		{
 			"name": "pages/repo-settings",
 			"rules": [
 				// “Sponsor” 的引号在 GitHub 文案中直弯混用，用字符类一并覆盖

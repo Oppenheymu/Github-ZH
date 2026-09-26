@@ -301,7 +301,39 @@
 				"Trending Repositories",
 				// —— 说明句被链接拆开后单独成节点的片段（摘录自实机文本节点清单）——
 				"email settings",
-				"to learn more about how we use this information."
+				"to learn more about how we use this information.",
+				// —— 账号管理（/settings/admin）——
+				"Change username",
+				"Changing your username can have unintended side effects.",
+				// 句中的「密码与身份验证」是链接 → 整句被拆开，链接后片段单独收录
+				// （链接文本 "Password and authentication" 已在上面的设置导航里收录）
+				"Looking to manage account security settings? You can find them in the",
+				// 「Patreon」是链接 → 说明句被拆开，链接前 / 链接后各成一条
+				"Link Patreon account",
+				"Connect a Patreon account for",
+				"to sponsor maintainers with. Get recognition on GitHub for sponsorships made on Patreon when the sponsored person has linked Patreon and GitHub, too, and has a public GitHub Sponsors profile.",
+				"Export account data",
+				// 导出说明句与「可用天数」之间可能夹着一个链接节点，故整句与尾句各收一条；
+				// 「Exports will be available for N days.」随天数变化，走 pages/settings 的
+				// export-available 规则（见 core/rules.jsonc）
+				"Export all repositories and profile metadata for",
+				"Exports will be available for 7 days.",
+				"Successor settings",
+				// 首句里的「Learn more about account successors」是链接 → 链接前片段单独收录
+				"By clicking \"Add Successor\" below, I acknowledge that I am the owner of the",
+				"account, and am authorizing GitHub to transfer content within that account to my GitHub Successor, designated below, in the event of my death. I understand that this appointment of a successor does not override legally binding next-of-kin rules or estate laws of any relevant jurisdiction, and does not create a binding will.",
+				"Add successor",
+				"Search by username, full name, or email address",
+				"You have not designated a successor.",
+				"Delete account",
+				// 组织清单随账号变化，清单本身与整句各走一条规则
+				// （owner-organizations / owner-organizations-list）
+				"Your account is currently an owner in these organizations",
+				"You must remove yourself from these organizations, transfer ownership, or delete these organizations before you can delete your user.",
+				// —— 按钮 ——
+				"Connect with Patreon",
+				"Start export",
+				"Delete your account"
 			]
 		},
 		{

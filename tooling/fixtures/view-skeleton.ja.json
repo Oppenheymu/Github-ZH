@@ -791,6 +791,8 @@
 				"global/comments-count"
 			],
 			"notTranslated": [
+				"settings/export-available",
+				"settings/owner-organizations",
 				"repo/commits-count",
 				"repo/reactions-count",
 				"repo/people-reacted",
