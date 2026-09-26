@@ -645,12 +645,21 @@ async function pathExists(path: string): Promise<boolean> {
 	}
 }
 
+/**
+ * 指定浏览器可执行文件的环境变量名。
+ * 仓库从 Github-ZH 改名为 Github-i18n 后，新名优先、旧名继续兜底——
+ * 别人本机（或 CI secrets）里存的还是旧名，不该因为一次改名就失效。
+ */
+const BROWSER_PATH_ENV = "GITHUB_I18N_BROWSER_PATH";
+const LEGACY_BROWSER_PATH_ENV = "GITHUB_ZH_BROWSER_PATH";
+
 async function resolveBrowser(
 	flagValue?: string,
 ): Promise<string> {
 	const candidates = [
 		flagValue,
-		process.env["GITHUB_ZH_BROWSER_PATH"],
+		process.env[BROWSER_PATH_ENV],
+		process.env[LEGACY_BROWSER_PATH_ENV],
 		...BROWSER_CANDIDATES,
 	].filter(
 		(path): path is string => typeof path === "string",
@@ -659,7 +668,7 @@ async function resolveBrowser(
 		if (await pathExists(candidate)) return candidate;
 	}
 	throw new Error(
-		"找不到浏览器可执行文件（--browser 或 GITHUB_ZH_BROWSER_PATH 可指定）",
+		`找不到浏览器可执行文件（--browser 或 ${BROWSER_PATH_ENV} 可指定，旧名 ${LEGACY_BROWSER_PATH_ENV} 仍兼容）`,
 	);
 }
 

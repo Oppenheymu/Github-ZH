@@ -1,10 +1,10 @@
 {
-    "name": "github-zh",
+    "name": "github-i18n",
     "version": "0.2.0",
     "private": true,
     "type": "module",
     "packageManager": "bun@1.4.2",
-    "description": "GitHub 汉化浏览器扩展（Chrome / Edge，Manifest V3）",
+    "description": "GitHub 界面本地化浏览器扩展（Chrome / Edge，Manifest V3）",
     "scripts": {
         "build": "bun tooling/build.ts",
         "watch": "bun tooling/build.ts --watch",

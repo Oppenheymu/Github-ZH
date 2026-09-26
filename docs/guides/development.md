@@ -257,6 +257,9 @@ popup 底部的「开发者模式」开关**默认关闭**，用于系统性发�
 
 导出 JSON 结构（排序：path 升序 → count 降序 → text 升序）：
 
+> `schema` 字段里的 `github-zh-misses/1` 是**故意保留的旧名**：它是用户粘贴回来的 JSON 里的字段值，
+> 改名会让已经导出的旧数据无法被识别。仓库改名不影响它。
+
 ```json
 {
   "schema": "github-zh-misses/1",
@@ -280,7 +283,7 @@ bun run verify -- --pages my-pages.txt --locale ja --out .zcode/misses-ja.json
 ```
 
 - `--locale <id>`：写进 storage（content script 据它选词典），同时决定**翻译探针的锚点与字系统计数**——判据不得硬编码某种语言的译文（旧版把「注册 / 登录」和 CJK 计数写死，换成任何别的语言都会误判为「翻译未生效」）；
-- `--pages` 每行一个 URL（`#` 为注释）；`--dwell` 调单页停留毫秒；`--headed` 便于旁观；`--browser` / `GITHUB_ZH_BROWSER_PATH` 指定浏览器；
+- `--pages` 每行一个 URL（`#` 为注释）；`--dwell` 调单页停留毫秒；`--headed` 便于旁观；`--browser` / `GITHUB_I18N_BROWSER_PATH` 指定浏览器（改名前的旧名 `GITHUB_ZH_BROWSER_PATH` 仍然兼容，两者同时设置时新名优先）；
 - 探针识别扩展上下文靠 content script 写下的**身份标记**（`src/shared/identity.ts`），不能用 `manifest.name`——品牌走 `__MSG_*__` 后它随浏览器界面语言变化；
 - 退出码：扩展未加载 / 翻译未生效 / 全部页面探针失败都会以非零码退出。
 
@@ -294,7 +297,7 @@ bun run verify -- --pages my-pages.txt --locale ja --out .zcode/misses-ja.json
 
 - content script 必须内联全部词典（现在是同步注入、天然无闪烁），实测数据占产物大头：迁移到 core/locales 形态后数据紧凑 JSON 约 **144 KB**（content.js 约 **195 KB**，`minify: false`）。相比单语言形态增加约 13 KB，来自共享结构（207 条规则 id + 模块名）与 ja 样例；
 - 因此 N 种语言**全量打包**在 N=2 时仍是最优解（无闪烁、零风险）；待到 N≥4 再考虑按 locale 分发（`chrome.scripting.registerContentScripts` 按语言注册是唯一能保持同步注入、无闪烁的方案，代价是引入 background service worker 与 `scripting` 权限）；
-- 发布一律用 `bun run pack` 产出的 zip。
+- 发布一律用 `bun run pack` 产出的 zip：仓库根目录下的 `github-i18n-v<版本>.zip`（store 模式、零依赖打包）。
 
 ## 已知边界
 

@@ -9,7 +9,7 @@
 // 不能把 content 入口（有顶层副作用）拖进工具侧的模块图。
 
 /** 内容脚本写进 isolated world 全局的值 */
-export const EXTENSION_MARKER = "github-zh/content";
+export const EXTENSION_MARKER = "github-i18n/content";
 
 /** 承载 EXTENSION_MARKER 的全局属性名 */
-export const EXTENSION_MARKER_KEY = "__githubZhContent";
+export const EXTENSION_MARKER_KEY = "__githubI18nContent";

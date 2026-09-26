@@ -1,4 +1,4 @@
-# GitHub 界面本地化（Github-ZH）
+# GitHub 界面本地化（Github-i18n）
 
 把 GitHub 网站界面本地化为多种语言的浏览器扩展（Chrome / Edge，Manifest V3）。
 

@@ -183,7 +183,7 @@ function main(): void {
 	const zip = buildZip(entries);
 	const outPath = join(
 		ROOT,
-		`github-zh-v${String(packageJson.version)}.zip`,
+		`github-i18n-v${String(packageJson.version)}.zip`,
 	);
 	writeFileSync(outPath, zip);
 	console.log(

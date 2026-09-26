@@ -1,7 +1,11 @@
 NOTICE
 ======
 
-本项目（Github-ZH，扩展显示名「GitHub 汉化」）是一个独立的原创开源项目：
+本项目（Github-i18n，扩展显示名「GitHub 界面本地化」）是一个独立的原创开源项目：
+
+0. 本仓库曾用名 Github-ZH（旧地址 github.com/Oppenheymu/Github-ZH）。
+   改名后旧链接会自动重定向到新地址；LICENSE 里的版权署名仍写作
+   「Github-ZH contributors」——那是改名时的既有署名，保持原样不改。
 
 1. 翻译词典与全部源码均为本项目原创编写，未复制、改编或翻译自任何
    第三方汉化项目（包括但不限于 maboloshi/github-chinese 等 GPL-3.0
