@@ -1561,6 +1561,16 @@
 				"Your gists",
 				"Your organizations",
 				"Signed in as",
+				// —— 用户菜单（2025 版重写：条目去掉 Your 前缀，并新增下列入口）——
+				// 同一字符串在别处出现时按「先到先得」由更具体的模块胜出（如 Appearance / Accessibility
+				// 也出现在 pages/settings，Free 也出现在 pages/marketing），跨模块同键属有意为之。
+				"Profile",
+				"Gists",
+				"Copilot settings",
+				"Appearance",
+				"Accessibility",
+				"Try Enterprise",
+				"Free",
 				// —— 通用操作 ——
 				"Edit",
 				"Delete",

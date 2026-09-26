@@ -795,6 +795,14 @@
 			"matched": ["pages/settings", "pages/repo", "global"],
 			"collisions": [
 				{
+					"key": "Accessibility",
+					"module": "pages/settings"
+				},
+				{
+					"key": "Appearance",
+					"module": "pages/settings"
+				},
+				{
 					"key": "Company",
 					"module": "pages/settings"
 				},
@@ -2571,7 +2579,12 @@
 				"pages/profile",
 				"global"
 			],
-			"collisions": [],
+			"collisions": [
+				{
+					"key": "Free",
+					"module": "pages/marketing"
+				}
+			],
 			"rules": [
 				"profile/commit-activity-year",
 				"profile/issues-needing-help",
@@ -2661,7 +2674,12 @@
 				"pages/profile",
 				"global"
 			],
-			"collisions": [],
+			"collisions": [
+				{
+					"key": "Free",
+					"module": "pages/marketing"
+				}
+			],
 			"rules": [
 				"profile/commit-activity-year",
 				"profile/issues-needing-help",

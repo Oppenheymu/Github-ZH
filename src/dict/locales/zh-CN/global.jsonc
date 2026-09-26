@@ -68,6 +68,16 @@
 		"Your gists": "你的 Gist",
 		"Your organizations": "你的组织",
 		"Signed in as": "当前登录身份",
+		// —— 用户菜单（2025 版重写：去掉 Your 前缀的条目 + 新增入口）——
+		"Profile": "个人资料",
+		"Gists": "Gist 代码片段",
+		"Copilot settings": "Copilot 设置",
+		// 「外观」「辅助功能」与 pages/settings 同译，设置页仍由更具体的模块胜出
+		"Appearance": "外观",
+		"Accessibility": "辅助功能",
+		"Try Enterprise": "试用企业版",
+		// 「Free」是「Try Enterprise」右侧的套餐徽章；定价页同名徽章在 pages/marketing 里已有译文
+		"Free": "免费",
 		// —— 通用操作 ——
 		"Edit": "编辑",
 		"Delete": "删除",
