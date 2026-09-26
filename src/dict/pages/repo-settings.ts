@@ -16,6 +16,7 @@ export const repoSettingsDict: PageDict = {
 		"Moderator tools": "管理员工具",
 		"Code security": "代码安全",
 		"Advanced Security": "高级安全",
+		"Code quality": "代码质量",
 		Runners: "运行器",
 		Environments: "环境",
 		Pages: "页面",
@@ -25,6 +26,7 @@ export const repoSettingsDict: PageDict = {
 		Actions: "Actions 工作流",
 		Agents: "代理",
 		Webhooks: "网络钩子",
+		Planning: "规划",
 		"Code, planning, and automation": "代码、规划与自动化",
 		Branches: "分支",
 		Tags: "标签",
@@ -308,6 +310,34 @@ export const repoSettingsDict: PageDict = {
 		selection: "已选",
 		results: "个结果",
 		"user granting permissions": "正在授予权限的用户",
+		// —— 协作者：基础角色 / 组织访问 / 自定义角色推广横幅 ——
+		"Base role": "基础角色",
+		None: "无",
+		"No base role set.": "未设置基础角色。",
+		Members: "成员",
+		"can access this repository.": "可访问此仓库。",
+		"Set base role.": "设置基础角色。",
+		"Set base role": "设置基础角色",
+		"Organization access": "组织访问",
+		"Manage.": "管理。",
+		Manage: "管理",
+		"Create team": "创建团队",
+		"Add teams": "添加团队",
+		Role: "角色",
+		"Find people or a team...": "查找用户或团队…",
+		"Find people or a team…": "查找用户或团队…",
+		"Mixed roles": "混合角色",
+		// 角色名：压过 global 的 Write:「编写」（评论框页签语义），此处是权限角色
+		Read: "读取",
+		Triage: "分类",
+		Write: "写入",
+		Maintain: "维护",
+		Admin: "管理员",
+		"Create custom roles with GitHub Enterprise":
+			"使用 GitHub Enterprise 创建自定义角色",
+		"Enterprise accounts offer organizations more granular control over permissions by allowing you to configure up to 20 custom repository roles. This enables greater control over who and how your users access code and data in your organization.":
+			"企业账户为组织提供更细粒度的权限控制，支持配置最多 20 个自定义仓库角色，从而更精细地控制组织中的哪些用户可以访问代码和数据，以及以何种方式访问。",
+		"Try GitHub Enterprise": "试用 GitHub Enterprise",
 		// —— sudo 身份确认（Access 子页弹层）——
 		"Confirm access": "确认访问",
 		Verify: "验证",
@@ -478,6 +508,39 @@ export const repoSettingsDict: PageDict = {
 				/^Enter the verification code sent to (.+)\. If it doesn’t appear within a few minutes, check your spam folder\.$/,
 			replacement:
 				"验证码已发送至 $1，如果几分钟内仍未收到，请检查垃圾邮件文件夹。",
+		},
+		// 直接访问 / 组织访问卡片：动态计数句（数量与单复数随数据变化）
+		{
+			pattern:
+				/^([\d,]+) entit(y|ies) (?:has|have) access to this repository\.$/,
+			replacement: "$1 个实体可访问此仓库。",
+		},
+		{
+			pattern:
+				/^([\d,]+) users? and ([\d,]+) teams? can access this repository through the organization\.$/,
+			replacement:
+				"$1 个用户和 $2 个团队可通过该组织访问此仓库。",
+		},
+		// 角色下拉按钮「Role: write」等，角色值小写、随当前权限变化
+		{
+			pattern: /^Role: read$/,
+			replacement: "角色：读取",
+		},
+		{
+			pattern: /^Role: triage$/,
+			replacement: "角色：分类",
+		},
+		{
+			pattern: /^Role: write$/,
+			replacement: "角色：写入",
+		},
+		{
+			pattern: /^Role: maintain$/,
+			replacement: "角色：维护",
+		},
+		{
+			pattern: /^Role: admin$/,
+			replacement: "角色：管理员",
 		},
 	],
 };
