@@ -3,9 +3,9 @@
 // / 协作者（Access）/ sudo 身份确认 / Copilot（云端代理、网络访问、MCP）
 // 注：路由也会命中 /orgs/<org>/settings，共享的侧边栏与危险区域文案同样适用；
 // 纯产品名（Copilot、Dependabot、OIDC 等）与用户名、邮箱占位符不收录
+// 简体中文 · 模块 pages/repo-settings（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
-	"$schema": "../../dict.schema.json",
-	"route": "^/[^/]+/[^/]+/settings",
+	"$schema": "../../../dict.schema.json",
 	"entries": {
 		// —— 设置侧边栏 ——
 		"General": "常规",
@@ -337,104 +337,5 @@
 		"You can configure your own MCP servers by adding JSON configuration below. MCP servers can optionally access secrets defined in the repository's": "你可以在下方添加 JSON 配置来配置自己的 MCP 服务器。MCP 服务器还可选择访问仓库中定义的机密",
 		"and": "与",
 		"environment.": "环境。"
-	},
-	"rules": [
-		// “Sponsor” 的引号在 GitHub 文案中直弯混用，用字符类一并覆盖
-		{
-			"pattern": "^Display a [\\u201C\"]Sponsor[\\u201D\"] button$",
-			"replacement": "显示“赞助”按钮"
-		},
-		// 推送限制说明的链接若拆成「链接 + 尾句」两个节点，尾句在此兜底
-		{
-			"pattern": "^, and send us your feedback\\.$",
-			"replacement": "，并向我们反馈。"
-		},
-		// 动态计数
-		{
-			"pattern": "^([\\d,]+) branch protection rules?$",
-			"replacement": "$1 条分支保护规则"
-		},
-		{
-			"pattern": "^([\\d,]+) star$",
-			"replacement": "$1 星标"
-		},
-		{
-			"pattern": "^([\\d,]+) watcher$",
-			"replacement": "$1 名关注者"
-		},
-		// 带仓库名的动态标题（仅匹配 owner/repo 形态，避免泛化误伤）
-		{
-			"pattern": "^Delete ([^/]+\\/[^/]+)$",
-			"replacement": "删除 $1"
-		},
-		{
-			"pattern": "^Make ([^/]+\\/[^/]+) private$",
-			"replacement": "将 $1 设为私有"
-		},
-		{
-			"pattern": "^Settings: (.+)$",
-			"replacement": "设置：$1"
-		},
-		{
-			"pattern": "^Add people to (.+)$",
-			"replacement": "向 $1 添加协作者"
-		},
-		// sudo 验证码提示（邮箱地址随账号变化，用规则捕获）
-		{
-			"pattern": "^Enter the verification code sent to (.+)\\. If it doesn\\u2019t appear within a few minutes, check your spam folder\\.$",
-			"replacement": "验证码已发送至 $1，如果几分钟内仍未收到，请检查垃圾邮件文件夹。"
-		},
-		// 直接访问 / 组织访问卡片：动态计数句（数量与单复数随数据变化）。
-		// 数字在页面上是独立链接节点，句子会被切成「数字 + 尾段」，整句与尾段都收
-		{
-			"pattern": "^([\\d,]+) entit(y|ies) (?:has|have) access to this repository\\.?$",
-			"replacement": "$1 个实体可访问此仓库。"
-		},
-		{
-			"pattern": "^entit(y|ies) (?:has|have) access to this repository\\.?$",
-			"replacement": "个实体可访问此仓库。"
-		},
-		{
-			"pattern": "^([\\d,]+) users? and ([\\d,]+) teams? can access this repository through the organization\\.?$",
-			"replacement": "$1 个用户和 $2 个团队可通过该组织访问此仓库。"
-		},
-		{
-			"pattern": "^teams? can access this repository through the organization\\.?$",
-			"replacement": "个团队可通过该组织访问此仓库。"
-		},
-		{
-			"pattern": "^can access this repository through the organization\\.?$",
-			"replacement": "可通过该组织访问此仓库。"
-		},
-		// 角色下拉按钮「Role: write」等，角色值小写、随当前权限变化
-		{
-			"pattern": "^Role: read$",
-			"replacement": "角色：读取"
-		},
-		{
-			"pattern": "^Role: triage$",
-			"replacement": "角色：分类"
-		},
-		{
-			"pattern": "^Role: write$",
-			"replacement": "角色：写入"
-		},
-		{
-			"pattern": "^Role: maintain$",
-			"replacement": "角色：维护"
-		},
-		{
-			"pattern": "^Role: admin$",
-			"replacement": "角色：管理员"
-		},
-		// 混合角色提示：经由组织所有权授予的 admin（组织名随页面变化）
-		{
-			"pattern": "^Admin as owner of the (.+) organization\\.?$",
-			"replacement": "作为 $1 组织的所有者，拥有管理员权限。"
-		},
-		{
-			"pattern": "^as owner of the (.+) organization\\.?$",
-			"replacement": "，作为 $1 组织的所有者"
-		}
-	]
+	}
 }

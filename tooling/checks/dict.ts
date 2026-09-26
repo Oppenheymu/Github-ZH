@@ -1,61 +1,62 @@
-// 词典门禁：结构编译（严格）+ 词条与规则的语义约束
+// 词典门禁：结构编译（严格）+ 跨文件交叉引用 + 词条与规则的语义约束 + 覆盖率报告
 //
 // 分工说明（改本文件前先读）：
 // - 结构合法性（字段白名单、route 以 ^/ 锚定、正则可编译、规则不得带 flags）由
 //   src/dict/load.ts 负责——本门禁走严格路径调用同一套函数，故校验逻辑只有一份；
 // - 单文件内的重复键由 Biome 的 lint/suspicious/noDuplicateObjectKeys 负责
 //   （biome check . 会扫 .jsonc，两种引号写法都能报），故这里不再扫源码；
-// - 跨模块同键异译是「先到先得 + 注册表顺序」的有意设计，不作错误（见 registry.ts 注释）；
-// - 本文件只补 loader 管不到的语义约束：键值形态、译文是否真的译成了目标语言、
-//   以及「译文不得等于任何键」这一防翻译循环的结构门禁。
-//
-// 语言相关判定一律取自 src/dict/locales.ts 的声明，这里不写死任何具体文字系统：
-// 硬编码汉字会把纯假名的日语译文拒之门外。
+// - 跨模块同键异译是「先到先得 + 模块顺序」的有意设计，不作错误（见 registry.ts 注释）；
+// - 本文件补 loader 管不到的语义约束：
+//   * core/canonical.jsonc 是键的权威清单——各语言词条的键不在清单里即报错（拼错即报），
+//     它同时是覆盖率的分母与「译文不得等于任何键」的键集合；
+//   * 译文必须含目标语言的文字系统（语言声明见 src/dict/locales.ts，不写死汉字）；
+//   * 规则模板引用的捕获组（$1 / $<name>）必须在对应 pattern 里存在；
+//   * 防翻译循环的两条结构门禁（译文≠键、替换产物不再命中规则）。
 //
 // 零依赖 bun 直跑；校验逻辑导出为纯函数供测试复用；失败置 exitCode = 1。
 
 import { hasNonLatinLetter } from "../../src/content/filters.ts";
+import canonicalRaw from "../../src/dict/core/canonical.jsonc";
 import {
-	buildGlobalDict,
-	buildPageDict,
+	buildAliases,
+	buildEntries,
+	buildLocaleDict,
+	buildModules,
+	buildReplacements,
+	buildRuleDefs,
 } from "../../src/dict/load.ts";
 import {
-	FALLBACK_LOCALE,
 	getLocaleMeta,
+	isLocaleId,
 	LOCALES,
-	type LocaleId,
 	type LocaleMeta,
 	type Script,
 } from "../../src/dict/locales.ts";
 import {
-	globalRawDict,
-	pageRawModules,
+	coreRawDict,
+	localeRawDicts,
 } from "../../src/dict/registry.ts";
 import type {
-	GlobalDict,
-	PageDict,
-	Rule,
+	DictCore,
+	LocaleDict,
+	RuleDef,
 } from "../../src/shared/types.ts";
-
-/**
- * 迁移到 core/ + locales/ 之前，data/** 全部是默认语言（zh-CN）的数据。
- * 门禁仍按「某语言的数据」校验，这样语言相关判定从第一天就走在最终路径上。
- */
-const DATA_LOCALE: LocaleId = FALLBACK_LOCALE;
 
 /**
  * 译文与键完全相同时的显式例外（键 = 英文原文）。
  * 将来某语言需要原样保留英文术语（日语保留 Markdown / GitHub Actions 等）
- * 时加在这里，**不要**因此放弃这条检查。
+ * 时按「语言 id → 允许的文本」加在这里，**不要**因此放弃这条检查。
  */
-const IDENTICAL_ALLOWLIST: readonly string[] = [];
+const IDENTICAL_ALLOWLIST: Readonly<
+	Record<string, readonly string[]>
+> = {};
 
 /** 一个字系一个正则；门禁调用量小，无需缓存池 */
 function scriptPattern(script: Script): RegExp {
 	return new RegExp(`\\p{Script=${script}}`, "u");
 }
 
-/** 文本是否含指定语言文字系统的字母 */
+/** 文本是否含指定语言文字系统的字母（scripts 为空 = 拉丁语系目标，无从判定） */
 function hasAnyScript(
 	text: string,
 	scripts: readonly Script[],
@@ -79,50 +80,73 @@ function decodeUnicodeEscapes(source: string): string {
 	);
 }
 
-/** 校验单条正则规则，返回中文错误列表（空数组 = 通过） */
-export function validateRule(
-	rule: Rule,
-	where: string,
-	locale: LocaleMeta,
-): string[] {
-	const errors: string[] = [];
-	if (rule.pattern.source.length === 0) {
-		errors.push(`${where}：pattern 不能为空`);
-	}
-	if (
-		hasNonLatinLetter(
-			decodeUnicodeEscapes(rule.pattern.source),
-		)
-	) {
-		errors.push(
-			`${where}：pattern 不得含非拉丁字母（输入恒为英文原文）`,
-		);
-	}
-	if (
-		typeof rule.replacement !== "string" ||
-		rule.replacement.trim().length === 0
-	) {
-		errors.push(`${where}：replacement 不能为空`);
-	} else if (
-		locale.scripts.length > 0 &&
-		!hasAnyScript(rule.replacement, locale.scripts)
-	) {
-		errors.push(
-			`${where}：replacement 必须含 ${locale.name} 的文字系统（${locale.scripts.join(" / ")}），防翻译循环`,
-		);
-	}
-	return errors;
+// —— core/canonical.jsonc ——
+
+export interface CanonicalModule {
+	readonly name: string;
+	readonly keys: readonly string[];
 }
 
-/** 校验一组静态词条，返回中文错误列表 */
-export function validateEntries(
-	entries: Readonly<Record<string, string>>,
+const CANONICAL_KEYS: readonly string[] = ["modules"];
+
+/** 编译 core/canonical.jsonc（仅门禁使用的键清单），非法即抛中文错误 */
+export function buildCanonical(
+	raw: unknown,
 	where: string,
-	locale: LocaleMeta,
+): readonly CanonicalModule[] {
+	if (raw === null || typeof raw !== "object") {
+		throw new Error(`${where}：必须是对象`);
+	}
+	const source = raw as Record<string, unknown>;
+	for (const key of Object.keys(source)) {
+		if (key === "$schema") continue;
+		if (!CANONICAL_KEYS.includes(key)) {
+			throw new Error(
+				`${where}：未知字段 ${JSON.stringify(key)}`,
+			);
+		}
+	}
+	const modules = source["modules"];
+	if (!Array.isArray(modules)) {
+		throw new Error(`${where} modules：必须是数组`);
+	}
+	return modules.map((item, index) => {
+		const at = `${where} modules[${index}]`;
+		if (item === null || typeof item !== "object") {
+			throw new Error(`${at}：必须是对象`);
+		}
+		const record = item as Record<string, unknown>;
+		const name = record["name"];
+		if (typeof name !== "string" || name.length === 0) {
+			throw new Error(`${at} name：必须是非空字符串`);
+		}
+		const keys = record["keys"];
+		if (!Array.isArray(keys)) {
+			throw new Error(`${at} keys：必须是数组`);
+		}
+		return {
+			name,
+			keys: keys.map((key, keyIndex) => {
+				if (typeof key !== "string") {
+					throw new Error(
+						`${at} keys[${keyIndex}]：必须是字符串`,
+					);
+				}
+				return key;
+			}),
+		};
+	});
+}
+
+/** 校验规范键自身形态（键是英文原文，不得含目标语言文字系统） */
+export function validateCanonicalKeys(
+	module: CanonicalModule,
+	where: string,
 ): string[] {
 	const errors: string[] = [];
-	for (const [key, value] of Object.entries(entries)) {
-		const label = `${where} 词条 ${JSON.stringify(key)}`;
+	const seen = new Set<string>();
+	for (const key of module.keys) {
+		const label = `${where} 键 ${JSON.stringify(key)}`;
 		if (key.trim().length === 0)
 			errors.push(`${label}：键不能为空`);
 		if (key !== key.trim())
@@ -136,12 +160,53 @@ export function validateEntries(
 				`${label}：键不含拉丁字母（疑似误收录纯符号 / 数字）`,
 			);
 		}
+		if (seen.has(key))
+			errors.push(`${label}：同一模块内键重复`);
+		seen.add(key);
+	}
+	return errors;
+}
+
+/** 规范键清单与模块清单必须逐一对应（名字与顺序都一致） */
+export function validateCanonicalModules(
+	canonical: readonly CanonicalModule[],
+	modules: readonly { name: string }[],
+): string[] {
+	const expected = modules.map((module) => module.name);
+	const actual = canonical.map((module) => module.name);
+	if (expected.join("\u0000") === actual.join("\u0000")) {
+		return [];
+	}
+	return [
+		`core/canonical.jsonc 的模块必须与 core/modules.jsonc 同名同序：期望 [${expected.join(", ")}]，实为 [${actual.join(", ")}]`,
+	];
+}
+
+// —— 词条与规则 ——
+
+/** 校验一组词条：键必须在规范键清单里，值必须含目标语言文字系统 */
+export function validateEntries(
+	entries: Readonly<Record<string, string>>,
+	where: string,
+	locale: LocaleMeta,
+	canonicalKeys: ReadonlySet<string>,
+): string[] {
+	const errors: string[] = [];
+	for (const [key, value] of Object.entries(entries)) {
+		const label = `${where} 词条 ${JSON.stringify(key)}`;
+		if (!canonicalKeys.has(key)) {
+			errors.push(
+				`${label}：键不在 core/canonical.jsonc 里（拼错了？上游改了原文就该改清单或加别名）`,
+			);
+		}
 		if (
 			typeof value !== "string" ||
 			value.trim().length === 0
 		) {
 			errors.push(`${label}：值不能为空`);
-		} else if (
+			continue;
+		}
+		if (
 			locale.scripts.length > 0 &&
 			!hasAnyScript(value, locale.scripts)
 		) {
@@ -153,35 +218,99 @@ export function validateEntries(
 	return errors;
 }
 
-/** 校验一个词典模块（global 与页面模块共用） */
-export function validateDict(
-	dict: GlobalDict | PageDict,
+/** 取出替换模板引用的捕获组：位置引用 $1 与命名引用 $<name> */
+export function extractTemplateRefs(template: string): {
+	readonly indexes: readonly number[];
+	readonly names: readonly string[];
+} {
+	const indexes: number[] = [];
+	const names: string[] = [];
+	for (const match of template.matchAll(
+		/\$(?:(\d+)|<([^>]*)>)/g,
+	)) {
+		if (match[1] !== undefined) {
+			indexes.push(Number.parseInt(match[1], 10));
+		} else if (match[2] !== undefined) {
+			names.push(match[2]);
+		}
+	}
+	return { indexes, names };
+}
+
+/** pattern 的捕获组总数（追加空分支是 JS 里数捕获组的惯用技巧） */
+export function countGroups(pattern: RegExp): number {
+	const probe = new RegExp(`${pattern.source}|`);
+	const match = probe.exec("");
+	return (match?.length ?? 1) - 1;
+}
+
+/** pattern 里声明的命名捕获组名 */
+export function namedGroups(pattern: RegExp): string[] {
+	const names: string[] = [];
+	for (const match of pattern.source.matchAll(
+		/\(\?<([A-Za-z_$][A-Za-z0-9_$]*)>/g,
+	)) {
+		if (match[1] !== undefined) names.push(match[1]);
+	}
+	return names;
+}
+
+/** 校验一条规则模板：形态（含目标文字系统）+ 捕获组引用完整性 */
+export function validateTemplate(
+	template: string,
+	def: RuleDef,
 	where: string,
 	locale: LocaleMeta,
 ): string[] {
-	return [
-		...validateEntries(dict.entries, where, locale),
-		...dict.rules.flatMap((rule) =>
-			validateRule(rule, where, locale),
-		),
-	];
+	const errors: string[] = [];
+	if (template.trim().length === 0) {
+		errors.push(`${where}：模板不能为空`);
+		return errors;
+	}
+	if (
+		locale.scripts.length > 0 &&
+		!hasAnyScript(template, locale.scripts)
+	) {
+		errors.push(
+			`${where}：模板必须含 ${locale.name} 的文字系统（${locale.scripts.join(" / ")}），防翻译循环`,
+		);
+	}
+	const refs = extractTemplateRefs(template);
+	const total = countGroups(def.pattern);
+	for (const index of refs.indexes) {
+		if (index >= 1 && index <= total) continue;
+		errors.push(
+			`${where}：模板引用了 $${index}，但 pattern 只有 ${total} 个捕获组（${JSON.stringify(def.pattern.source)}）`,
+		);
+	}
+	const declared = new Set(namedGroups(def.pattern));
+	for (const name of refs.names) {
+		if (declared.has(name)) continue;
+		errors.push(
+			`${where}：模板引用了 $<${name}>，但 pattern 未声明该命名组（已声明：${[...declared].join(" / ") || "无"}）`,
+		);
+	}
+	return errors;
 }
 
-/** 收集全部模块的词条键（防循环门禁的「键集合」） */
-function collectKeys(
-	global: GlobalDict | null,
-	pages: readonly (readonly [string, PageDict])[],
-): Set<string> {
-	const keys = new Set<string>();
-	if (global !== null) {
-		for (const key of Object.keys(global.entries))
-			keys.add(key);
+/** 校验共享规则 pattern 的非英文字系（输入恒为英文原文） */
+export function validateRuleDef(
+	def: RuleDef,
+	where: string,
+): string[] {
+	if (def.pattern.source.length === 0) {
+		return [`${where}：pattern 不能为空`];
 	}
-	for (const [, dict] of pages) {
-		for (const key of Object.keys(dict.entries))
-			keys.add(key);
+	if (
+		hasNonLatinLetter(
+			decodeUnicodeEscapes(def.pattern.source),
+		)
+	) {
+		return [
+			`${where}：pattern 不得含非拉丁字母（输入恒为英文原文）`,
+		];
 	}
-	return keys;
+	return [];
 }
 
 /**
@@ -190,19 +319,22 @@ function collectKeys(
  * 翻译循环的真实条件是两条同时成立：(a) 脚本守卫没拦住译文，(b) 译文本身又是
  * 一个键、或能命中某条规则。这里从结构上让 (b) 不可能发生，于是各语言拿到同一
  * 套保证——包括拉丁语系目标（脚本守卫对它们结构上失效）。
+ * 别名源文本也算「键」：它是引擎的另一种输入，译文等于它同样会被二次翻译。
  */
 export function validateNoIdentity(
 	entries: Readonly<Record<string, string>>,
 	where: string,
 	keys: ReadonlySet<string>,
+	localeId: string,
 ): string[] {
+	const allowed = IDENTICAL_ALLOWLIST[localeId] ?? [];
 	const errors: string[] = [];
 	for (const [key, value] of Object.entries(entries)) {
 		const trimmed = value.trim();
 		if (!keys.has(trimmed)) continue;
-		if (IDENTICAL_ALLOWLIST.includes(trimmed)) continue;
+		if (allowed.includes(trimmed)) continue;
 		errors.push(
-			`${where} 词条 ${JSON.stringify(key)}：译文 ${JSON.stringify(trimmed)} 等于某个词典键，会在下一轮被再翻一次（防循环）`,
+			`${where} 词条 ${JSON.stringify(key)}：译文 ${JSON.stringify(trimmed)} 等于某个键（或别名源文本），会在下一轮被再翻一次（防循环）`,
 		);
 	}
 	return errors;
@@ -214,17 +346,17 @@ export function validateNoIdentity(
  * 字面量为锚，模板能命中即说明有循环风险（实测现有数据命中数为 0）。
  */
 export function validateRulesRematch(
-	rules: readonly Rule[],
+	templates: readonly { id: string; template: string }[],
+	defs: readonly RuleDef[],
 	where: string,
 ): string[] {
 	const errors: string[] = [];
-	for (const [index, rule] of rules.entries()) {
-		const template = rule.replacement;
+	for (const { id, template } of templates) {
 		if (template.trim().length === 0) continue;
-		for (const other of rules) {
-			if (!other.pattern.test(template)) continue;
+		for (const def of defs) {
+			if (!def.pattern.test(template)) continue;
 			errors.push(
-				`${where} 规则 ${index}（${JSON.stringify(other.pattern.source)}）会再次命中替换产物 ${JSON.stringify(template)}（防循环）`,
+				`${where} 规则模板 ${JSON.stringify(id)} 会被规则 ${JSON.stringify(def.id)} 再次命中（${JSON.stringify(template)}）：防循环`,
 			);
 			break;
 		}
@@ -232,115 +364,324 @@ export function validateRulesRematch(
 	return errors;
 }
 
-/**
- * 严格构建注册表里的全部模块：任一模块报错即记入 errors 并跳过，
- * 以便一次列全所有问题（loader 是「首错即抛」，这里负责汇集）。
- */
-export function buildAll(raw: {
-	global: unknown;
-	pages: readonly (readonly [string, unknown])[];
-}): {
-	global: GlobalDict | null;
-	pages: readonly (readonly [string, PageDict])[];
-	errors: string[];
-} {
+/** 校验别名：源必须是英文原文，目标必须是规范键，且两者不能相同 */
+export function validateAliases(
+	aliases: Readonly<Record<string, string>>,
+	where: string,
+	canonicalKeys: ReadonlySet<string>,
+): string[] {
 	const errors: string[] = [];
-	const collect = <T>(build: () => T): T | null => {
+	for (const [source, target] of Object.entries(aliases)) {
+		if (hasNonLatinLetter(source)) {
+			errors.push(
+				`${where} 别名 ${JSON.stringify(source)}：源文本必须是 GitHub 渲染的英文原文`,
+			);
+		}
+		if (!canonicalKeys.has(target)) {
+			errors.push(
+				`${where} 别名 ${JSON.stringify(source)}：目标 ${JSON.stringify(target)} 不在 core/canonical.jsonc 里`,
+			);
+		}
+		if (source === target) {
+			errors.push(
+				`${where} 别名 ${JSON.stringify(source)}：源与目标相同，无需别名`,
+			);
+		}
+	}
+	return errors;
+}
+
+// —— 汇总与主流程 ——
+
+export interface BuiltCore {
+	readonly core: DictCore | null;
+	readonly canonical: readonly CanonicalModule[];
+	readonly errors: readonly string[];
+}
+
+/** 严格构建语言无关的核心数据 + 键清单（一次列全所有问题） */
+export function buildCore(raw?: {
+	readonly modules: unknown;
+	readonly rules: unknown;
+	readonly aliases: unknown;
+	readonly canonical: unknown;
+}): BuiltCore {
+	const input = raw ?? {
+		modules: coreRawDict.modules,
+		rules: coreRawDict.rules,
+		aliases: coreRawDict.aliases,
+		canonical: canonicalRaw,
+	};
+	const errors: string[] = [];
+	let core: DictCore | null = null;
+	try {
+		const modules = buildModules(
+			input.modules,
+			"core/modules",
+		);
+		core = {
+			modules,
+			rules: buildRuleDefs(
+				input.rules,
+				"core/rules",
+				modules,
+			),
+			aliases: buildAliases(input.aliases, "core/aliases"),
+		};
+		for (const def of core.rules) {
+			errors.push(
+				...validateRuleDef(def, `core/rules ${def.id}`),
+			);
+		}
+	} catch (error) {
+		errors.push(
+			error instanceof Error
+				? error.message
+				: String(error),
+		);
+	}
+	let canonical: readonly CanonicalModule[] = [];
+	try {
+		canonical = buildCanonical(
+			input.canonical,
+			"core/canonical",
+		);
+	} catch (error) {
+		errors.push(
+			error instanceof Error
+				? error.message
+				: String(error),
+		);
+	}
+	for (const module of canonical) {
+		errors.push(
+			...validateCanonicalKeys(
+				module,
+				`core/canonical ${module.name}`,
+			),
+		);
+	}
+	if (core !== null && canonical.length > 0) {
+		errors.push(
+			...validateCanonicalModules(canonical, core.modules),
+		);
+		errors.push(
+			...validateAliases(
+				core.aliases,
+				"core/aliases",
+				new Set(
+					canonical.flatMap((module) => [...module.keys]),
+				),
+			),
+		);
+	}
+	return { core, canonical, errors };
+}
+
+export interface BuiltLocale {
+	readonly locale: LocaleMeta;
+	readonly dict: LocaleDict | null;
+	readonly errors: readonly string[];
+	/** 已翻译键数 / 规范键总数（分母来自 core/canonical.jsonc） */
+	readonly translated: number;
+	readonly total: number;
+	/** 各模块缺译情况：模块名 → { 已译, 总数 } */
+	readonly perModule: readonly (readonly [
+		string,
+		number,
+		number,
+	])[];
+}
+
+/** 严格构建并校验一个语言的数据 */
+export function buildLocaleData(input: {
+	readonly localeId: string;
+	readonly core: DictCore;
+	readonly canonical: readonly CanonicalModule[];
+	readonly modules: readonly (readonly [string, unknown])[];
+	readonly rulesRaw: unknown | null;
+}): BuiltLocale | null {
+	const { localeId } = input;
+	if (!isLocaleId(localeId)) return null;
+	const locale = getLocaleMeta(localeId);
+	const errors: string[] = [];
+	const where = `locales/${localeId}`;
+	const canonicalByModule = new Map(
+		input.canonical.map((module) => [
+			module.name,
+			new Set(module.keys),
+		]),
+	);
+	// 「键集合」= 规范键 ∪ 别名源文本（两者都是引擎输入，译文等于它们都会被再翻一次）
+	const allKeys = new Set<string>(
+		input.canonical.flatMap((module) => [...module.keys]),
+	);
+	for (const source of Object.keys(input.core.aliases)) {
+		allKeys.add(source);
+	}
+
+	for (const [moduleName, raw] of input.modules) {
+		const keys = canonicalByModule.get(moduleName);
+		if (keys === undefined) {
+			errors.push(
+				`${where}/${moduleName}：模块未在 core/modules.jsonc 里声明`,
+			);
+			continue;
+		}
 		try {
-			return build();
+			const entries = buildEntries(
+				raw,
+				`${where}/${moduleName}`,
+			);
+			errors.push(
+				...validateEntries(
+					entries,
+					`${where}/${moduleName}`,
+					locale,
+					keys,
+				),
+				...validateNoIdentity(
+					entries,
+					`${where}/${moduleName}`,
+					allKeys,
+					localeId,
+				),
+			);
 		} catch (error) {
 			errors.push(
 				error instanceof Error
 					? error.message
 					: String(error),
 			);
-			return null;
 		}
-	};
-	const global = collect(() =>
-		buildGlobalDict(raw.global, "global"),
-	);
-	const pages: (readonly [string, PageDict])[] = [];
-	for (const [where, module] of raw.pages) {
-		const dict = collect(() =>
-			buildPageDict(module, where),
-		);
-		if (dict !== null) pages.push([where, dict]);
 	}
-	return { global, pages, errors };
-}
 
-function countEntries(
-	global: GlobalDict | null,
-	pages: readonly (readonly [string, PageDict])[],
-): number {
-	return (
-		(global === null
-			? 0
-			: Object.keys(global.entries).length) +
-		pages.reduce(
-			(sum, [, dict]) =>
-				sum + Object.keys(dict.entries).length,
-			0,
-		)
+	let replacements: Readonly<Record<string, string>> = {};
+	if (input.rulesRaw !== null) {
+		try {
+			replacements = buildReplacements(
+				input.rulesRaw,
+				`${where}/rules`,
+				input.core.rules,
+			);
+		} catch (error) {
+			errors.push(
+				error instanceof Error
+					? error.message
+					: String(error),
+			);
+		}
+	}
+	const byId = new Map(
+		input.core.rules.map((def) => [def.id, def]),
 	);
-}
-
-function countRules(
-	global: GlobalDict | null,
-	pages: readonly (readonly [string, PageDict])[],
-): number {
-	return (
-		(global === null ? 0 : global.rules.length) +
-		pages.reduce(
-			(sum, [, dict]) => sum + dict.rules.length,
-			0,
-		)
-	);
-}
-
-/** 汇总一个「模块集合」的全部语义错误（迁移前：整个 data/** 即一种语言的数据） */
-export function validateAll(
-	built: {
-		global: GlobalDict | null;
-		pages: readonly (readonly [string, PageDict])[];
-	},
-	locale: LocaleMeta,
-): string[] {
-	const errors: string[] = [];
-	if (built.global !== null) {
+	const templates: { id: string; template: string }[] = [];
+	for (const [id, template] of Object.entries(
+		replacements,
+	)) {
+		const def = byId.get(id);
+		if (def === undefined) continue;
+		templates.push({ id, template });
 		errors.push(
-			...validateDict(built.global, "global", locale),
-		);
-	}
-	for (const [where, dict] of built.pages) {
-		errors.push(...validateDict(dict, where, locale));
-	}
-	const keys = collectKeys(built.global, built.pages);
-	if (built.global !== null) {
-		errors.push(
-			...validateNoIdentity(
-				built.global.entries,
-				"global",
-				keys,
+			...validateTemplate(
+				template,
+				def,
+				`${where}/rules ${id}`,
+				locale,
 			),
-		);
-	}
-	for (const [where, dict] of built.pages) {
-		errors.push(
-			...validateNoIdentity(dict.entries, where, keys),
+			...validateNoIdentity(
+				{ [id]: template },
+				`${where}/rules`,
+				allKeys,
+				localeId,
+			),
 		);
 	}
 	errors.push(
 		...validateRulesRematch(
-			[
-				...(built.global?.rules ?? []),
-				...built.pages.flatMap(([, dict]) => dict.rules),
-			],
-			"全站",
+			templates,
+			input.core.rules,
+			where,
 		),
 	);
-	return errors;
+
+	// 严格组装一次：结构与交叉引用问题也要能在这里暴露
+	let dict: LocaleDict | null = null;
+	try {
+		dict = buildLocaleDict({
+			locale: localeId,
+			core: input.core,
+			entries: new Map(input.modules),
+			rulesRaw: input.rulesRaw,
+		});
+	} catch (error) {
+		errors.push(
+			error instanceof Error
+				? error.message
+				: String(error),
+		);
+	}
+
+	const perModule: (readonly [string, number, number])[] =
+		[];
+	let translated = 0;
+	let total = 0;
+	const shipped = new Map(input.modules);
+	for (const module of input.canonical) {
+		const totalKeys = module.keys.length;
+		total += totalKeys;
+		const raw = shipped.get(module.name);
+		let done = 0;
+		if (raw !== undefined) {
+			try {
+				const entries = buildEntries(
+					raw,
+					`${where}/${module.name}`,
+				);
+				done = Object.keys(entries).filter((key) =>
+					module.keys.includes(key),
+				).length;
+			} catch {
+				done = 0;
+			}
+		}
+		translated += done;
+		perModule.push([module.name, done, totalKeys]);
+	}
+	return {
+		locale,
+		dict,
+		errors,
+		translated,
+		total,
+		perModule,
+	};
+}
+
+/** 覆盖率报告：总覆盖率 + 尚未开译的模块（稀疏覆盖不是错误，缺多少要看得见） */
+export function formatCoverage(built: BuiltLocale): string {
+	if (built.total === 0)
+		return `${built.locale.id}：无规范键`;
+	const percent = (
+		(built.translated / built.total) *
+		100
+	).toFixed(1);
+	const pending = built.perModule
+		.filter(([, done, total]) => done < total)
+		.map(
+			([name, done, total]) => `${name} ${done}/${total}`,
+		);
+	const tail =
+		pending.length === 0
+			? "全部已译"
+			: `${pending.length} 个模块待译`;
+	return `${built.locale.id} ${built.translated}/${built.total}（${percent}%，${tail}）`;
+}
+
+function report(errors: readonly string[]): void {
+	console.error(`词典门禁未通过（${errors.length} 处）：`);
+	for (const error of errors) console.error(`  - ${error}`);
+	process.exitCode = 1;
 }
 
 function main(): void {
@@ -358,27 +699,73 @@ function main(): void {
 			}
 		}
 	}
-	const locale = getLocaleMeta(DATA_LOCALE);
-	const built = buildAll({
-		global: globalRawDict,
-		pages: pageRawModules,
-	});
-	const errors = [
-		...built.errors,
-		...validateAll(built, locale),
-	];
 
-	if (errors.length > 0) {
-		console.error(
-			`词典门禁未通过（${errors.length} 处）：`,
-		);
-		for (const error of errors)
-			console.error(`  - ${error}`);
-		process.exitCode = 1;
+	const builtCore = buildCore();
+	const errors = [...builtCore.errors];
+	if (builtCore.core === null) {
+		report(errors);
 		return;
 	}
+	const core = builtCore.core;
+
+	// 声明了却没数据 / 有数据却没声明，都是配置错误
+	const declared = new Set<string>(
+		LOCALES.map((meta) => meta.id),
+	);
+	const shipped = new Set<string>(
+		localeRawDicts.map((raw) => raw.locale),
+	);
+	for (const id of declared) {
+		if (!shipped.has(id)) {
+			errors.push(
+				`${id}：src/dict/locales.ts 声明了该语言，但 src/dict/registry.ts 里没有它的数据`,
+			);
+		}
+	}
+	for (const id of shipped) {
+		if (!declared.has(id)) {
+			errors.push(
+				`${id}：src/dict/registry.ts 里有数据，但 src/dict/locales.ts 未声明该语言`,
+			);
+		}
+	}
+
+	const built: BuiltLocale[] = [];
+	for (const raw of localeRawDicts) {
+		const localeData = buildLocaleData({
+			localeId: raw.locale,
+			core,
+			canonical: builtCore.canonical,
+			modules: raw.modules,
+			rulesRaw: raw.rules,
+		});
+		if (localeData === null) {
+			errors.push(
+				`${raw.locale}：不是 src/dict/locales.ts 里声明的语言 id`,
+			);
+			continue;
+		}
+		errors.push(...localeData.errors);
+		built.push(localeData);
+	}
+
+	if (errors.length > 0) {
+		report(errors);
+		return;
+	}
+	const canonicalKeys = builtCore.canonical.reduce(
+		(sum, module) => sum + module.keys.length,
+		0,
+	);
+	const translated = built.reduce(
+		(sum, localeData) => sum + localeData.translated,
+		0,
+	);
 	console.log(
-		`词典门禁通过（${locale.name}）：${countEntries(built.global, built.pages)} 词条 / ${countRules(built.global, built.pages)} 规则 / ${built.pages.length} 页面模块`,
+		`词典门禁通过：${core.modules.length} 模块 / ${canonicalKeys} 规范键 / ${core.rules.length} 条共享规则 / ${translated} 条译文`,
+	);
+	console.log(
+		`覆盖率：${built.map((localeData) => formatCoverage(localeData)).join(" | ")}`,
 	);
 }
 

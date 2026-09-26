@@ -1,0 +1,44 @@
+// 提交与版本模块：/owner/repo 下的提交相关子页专属词条
+// 覆盖 commits / commit / tags / branches / compare 五类子树
+// 注：用户名、提交哈希、提交消息为仓库内容，不收录；属性不应用规则
+// （见 content/walker.ts），含动态部分的属性值不设词条
+// 简体中文 · 模块 pages/commits（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
+{
+	"$schema": "../../../dict.schema.json",
+	"entries": {
+		// —— 分支页：表格列头与行内操作 ——
+		"Ahead": "领先",
+		"Behind": "落后",
+		"Check status": "检查状态",
+		"Branch menu": "分支菜单",
+		"Action menu": "操作菜单",
+		"Copy branch name to clipboard": "复制分支名到剪贴板",
+		// —— 分支页：区块标题与筛选 ——
+		"Active branches": "活跃分支",
+		"Stale": "陈旧",
+		"View rules": "查看规则",
+		"View more branches": "查看更多分支",
+		"Search branches...": "搜索分支…",
+		// —— 提交列表页：筛选栏 sr-only 分区标题 ——
+		"User selector": "用户选择器",
+		"Branch selector": "分支选择器",
+		"Datepicker": "日期选择器",
+		"All time": "全部时间",
+		"Commit history": "提交历史",
+		// —— 标签页 ——
+		"Notes": "说明",
+		// —— 提交详情页：文件树与差异工具栏 ——
+		"Expand file tree": "展开文件树",
+		"Collapse file tree": "收起文件树",
+		"Collapse file": "收起文件",
+		"Copy file name to clipboard": "复制文件名到剪贴板",
+		"Open diff view settings": "打开差异视图设置",
+		"Filter files…": "筛选文件…",
+		"Filter options": "筛选选项",
+		"Browse the repository at this point in the history": "浏览该历史时点的仓库",
+		"Browse files": "浏览文件",
+		// —— 比较页 ——
+		"Find a branch": "查找分支",
+		"base repository:": "基准仓库："
+	}
+}

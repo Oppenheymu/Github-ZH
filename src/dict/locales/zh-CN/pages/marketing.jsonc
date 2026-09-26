@@ -5,9 +5,9 @@
 // 不可译缩写、纯容量数值（2GB 等）不收录；内部实验标识
 // （River Breakout）非用户文案不收录；Contact Sales 为跨营销页
 // 出现的 CTA，留待全站词条处理
+// 简体中文 · 模块 pages/marketing（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
-	"$schema": "../../dict.schema.json",
-	"route": "^/(features|pricing)",
+	"$schema": "../../../dict.schema.json",
 	"entries": {
 		// —— /pricing：套餐卡 ——
 		"Free": "免费",
@@ -401,6 +401,5 @@
 		"Screenshot of a GitHub Projects board titled 'Product Roadmap,' displaying three columns: Backlog, In Progress, and Triage. Each column contains cards representing issues or tasks, with labels and tags indicating status, priority, iteration.": "标题为“Product Roadmap”的 GitHub Projects 看板截图，显示 Backlog、In Progress 和 Triage 三列。每列包含代表议题或任务的卡片，带有指示状态、优先级和迭代的标签。",
 		"American Airlines office": "美国航空办公室",
 		"Ford car interior": "福特汽车内饰"
-	},
-	"rules": []
+	}
 }

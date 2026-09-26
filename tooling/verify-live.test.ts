@@ -4,8 +4,10 @@ import { describe, expect, it } from "bun:test";
 import type { MissItem } from "../src/shared/types.ts";
 import {
 	aggregateMisses,
+	PROBE_ANCHORS,
 	parseArgs,
 	parsePagesFile,
+	probeExpression,
 } from "./verify-live.ts";
 
 describe("parseArgs", () => {
@@ -14,6 +16,7 @@ describe("parseArgs", () => {
 			dwell: 11000,
 			headed: false,
 			keep: false,
+			locale: "zh-CN",
 		});
 	});
 
@@ -30,6 +33,8 @@ describe("parseArgs", () => {
 				"--keep",
 				"--browser",
 				"msedge.exe",
+				"--locale",
+				"ja",
 			]),
 		).toEqual({
 			out: "m.json",
@@ -38,6 +43,7 @@ describe("parseArgs", () => {
 			headed: true,
 			keep: true,
 			browser: "msedge.exe",
+			locale: "ja",
 		});
 	});
 
@@ -57,6 +63,42 @@ describe("parseArgs", () => {
 		expect(() => parseArgs(["--dwell", "999"])).toThrow(
 			"--dwell 需为不小于 3000 的整数毫秒",
 		);
+	});
+
+	it("rejects an undeclared locale", () => {
+		expect(() => parseArgs(["--locale", "de"])).toThrow(
+			/--locale 只支持已声明的语言/,
+		);
+	});
+});
+
+describe("probeExpression", () => {
+	it("parameterizes the anchors per locale", () => {
+		for (const [locale, anchors] of Object.entries(
+			PROBE_ANCHORS,
+		)) {
+			const expression = probeExpression(
+				locale as keyof typeof PROBE_ANCHORS,
+			);
+			expect(expression).toContain(anchors.signIn);
+			expect(expression).toContain(anchors.signUp);
+		}
+	});
+
+	it("counts characters of the target scripts", () => {
+		// 中文与日语都是汉字系，日语的脚本集合还必须包含假名
+		expect(probeExpression("zh-CN")).toContain(
+			"\\p{Script=Han}",
+		);
+		expect(probeExpression("ja")).toContain(
+			"\\p{Script=Katakana}",
+		);
+		// 生成的表达式本身必须能编译（真机上由 CDP 求值）
+		const source = probeExpression("ja");
+		expect(source).not.toContain("undefined");
+		expect(
+			() => new Function(`return ${source}`),
+		).not.toThrow();
 	});
 });
 

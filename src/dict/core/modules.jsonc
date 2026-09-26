@@ -1,0 +1,58 @@
+// 模块清单（运行时）：模块名 + 路由，顺序即优先级——具体页在前，global 兜底在最后。
+//
+// 为什么路由是语言无关的、只存一份：上游改版改的是「哪个路径下的哪些英文原文」，
+// 与译成哪种语言无关。译文按模块放在 locales/<语言>/ 下，键集合不必跨语言相同
+// （引擎未命中即保留英文，缺键 = 尚未翻译，不是错误）。
+//
+// 词条键的权威清单在 core/canonical.jsonc（覆盖率分母 + 拼错即报）；本文件只管路由。
+{
+	"$schema": "../../dict.schema.json",
+	"modules": [
+		{
+			"name": "pages/issues",
+			"route": "^/[^/]+/[^/]+/issues"
+		},
+		{
+			"name": "pages/pulls",
+			"route": "^/[^/]+/[^/]+/pull"
+		},
+		{ "name": "pages/settings", "route": "^/settings" },
+		{
+			"name": "pages/repo-settings",
+			"route": "^/[^/]+/[^/]+/settings"
+		},
+		{
+			"name": "pages/actions",
+			"route": "^/[^/]+/[^/]+/actions"
+		},
+		{
+			"name": "pages/agents",
+			"route": "^/[^/]+/[^/]+/agents"
+		},
+		{ "name": "pages/dashboard", "route": "^/$" },
+		{
+			"name": "pages/commits",
+			"route": "^/[^/]+/[^/]+/(commits?|tags|branches|compare)"
+		},
+		{
+			"name": "pages/discussions",
+			"route": "^/[^/]+/[^/]+/discussions"
+		},
+		{ "name": "pages/wiki", "route": "^/[^/]+/[^/]+/wiki" },
+		{
+			"name": "pages/insights",
+			"route": "^/[^/]+/[^/]+/(pulse|graphs|forks|security|projects)"
+		},
+		{
+			"name": "pages/search",
+			"route": "^/(search|topics)"
+		},
+		{
+			"name": "pages/marketing",
+			"route": "^/(features|pricing)"
+		},
+		{ "name": "pages/profile", "route": "^/[^/]+$" },
+		{ "name": "pages/repo", "route": "^/[^/]+/[^/]+" },
+		{ "name": "global", "route": "^/" }
+	]
+}

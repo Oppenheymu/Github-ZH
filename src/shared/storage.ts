@@ -1,9 +1,16 @@
-// chrome.storage.local 的开关与开发者漏翻日志读写（content script 与 popup 共用）
+// chrome.storage.local 的开关、翻译目标语言与开发者漏翻日志读写
+// （content script 与 popup 共用）
 
+import {
+	isLocaleId,
+	type LocaleId,
+	resolveLocale,
+} from "../dict/locales.ts";
 import type { MissItem, MissKind } from "./types.ts";
 
 const ENABLED_KEY = "enabled";
 const DEV_MODE_KEY = "devMode";
+const LOCALE_KEY = "locale";
 const MISS_LOG_KEY = "missLog";
 
 /** 需要整页刷新联动的开关键（content script 侧任一变化即 reload） */
@@ -38,6 +45,51 @@ export async function writeDevMode(
 ): Promise<void> {
 	await chrome.storage.local.set({
 		[DEV_MODE_KEY]: devMode,
+	});
+}
+
+/** 收窄 storage 取出的语言值：非声明过的 id（含脏数据）一律视为「自动」 */
+function narrowLocale(value: unknown): LocaleId | null {
+	return isLocaleId(value) ? value : null;
+}
+
+/**
+ * 读取翻译目标语言；null = 自动（跟随浏览器界面语言）。
+ * 从未设置过、或存的值不是声明过的语言 id，都按自动处理。
+ */
+export async function readLocale(): Promise<LocaleId | null> {
+	const data = await chrome.storage.local.get(LOCALE_KEY);
+	return narrowLocale(data[LOCALE_KEY]);
+}
+
+/** 写入翻译目标语言；传 null 表示恢复「自动」（删除该键） */
+export async function writeLocale(
+	locale: LocaleId | null,
+): Promise<void> {
+	if (locale === null) {
+		await chrome.storage.local.remove(LOCALE_KEY);
+		return;
+	}
+	await chrome.storage.local.set({ [LOCALE_KEY]: locale });
+}
+
+/** 解析最终生效的语言：用户选过就用它，否则跟随浏览器界面语言（未支持即回退） */
+export function effectiveLocale(
+	selected: LocaleId | null,
+	browserLanguage: string,
+): LocaleId {
+	return selected ?? resolveLocale(browserLanguage);
+}
+
+/** 监听翻译目标语言变化（content script 侧收到即整页刷新） */
+export function watchLocale(
+	callback: (locale: LocaleId | null) => void,
+): void {
+	chrome.storage.onChanged.addListener((changes, area) => {
+		if (area !== "local") return;
+		const change = changes[LOCALE_KEY];
+		if (!change) return;
+		callback(narrowLocale(change.newValue));
 	});
 }
 

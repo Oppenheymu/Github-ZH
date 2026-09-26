@@ -1,19 +1,25 @@
-// 路由解析：按 location.pathname 合并 global 与命中的页面模块
-// buildView / matchPageModules 为纯函数；viewForPath 用单槽缓存热路径
+// 路由解析：按 location.pathname 合并命中的模块（含 global 兜底）
+// buildView / matchModules 为纯函数；viewForPath 用单槽缓存热路径
 
-import { globalDict, pageDicts } from "../dict/index.ts";
+import { dictCore, dictForLocale } from "../dict/index.ts";
+import type { LocaleId } from "../dict/locales.ts";
 import type {
 	DictView,
-	GlobalDict,
-	PageDict,
+	LocaleDict,
+	ModuleDict,
 	Rule,
 } from "../shared/types.ts";
 
-/** 纯函数：返回所有 route 命中 pathname 的页面模块（保持注册表顺序） */
-export function matchPageModules(
+/** 语言无关的上游改名映射：所有语言共用一份，构建视图时直接挂上 */
+const aliasMap: ReadonlyMap<string, string> = new Map(
+	Object.entries(dictCore.aliases),
+);
+
+/** 纯函数：返回所有 route 命中 pathname 的模块（保持 core 里的顺序） */
+export function matchModules(
 	pathname: string,
-	modules: readonly PageDict[],
-): PageDict[] {
+	modules: readonly ModuleDict[],
+): ModuleDict[] {
 	return modules.filter((dict) =>
 		dict.route.test(pathname),
 	);
@@ -21,42 +27,48 @@ export function matchPageModules(
 
 /**
  * 纯函数：构建合并视图。
- * 词条「先到先得」——调用方需保证 modules 已按具体 → 泛化排序，
- * 因此具体页词条压过泛化页，页面词条压过 global 兜底；
- * 规则同序合并，运行时首条命中生效。
+ * 词条「先到先得」——模块顺序即优先级（具体页在前、global 兜底在后），
+ * 因此具体页词条压过泛化页，页面词条压过 global；规则同序合并，运行时首条命中生效。
  */
 export function buildView(
 	pathname: string,
-	global: GlobalDict,
-	modules: readonly PageDict[],
+	dict: LocaleDict,
+	aliases: ReadonlyMap<string, string> = aliasMap,
 ): DictView {
 	const entries = new Map<string, string>();
-	const put = (
-		source: Readonly<Record<string, string>>,
-	) => {
-		for (const [key, value] of Object.entries(source)) {
+	const rules: Rule[] = [];
+	for (const module of matchModules(
+		pathname,
+		dict.modules,
+	)) {
+		for (const [key, value] of Object.entries(
+			module.entries,
+		)) {
 			if (!entries.has(key)) entries.set(key, value);
 		}
-	};
-	const rules: Rule[] = [];
-	for (const dict of matchPageModules(pathname, modules)) {
-		put(dict.entries);
-		rules.push(...dict.rules);
+		rules.push(...module.rules);
 	}
-	put(global.entries);
-	rules.push(...global.rules);
-	return { entries, rules };
+	return { entries, aliases, rules };
 }
 
-// 单槽缓存：Turbo 导航改路径时才重建视图
-let cachedPath: string | null = null;
+// 单槽缓存：Turbo 导航改路径或用户改目标语言时才重建视图
+let cachedKey: string | null = null;
 let cachedView: DictView | null = null;
 
-/** 入口热路径：同一路径直接复用缓存视图，换路径即重建 */
-export function viewForPath(pathname: string): DictView {
-	if (cachedPath === pathname && cachedView !== null)
+/** 入口热路径：同一 (路径, 语言) 直接复用缓存视图，否则重建 */
+export function viewForPath(
+	pathname: string,
+	locale: LocaleId,
+): DictView {
+	const key = `${locale}\u0000${pathname}`;
+	if (cachedKey === key && cachedView !== null) {
 		return cachedView;
-	cachedPath = pathname;
-	cachedView = buildView(pathname, globalDict, pageDicts);
+	}
+	cachedKey = key;
+	cachedView = buildView(
+		pathname,
+		dictForLocale(locale),
+		aliasMap,
+	);
 	return cachedView;
 }

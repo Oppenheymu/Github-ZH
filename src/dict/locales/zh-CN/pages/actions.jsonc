@@ -1,9 +1,9 @@
 // Actions 模块：/owner/repo/actions 子树——工作流侧栏、运行列表、筛选与删除确认
 // 注：工作流名（CI 等）、提交消息、提交哈希为仓库内容，不收录；
 // 运行时长与运行计数是动态文本，用规则覆盖；属性（title/aria）不应用规则
+// 简体中文 · 模块 pages/actions（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
-	"$schema": "../../dict.schema.json",
-	"route": "^/[^/]+/[^/]+/actions",
+	"$schema": "../../../dict.schema.json",
 	"entries": {
 		// —— 侧栏 ——
 		"Actions Workflows": "Actions 工作流",
@@ -64,48 +64,5 @@
 		"Pin CI": "置顶 CI",
 		// 工作流侧栏钉选状态（aria）
 		"pinned": "已置顶"
-	},
-	"rules": [
-		// 运行时长：12s / 3m 40s / 1h 2m 3s（长格式在前，首条命中生效）
-		{
-			"pattern": "^([\\d,]+)h ([\\d,]+)m ([\\d,]+)s$",
-			"replacement": "$1 时 $2 分 $3 秒"
-		},
-		{
-			"pattern": "^([\\d,]+)h ([\\d,]+)m$",
-			"replacement": "$1 时 $2 分"
-		},
-		{
-			"pattern": "^([\\d,]+)m ([\\d,]+)s$",
-			"replacement": "$1 分 $2 秒"
-		},
-		{ "pattern": "^([\\d,]+)s$", "replacement": "$1 秒" },
-		// 运行行菜单「查看」链接与 sr-only 页头标题
-		{
-			"pattern": "^View #(\\d+)$",
-			"replacement": "查看 #$1"
-		},
-		{
-			"pattern": "^Actions: ([^/]+\\/[^/]+)$",
-			"replacement": "Actions 页面：$1"
-		},
-		// 运行计数与带仓库名的页头标题
-		{
-			"pattern": "^([\\d,]+)\\+ workflow runs?$",
-			"replacement": "$1+ 个工作流运行"
-		},
-		{
-			"pattern": "^([\\d,]+) workflow runs?$",
-			"replacement": "$1 个工作流运行"
-		},
-		{
-			"pattern": "^Workflow runs \\u00B7 (.+)$",
-			"replacement": "工作流运行 · $1"
-		},
-		// 运行行「opened by <用户>」片段：内部空白随 JSX 渲染浮动，用 \s+ 容错
-		{
-			"pattern": "^opened\\s+by$",
-			"replacement": "打开者："
-		}
-	]
+	}
 }

@@ -4,8 +4,10 @@
 //
 // 用法：
 //   bun tooling/verify-live.ts [--out <文件>] [--pages <清单文件>] [--dwell <毫秒>]
-//                              [--headed] [--keep] [--browser <可执行文件>]
+//                              [--locale <语言 id>] [--headed] [--keep] [--browser <可执行文件>]
 //
+// --locale 会写进 storage（content script 据它选词典），同时决定翻译探针的锚点，
+// 因此探针不依赖「某一种语言的中文译文」这类硬编码判据。
 // 页面清单文件：每行一个 URL，# 开头为注释；缺省用 DEFAULT_PAGES。
 // 退出码：0 成功；1 失败（原因见 stderr，中文）。
 //
@@ -27,6 +29,13 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+	FALLBACK_LOCALE,
+	getLocaleMeta,
+	isLocaleId,
+	LOCALES,
+	type LocaleId,
+} from "../src/dict/locales.ts";
 import {
 	EXTENSION_MARKER,
 	EXTENSION_MARKER_KEY,
@@ -59,6 +68,8 @@ export interface VerifyOptions {
 	headed: boolean;
 	keep: boolean;
 	browser?: string;
+	/** 目标语言：写进 storage 以便 content script 用它翻译，同时决定探针锚点 */
+	locale: LocaleId;
 }
 
 /** 解析命令行参数；未知参数与缺值一律抛中文错误 */
@@ -69,6 +80,7 @@ export function parseArgs(
 		dwell: 11000,
 		headed: false,
 		keep: false,
+		locale: FALLBACK_LOCALE,
 	};
 	for (let i = 0; i < argv.length; i++) {
 		const arg = argv[i];
@@ -105,6 +117,16 @@ export function parseArgs(
 			case "--browser":
 				options.browser = value();
 				break;
+			case "--locale": {
+				const locale = value();
+				if (!isLocaleId(locale)) {
+					throw new Error(
+						`--locale 只支持已声明的语言：${LOCALES.map((meta) => meta.id).join(" / ")}`,
+					);
+				}
+				options.locale = locale;
+				break;
+			}
 			default:
 				throw new Error(`未知参数：${arg}`);
 		}
@@ -436,44 +458,70 @@ async function openIsolatedSession(
 // —— 页面探针 ——
 
 // 在扩展上下文里执行的 storage 读写（content script 有 storage 权限）
-const SET_TOGGLES =
-	"chrome.storage.local.set({ enabled: true, devMode: true }).then(() => true)";
+const setToggles = (locale: LocaleId): string =>
+	`chrome.storage.local.set({ enabled: true, devMode: true, locale: ${JSON.stringify(locale)} }).then(() => true)`;
 const READ_MISS_LOG =
 	"chrome.storage.local.get('missLog').then((d) => (Array.isArray(d.missLog) ? d.missLog : []))";
 const CLEAR_MISS_LOG =
 	"chrome.storage.local.set({ missLog: [] }).then(() => true)";
-// 翻译探针：头部「登录 / 注册」词条是全站必渲染的稳定锚点（匿名页面同样生效）
-const PAGE_PROBE = `(() => { const links = [...document.querySelectorAll('a')].map((a) => (a.innerText || '').trim()); return { zhSignUp: links.filter((x) => x === '注册').length, zhSignIn: links.filter((x) => x === '登录').length, cjk: (document.body.innerText.match(/[\\u4e00-\\u9fff]/g) || []).length }; })()`;
+
+/**
+ * 各语言的翻译探针锚点：头部「登录 / 注册」链接是全站必渲染的稳定锚点，
+ * 匿名页面同样生效。判据不能写死中文（旧版硬编码「注册 / 登录」与 CJK 计数，
+ * 换成任何别的语言都会判成「翻译未生效」）。
+ */
+export const PROBE_ANCHORS: Readonly<
+	Record<LocaleId, { signIn: string; signUp: string }>
+> = {
+	"zh-CN": { signIn: "登录", signUp: "注册" },
+	ja: { signIn: "サインイン", signUp: "サインアップ" },
+};
+
+/** 统计正文里属于该语言文字系统的字符数（拉丁语系目标无从判定，记 0） */
+function scriptCountExpression(locale: LocaleId): string {
+	const scripts = getLocaleMeta(locale).scripts;
+	if (scripts.length === 0) return "0";
+	const source = `[${scripts
+		.map((script) => `\\p{Script=${script}}`)
+		.join("")}]`;
+	return `(document.body.innerText.match(new RegExp(${JSON.stringify(source)}, 'gu')) || []).length`;
+}
+
+/** 生成在页面上下文里执行的探针表达式（按目标语言参数化） */
+export function probeExpression(locale: LocaleId): string {
+	const anchors = PROBE_ANCHORS[locale];
+	return `(() => { const links = [...document.querySelectorAll('a')].map((a) => (a.innerText || '').trim()); return { signUp: links.filter((x) => x === ${JSON.stringify(anchors.signUp)}).length, signIn: links.filter((x) => x === ${JSON.stringify(anchors.signIn)}).length, scriptChars: ${scriptCountExpression(locale)} }; })()`;
+}
 
 interface ProbeResult {
-	zhSignUp: number;
-	zhSignIn: number;
-	cjk: number;
+	signUp: number;
+	signIn: number;
+	scriptChars: number;
 }
 
 function narrowProbe(value: unknown): ProbeResult | null {
 	if (typeof value !== "object" || value === null)
 		return null;
 	const record = value as {
-		zhSignUp?: unknown;
-		zhSignIn?: unknown;
-		cjk?: unknown;
+		signUp?: unknown;
+		signIn?: unknown;
+		scriptChars?: unknown;
 	};
-	const { zhSignUp, zhSignIn, cjk } = record;
+	const { signUp, signIn, scriptChars } = record;
 	if (
-		typeof zhSignUp !== "number" ||
-		typeof zhSignIn !== "number" ||
-		typeof cjk !== "number"
+		typeof signUp !== "number" ||
+		typeof signIn !== "number" ||
+		typeof scriptChars !== "number"
 	)
 		return null;
-	return { zhSignUp, zhSignIn, cjk };
+	return { signUp, signIn, scriptChars };
 }
 
 export interface PageProbe {
 	url: string;
 	misses: MissItem[];
 	translated: boolean | null;
-	cjkCount: number | null;
+	scriptChars: number | null;
 	error: string | null;
 }
 
@@ -485,13 +533,14 @@ async function probePage(input: {
 	url: string;
 	dwell: number;
 	first: boolean;
+	locale: LocaleId;
 }): Promise<PageProbe> {
-	const { port, url, dwell, first } = input;
+	const { port, url, dwell, first, locale } = input;
 	const probe: PageProbe = {
 		url,
 		misses: [],
 		translated: null,
-		cjkCount: null,
+		scriptChars: null,
 		error: null,
 	};
 	let tabId: string | null = null;
@@ -520,7 +569,7 @@ async function probePage(input: {
 				current.webSocketDebuggerUrl,
 			);
 			try {
-				await setup.evaluate(SET_TOGGLES);
+				await setup.evaluate(setToggles(locale));
 			} finally {
 				setup.close();
 			}
@@ -536,12 +585,12 @@ async function probePage(input: {
 			);
 			await session.evaluate(CLEAR_MISS_LOG);
 			const pageResult = narrowProbe(
-				await session.evaluate(PAGE_PROBE),
+				await session.evaluate(probeExpression(locale)),
 			);
 			if (pageResult) {
 				probe.translated =
-					pageResult.zhSignUp + pageResult.zhSignIn > 0;
-				probe.cjkCount = pageResult.cjk;
+					pageResult.signUp + pageResult.signIn > 0;
+				probe.scriptChars = pageResult.scriptChars;
 			}
 		} finally {
 			session.close();
@@ -643,10 +692,13 @@ export interface VerifyReport {
 	source: "verify-live/1";
 	exportedAt: string;
 	browser: string;
+	/** 本次探针使用的目标语言 */
+	locale: LocaleId;
 	pages: {
 		url: string;
 		translated: boolean | null;
-		cjkCount: number | null;
+		/** 正文里属于目标语言文字系统的字符数 */
+		scriptChars: number | null;
 		missCount: number;
 		error: string | null;
 	}[];
@@ -713,6 +765,7 @@ export async function runVerify(
 					url: pageUrl,
 					dwell: options.dwell,
 					first: index === 0,
+					locale: options.locale,
 				}),
 			);
 		}
@@ -736,10 +789,11 @@ export async function runVerify(
 			source: "verify-live/1",
 			exportedAt: new Date().toISOString(),
 			browser,
+			locale: options.locale,
 			pages: pageProbes.map((page) => ({
 				url: page.url,
 				translated: page.translated,
-				cjkCount: page.cjkCount,
+				scriptChars: page.scriptChars,
 				missCount: page.misses.length,
 				error: page.error,
 			})),

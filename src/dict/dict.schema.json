@@ -1,91 +1,202 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
-	"title": "GitHub 汉化词典模块",
-	"description": "编辑器侧校验：在 VS Code 里对 src/dict/data/**.jsonc 提供补全与红线。权威门禁是 bun run check:dict——本文件只做人打开文件时的即时提示，CI 不读它。分工：重复键由 Biome 的 noDuplicateObjectKeys 负责；正则能否编译、跨模块重复键、译文是否含目标语言文字系统、译文是否等于某个键，均由 check:dict 按 src/dict/locales.ts 的语言声明负责，此处只能用码点区间近似。",
+	"title": "GitHub 界面本地化词典数据",
+	"description": "编辑器侧校验：对 src/dict/core/** 与 src/dict/locales/** 提供补全与红线。权威门禁是 bun run check:dict——本文件只做人打开文件时的即时提示，CI 不读它。分工：重复键由 Biome 的 noDuplicateObjectKeys 负责；正则可编译、规则 id 与模块名交叉引用、译文是否含目标语言文字系统、译文是否等于某个键、键是否在 core/canonical.jsonc 里，全由 check:dict 负责（语言声明见 src/dict/locales.ts），此处只能用码点区间近似。",
 	"$defs": {
-		"cjk": {
+		"targetScript": {
 			"type": "string",
 			"pattern": "[\\u3040-\\u30ff\\u3400-\\u4dbf\\u4e00-\\u9fff\\uf900-\\ufaff]",
-			"description": "含目标语言文字系统的近似判定（近似：扩展 A + 基本区 + 兼容区 + 假名；精确判定见 check:dict 与 src/dict/locales.ts）"
+			"description": "含目标语言的文字系统（近似：假名 + 扩展 A + 基本区 + 兼容区）"
 		},
-		"entries": {
-			"type": "object",
-			"description": "静态词条：键 = GitHub 实际渲染的英文原文精确串（整节点精确匹配语义），值 = 简体中文译文",
-			"propertyNames": {
-				"allOf": [
-					{
-						"pattern": "^\\S(?:[\\s\\S]*\\S)?$",
-						"description": "键不得含首尾空白（用 [\\s\\S] 而非 .，允许键内含换行——insights 有一条多行键）"
-					},
-					{
-						"pattern": "[A-Za-z]",
-						"description": "键必须含拉丁字母（纯数字 / 纯符号疑似误收录）"
-					},
-					{
-						"not": { "$ref": "#/$defs/cjk" },
-						"description": "键必须保持英文原文，不得含目标语言的文字系统"
-					}
-				]
-			},
-			"additionalProperties": {
-				"type": "string",
-				"allOf": [{ "$ref": "#/$defs/cjk" }],
-				"description": "值必须含目标语言的文字系统（防 MutationObserver 翻译循环；语言声明见 src/dict/locales.ts）"
-			}
+		"patternSource": {
+			"type": "string",
+			"minLength": 1,
+			"not": { "$ref": "#/$defs/targetScript" },
+			"description": "正则源串。输入恒为英文原文，故不得含目标语言的文字系统。反斜杠需双写：正则 \\d 在 JSONC 里写作 \"\\\\d\"（写漏一层 Bun 会直接报 Syntax Error，不会静默变成别的正则）。/ 无需转义（字符串形态不是正则字面量）"
 		},
-		"rules": {
+		"translation": {
+			"type": "string",
+			"minLength": 1,
+			"allOf": [{ "$ref": "#/$defs/targetScript" }],
+			"description": "译文 / 替换模板：必须含目标语言的文字系统（防 MutationObserver 翻译循环）；模板可用 $1 或 $<name> 引用捕获组"
+		},
+		"modules": {
 			"type": "array",
-			"description": "动态文本正则规则。注意：本结构没有 flags 字段——g / y 的 lastIndex 状态会跨节点累积导致漏翻，故从结构上不允许，写了会被 check:dict 拒绝",
+			"minItems": 1,
 			"items": {
 				"type": "object",
-				"required": ["pattern", "replacement"],
+				"required": ["name", "route"],
 				"additionalProperties": false,
 				"properties": {
-					"pattern": {
+					"name": {
 						"type": "string",
-						"minLength": 1,
-						"not": { "$ref": "#/$defs/cjk" },
-						"description": "对整段已 trim 的文本 test。输入恒为英文原文，故不得含目标语言的文字系统。反斜杠需双写：正则 \\d 在 JSONC 里写作 \"\\\\d\"（写漏一层 Bun 会直接报 Syntax Error，不会静默变成别的正则）"
+						"pattern": "^[a-z][a-z0-9/-]*$",
+						"description": "模块名：global 或 pages/<页名>，须与 core/canonical.jsonc 及 locales/<语言>/ 下的路径一致"
 					},
-					"replacement": {
-						"type": "string",
-						"minLength": 1,
-						"allOf": [{ "$ref": "#/$defs/cjk" }],
-						"description": "替换模板，可用 $1 引用捕获组；必须含目标语言的文字系统"
+					"route": {
+						"$ref": "#/$defs/patternSource",
+						"description": "路由正则源串：必须以 ^/ 锚定 pathname；顺序即优先级（具体页在前，global 的 ^/ 必须在最后）"
 					}
 				}
 			}
 		},
-		"pageDict": {
-			"type": "object",
-			"description": "页面模块：仅 route 命中 location.pathname 时参与合并",
-			"required": ["route", "entries", "rules"],
-			"additionalProperties": false,
-			"properties": {
-				"$schema": { "type": "string" },
-				"route": {
-					"type": "string",
-					"pattern": "^\\^/",
-					"description": "路由正则源串：必须以 ^/ 锚定 pathname，不得带标志；/ 无需转义（字符串形态不是正则字面量）"
-				},
-				"entries": { "$ref": "#/$defs/entries" },
-				"rules": { "$ref": "#/$defs/rules" }
+		"ruleGroups": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"required": ["name", "rules"],
+				"additionalProperties": false,
+				"properties": {
+					"name": {
+						"type": "string",
+						"description": "模块名：必须在 core/modules.jsonc 里存在；分组顺序必须与模块顺序一致"
+					},
+					"rules": {
+						"type": "array",
+						"items": {
+							"type": "object",
+							"required": ["id", "pattern"],
+							"additionalProperties": false,
+							"properties": {
+								"id": {
+									"type": "string",
+									"pattern": "^[a-z][a-z0-9-]*(/[a-z0-9-]+)+$",
+									"description": "全局唯一的规则 id（形如 global/minutes-ago）。locales/<语言>/rules.jsonc 按它对齐模板，故禁止复用与改名后不跟改模板"
+								},
+								"pattern": {
+									"$ref": "#/$defs/patternSource",
+									"description": "对整段已 trim 的文本 test，首条命中生效。本结构没有 flags 字段——g / y 的 lastIndex 状态会跨节点累积导致漏翻，写了会被 check:dict 拒绝"
+								}
+							}
+						}
+					}
+				}
 			}
 		},
-		"globalDict": {
+		"coreModules": {
 			"type": "object",
-			"description": "全站词典：所有页面共享的词条与规则；规则排在所有页面模块规则之后生效",
-			"required": ["entries", "rules"],
+			"description": "core/modules.jsonc：模块与路由（语言无关，顺序即优先级）",
+			"required": ["modules"],
 			"additionalProperties": false,
 			"properties": {
 				"$schema": { "type": "string" },
-				"entries": { "$ref": "#/$defs/entries" },
-				"rules": { "$ref": "#/$defs/rules" }
+				"modules": { "$ref": "#/$defs/modules" }
+			}
+		},
+		"coreRules": {
+			"type": "object",
+			"description": "core/rules.jsonc：共享正则规则（pattern 与语言无关，只有模板分语言）",
+			"required": ["modules"],
+			"additionalProperties": false,
+			"properties": {
+				"$schema": { "type": "string" },
+				"modules": { "$ref": "#/$defs/ruleGroups" }
+			}
+		},
+		"coreAliases": {
+			"type": "object",
+			"description": "core/aliases.jsonc：上游改名映射（当前 DOM 文本 → 规范键），语义没变才加，改名要留 note",
+			"required": ["aliases"],
+			"additionalProperties": false,
+			"properties": {
+				"$schema": { "type": "string" },
+				"aliases": {
+					"type": "object",
+					"propertyNames": { "pattern": "\\S" },
+					"additionalProperties": {
+						"type": "string",
+						"minLength": 1,
+						"description": "目标规范键：必须在 core/canonical.jsonc 里存在（check:dict 校验）"
+					}
+				}
+			}
+		},
+		"coreCanonical": {
+			"type": "object",
+			"description": "core/canonical.jsonc：规范键清单（仅门禁使用，不进 content 包）",
+			"required": ["modules"],
+			"additionalProperties": false,
+			"properties": {
+				"$schema": { "type": "string" },
+				"modules": {
+					"type": "array",
+					"minItems": 1,
+					"items": {
+						"type": "object",
+						"required": ["name", "keys"],
+						"additionalProperties": false,
+						"properties": {
+							"name": { "type": "string" },
+							"keys": {
+								"type": "array",
+								"items": {
+									"type": "string",
+									"allOf": [
+										{
+											"pattern": "^\\S(?:[\\s\\S]*\\S)?$",
+											"description": "键不得含首尾空白（用 [\\s\\S] 而非 .，允许键内含换行——insights 有一条多行键）"
+										},
+										{
+											"pattern": "[A-Za-z]",
+											"description": "键必须含拉丁字母（纯数字 / 纯符号疑似误收录）"
+										},
+										{
+											"not": {
+												"$ref": "#/$defs/targetScript"
+											},
+											"description": "键必须保持 GitHub 渲染的英文原文，不得含目标语言文字系统"
+										}
+									]
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"localeEntries": {
+			"type": "object",
+			"description": "locales/<语言>/<模块>.jsonc：某语言的词条（稀疏覆盖，缺键 = 尚未翻译）",
+			"required": ["entries"],
+			"additionalProperties": false,
+			"properties": {
+				"$schema": { "type": "string" },
+				"entries": {
+					"type": "object",
+					"propertyNames": {
+						"description": "键必须与 core/canonical.jsonc 里的英文原文完全一致（拼错会被 check:dict 报出来）"
+					},
+					"additionalProperties": {
+						"$ref": "#/$defs/translation"
+					}
+				}
+			}
+		},
+		"localeRules": {
+			"type": "object",
+			"description": "locales/<语言>/rules.jsonc：规则 id → 替换模板（未写 = 该语言未翻译该规则，规则不生效）",
+			"required": ["replacements"],
+			"additionalProperties": false,
+			"properties": {
+				"$schema": { "type": "string" },
+				"replacements": {
+					"type": "object",
+					"propertyNames": {
+						"description": "规则 id：必须在 core/rules.jsonc 里存在（check:dict 校验）"
+					},
+					"additionalProperties": {
+						"$ref": "#/$defs/translation"
+					}
+				}
 			}
 		}
 	},
 	"oneOf": [
-		{ "$ref": "#/$defs/pageDict" },
-		{ "$ref": "#/$defs/globalDict" }
+		{ "$ref": "#/$defs/coreModules" },
+		{ "$ref": "#/$defs/coreRules" },
+		{ "$ref": "#/$defs/coreAliases" },
+		{ "$ref": "#/$defs/coreCanonical" },
+		{ "$ref": "#/$defs/localeEntries" },
+		{ "$ref": "#/$defs/localeRules" }
 	]
 }

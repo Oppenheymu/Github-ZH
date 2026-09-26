@@ -1,9 +1,9 @@
 // 仓库模块：任意两段路径（/owner/repo 及其子页）的仓库骨架词条
 // 覆盖仓库首页骨架、文件列表、发布（releases）与提交签名等子页 UI
 // 注意：本模块是最泛化的路由，其余模块词条都会压过它（先到先得合并）
+// 简体中文 · 模块 pages/repo（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
-	"$schema": "../../dict.schema.json",
-	"route": "^/[^/]+/[^/]+",
+	"$schema": "../../../dict.schema.json",
 	"entries": {
 		"Code": "代码",
 		"Clone": "克隆",
@@ -96,19 +96,5 @@
 		"Learn about vigilant mode": "了解警惕模式",
 		"main branch": "main 分支",
 		"commits by Copilot": "Copilot 的提交"
-	},
-	"rules": [
-		{
-			"pattern": "^([\\d,]+) Commits$",
-			"replacement": "$1 次提交"
-		},
-		{
-			"pattern": "^(\\d+) reactions?$",
-			"replacement": "$1 次回应"
-		},
-		{
-			"pattern": "^([\\d,]+) people reacted$",
-			"replacement": "$1 人已回应"
-		}
-	]
+	}
 }

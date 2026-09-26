@@ -7,12 +7,19 @@
 
 import { serializeMisses } from "../content/collector.ts";
 import {
+	isLocaleId,
+	LOCALES,
+	type LocaleId,
+} from "../dict/locales.ts";
+import {
 	readDevMode,
 	readEnabled,
+	readLocale,
 	readMissLog,
 	watchMissLog,
 	writeDevMode,
 	writeEnabled,
+	writeLocale,
 	writeMissLog,
 } from "../shared/storage.ts";
 import type { MissItem } from "../shared/types.ts";
@@ -77,9 +84,35 @@ const devClear = assertFound(
 	document.querySelector<HTMLButtonElement>("#dev-clear"),
 	"#dev-clear",
 );
+const localeSelect = assertFound(
+	document.querySelector<HTMLSelectElement>("#locale"),
+	"#locale",
+);
 
 /** 当前漏翻日志缓存：watchMissLog 实时同步，复制时同步序列化（用户手势内完成剪贴板写入） */
 let misses: readonly MissItem[] = [];
+
+/**
+ * 初始化语言选择器：第一项是「自动」（值空串 → storage 里删除该键），
+ * 其余项由 src/dict/locales.ts 的声明生成，选项文案用该语言自身书写。
+ */
+function buildLocaleSelect(): void {
+	const auto = document.createElement("option");
+	auto.value = "";
+	auto.textContent = msg("localeAuto");
+	localeSelect.append(auto);
+	for (const meta of LOCALES) {
+		const option = document.createElement("option");
+		option.value = meta.id;
+		option.textContent = meta.name;
+		localeSelect.append(option);
+	}
+}
+
+/** 回填选择器当前值（null = 自动） */
+function renderLocale(locale: LocaleId | null): void {
+	localeSelect.value = locale ?? "";
+}
 
 /** 渲染开关与状态文案（与 popup.html 的 #status.on/.off 样式联动） */
 function render(enabled: boolean): void {
@@ -139,6 +172,18 @@ function main(): void {
 		render(next);
 		// content script 经 storage.onChanged 收到后整页刷新生效
 		void writeEnabled(next);
+	});
+
+	buildLocaleSelect();
+	void readLocale().then(renderLocale);
+	localeSelect.addEventListener("change", () => {
+		// 空值 = 恢复「自动」：storage 里删除该键，由 content script 按浏览器语言解析
+		const value = localeSelect.value;
+		const next: LocaleId | null = isLocaleId(value)
+			? value
+			: null;
+		renderLocale(next);
+		void writeLocale(next);
 	});
 
 	void initDev();

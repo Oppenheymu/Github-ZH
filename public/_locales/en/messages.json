@@ -48,6 +48,15 @@
 	"devWarn": {
 		"message": "The export may contain page text such as file and repository names — review it before pasting. No network requests are made at any point."
 	},
+	"localeLabel": {
+		"message": "Translation language"
+	},
+	"localeAuto": {
+		"message": "Automatic (browser language)"
+	},
+	"localeHint": {
+		"message": "Some languages are only partly translated: text without a translation stays in English."
+	},
 	"footer": {
 		"message": "The dictionary keeps growing. Reports of missed or wrong translations are welcome in the repository."
 	}

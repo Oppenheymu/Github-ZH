@@ -17,9 +17,24 @@ const TRANSLATABLE_ATTRS = [
 ] as const;
 
 /**
+ * 查词：先按 DOM 文本直查当前语言词典，未命中再走上游改名映射
+ * （DOM 文本 → 规范键 → 译文）。热路径上未命中才多一次 Map 查找。
+ */
+function lookup(
+	view: DictView,
+	key: string,
+): string | undefined {
+	const direct = view.entries.get(key);
+	if (direct !== undefined) return direct;
+	const canonical = view.aliases.get(key);
+	if (canonical === undefined) return undefined;
+	return view.entries.get(canonical);
+}
+
+/**
  * 对一段文本应用词典视图，返回译文；未命中返回 null。
  * 查询键先 trim 并把连续空白折叠为单空格（GitHub React 页面的文本节点
- * 常带首尾空白与换行缩进，精确匹配必须先归一），顺序：静态词典精确命中
+ * 常带首尾空白与换行缩进，精确匹配必须先归一），顺序：静态词典（含改名映射）
  * → 首条命中的正则规则（pattern 不允许 g 标志，test 无 lastIndex 累积
  * 问题，见 tooling/checks/dict.ts 门禁）。
  */
@@ -29,7 +44,7 @@ export function translateText(
 ): string | null {
 	if (!isTranslatableText(text)) return null;
 	const normalized = normalizeKey(text);
-	const mapped = view.entries.get(normalized);
+	const mapped = lookup(view, normalized);
 	if (mapped !== undefined) return mapped;
 	for (const rule of view.rules) {
 		if (!rule.pattern.test(normalized)) continue;
@@ -77,7 +92,7 @@ function applyAttrs(
 		const value = element.getAttribute(name);
 		if (value === null) continue;
 		if (!isTranslatableText(value)) continue;
-		const mapped = view.entries.get(normalizeKey(value));
+		const mapped = lookup(view, normalizeKey(value));
 		if (mapped === undefined) {
 			// 未命中词条的属性值：开发者模式下记录（属性不应用正则规则，只会因缺词条漏翻）
 			recordAttr(name, normalizeKey(value));

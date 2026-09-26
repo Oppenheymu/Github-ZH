@@ -48,6 +48,15 @@
 	"devWarn": {
 		"message": "导出内容可能含页面文本（文件名、仓库名等），复制后请自查再粘贴；全程无网络请求。"
 	},
+	"localeLabel": {
+		"message": "翻译语言"
+	},
+	"localeAuto": {
+		"message": "自动（跟随浏览器语言）"
+	},
+	"localeHint": {
+		"message": "部分语言的词典尚不完整：没有译文的地方保持英文原文。"
+	},
 	"footer": {
 		"message": "词典持续扩充中，欢迎在仓库反馈漏翻与误伤。"
 	}

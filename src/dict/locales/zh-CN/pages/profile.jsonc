@@ -4,9 +4,9 @@
 // 注：仓库名 / 用户名 / 仓库描述为用户内容不收录；语言名专有名词不译；
 // 属性（title/aria/alt）不应用规则（见 content/walker.ts），半动态计数
 // 收静态词条仅解当前值（同 actions.jsonc 先例）
+// 简体中文 · 模块 pages/profile（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
-	"$schema": "../../dict.schema.json",
-	"route": "^/[^/]+$",
+	"$schema": "../../../dict.schema.json",
 	"entries": {
 		"Popular repositories": "热门仓库",
 		"Customize your pins": "自定义置顶项",
@@ -125,27 +125,5 @@
 		"105 pull requests": "105 个拉取请求",
 		"152 pull requests": "152 个拉取请求",
 		"3,000 pull requests": "3,000 个拉取请求"
-	},
-	"rules": [
-		// 组织 / 用户仓库列表的提交动态说明（仓库名为用户内容，捕获保留）
-		{
-			"pattern": "^([\\w.-]+\\/[\\w.-]+)['\\u2019]s past year of commit activity$",
-			"replacement": "$1 过去一年的提交动态"
-		},
-		// 仓库卡片的「需要帮助」议题计数（单复数折叠）
-		{
-			"pattern": "^\\(([\\d,]+) issues? needs? help\\)$",
-			"replacement": "（$1 个议题需要帮助）"
-		},
-		// 屏蔽 / 举报对话框标题带用户名（捕获保留；固定文案走静态词条）
-		{
-			"pattern": "^Block or report ([\\w.-]+)$",
-			"replacement": "屏蔽或举报 $1"
-		},
-		// 仓库列表分页说明
-		{
-			"pattern": "^Showing (\\d+) of ([\\d,]+) repositor(?:y|ies)$",
-			"replacement": "显示 $2 个仓库中的 $1 个"
-		}
-	]
+	}
 }

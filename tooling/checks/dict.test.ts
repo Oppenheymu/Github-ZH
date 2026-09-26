@@ -1,331 +1,474 @@
 import { describe, expect, it } from "bun:test";
+import canonicalRaw from "../../src/dict/core/canonical.jsonc";
 import {
-	buildGlobalDict,
-	buildPageDict,
+	buildEntries,
+	buildModules,
+	buildReplacements,
+	buildRuleDefs,
 } from "../../src/dict/load.ts";
-import { getLocaleMeta } from "../../src/dict/locales.ts";
 import {
-	globalRawDict,
-	pageRawModules,
+	getLocaleMeta,
+	LOCALES,
+} from "../../src/dict/locales.ts";
+import {
+	coreRawDict,
+	localeRawDicts,
 } from "../../src/dict/registry.ts";
+import type { RuleDef } from "../../src/shared/types.ts";
 import {
-	buildAll,
-	validateAll,
-	validateDict,
+	buildCanonical,
+	buildCore,
+	buildLocaleData,
+	countGroups,
+	extractTemplateRefs,
+	formatCoverage,
+	namedGroups,
+	validateAliases,
+	validateCanonicalModules,
 	validateEntries,
 	validateNoIdentity,
-	validateRule,
 	validateRulesRematch,
+	validateTemplate,
 } from "./dict.ts";
 
 /** 复数 zh / ja 的语言声明（校验逻辑必须靠声明，而不是硬编码汉字） */
 const ZH = getLocaleMeta("zh-CN");
 const JA = getLocaleMeta("ja");
 
-/** 一个合法页面模块的最小形态，反例在其上做单点破坏 */
-const validPage = () => ({
-	$schema: "../../dict.schema.json",
-	route: "^/owner/repo/issues",
-	entries: { "Close issue": "关闭议题" },
-	rules: [
-		{
-			pattern: "^(\\d+) minutes? ago$",
-			replacement: "$1 分钟前",
-		},
+const modulesRaw = () => ({
+	modules: [
+		{ name: "pages/issues", route: "^/[^/]+/[^/]+/issues" },
+		{ name: "global", route: "^/" },
 	],
 });
 
-describe("validateRule", () => {
-	it("accepts a well-formed rule", () => {
-		const errors = validateRule(
-			{
-				pattern: /^(\d+) minutes? ago$/,
-				replacement: "$1 分钟前",
-			},
-			"测试",
-			ZH,
-		);
-		expect(errors).toEqual([]);
-	});
-
-	it("requires the target script in the replacement", () => {
-		const errors = validateRule(
-			{ pattern: /^a$/, replacement: "b" },
-			"测试",
-			ZH,
-		);
-		expect(
-			errors.some((error) => error.includes("文字系统")),
-		).toBe(true);
-	});
-
-	it("accepts pure kana replacements for japanese", () => {
-		// 汉字判定会拒掉这条，语言声明判定必须放行
-		const errors = validateRule(
-			{ pattern: /^See more$/, replacement: "もっと見る" },
-			"测试",
-			JA,
-		);
-		expect(errors).toEqual([]);
-	});
-
-	it("rejects non-latin letters inside the pattern source", () => {
-		const errors = validateRule(
-			{ pattern: /中文/, replacement: "替换" },
-			"测试",
-			ZH,
-		);
-		expect(errors.length).toBeGreaterThan(0);
-	});
-});
-
-describe("validateEntries", () => {
-	it("accepts valid translations", () => {
-		const errors = validateEntries(
-			{ Star: "星标", Fork: "复刻" },
-			"测试",
-			ZH,
-		);
-		expect(errors).toEqual([]);
-	});
-
-	it("rejects non-latin keys and scriptless values", () => {
-		// 中文键：违反「键不得含非拉丁字母」与「键不含拉丁字母」两条
-		const errors = validateEntries(
-			{ 中文键: "值", English: "no cjk" },
-			"测试",
-			ZH,
-		);
-		expect(errors.length).toBe(3);
-	});
-
-	it("rejects empty values and letterless keys", () => {
-		const errors = validateEntries(
-			{ Empty: "", "123": "数字" },
-			"测试",
-			ZH,
-		);
-		expect(errors.length).toBeGreaterThanOrEqual(2);
-	});
-
-	it("rejects keys with leading or trailing whitespace", () => {
-		const errors = validateEntries(
-			{ " Open": "打开", "Close ": "关闭" },
-			"测试",
-			ZH,
-		).filter((error) => error.includes("首尾空白"));
-		expect(errors).toHaveLength(2);
-	});
-});
-
-describe("validateNoIdentity", () => {
-	it("flags a translation that equals some key", () => {
-		const errors = validateNoIdentity(
-			{ Markdown: "Markdown" },
-			"测试",
-			new Set(["Markdown", "Star"]),
-		);
-		expect(errors).toHaveLength(1);
-		expect(errors[0]).toContain("等于某个词典键");
-	});
-
-	it("ignores translations that are not keys", () => {
-		const errors = validateNoIdentity(
-			{ Star: "星标" },
-			"测试",
-			new Set(["Star"]),
-		);
-		expect(errors).toEqual([]);
-	});
-});
-
-describe("validateRulesRematch", () => {
-	it("flags a replacement that another rule would translate again", () => {
-		const errors = validateRulesRematch(
-			[
-				{
-					pattern: /^Much more$/,
-					replacement: "5 stars",
-				},
-				{
-					pattern: /^(\d+) stars$/,
-					replacement: "$1 星标",
-				},
-			],
-			"测试",
-		);
-		expect(errors).toHaveLength(1);
-		expect(errors[0]).toContain("再次命中");
-	});
-
-	it("accepts replacements that no rule matches", () => {
-		const errors = validateRulesRematch(
-			[
-				{
-					pattern: /^(\d+) minutes? ago$/,
-					replacement: "$1 分钟前",
-				},
-			],
-			"测试",
-		);
-		expect(errors).toEqual([]);
-	});
-});
-
-describe("buildPageDict", () => {
-	it("compiles route and rules from JSONC shapes", () => {
-		const dict = buildPageDict(validPage(), "测试");
-		// 断言行为而非 source：RegExp#source 会把 / 转义成 \/（规范要求可用于字面量）
-		expect(dict.route.test("/owner/repo/issues")).toBe(
+describe("buildModules", () => {
+	it("compiles routes and requires global to come last", () => {
+		const modules = buildModules(modulesRaw(), "测试");
+		expect(modules).toHaveLength(2);
+		expect(modules[1]?.route.test("/anything/at/all")).toBe(
 			true,
 		);
-		expect(dict.route.test("/owner/repo/issues/12")).toBe(
-			true,
-		);
-		expect(dict.route.test("/owner/repo/pulls")).toBe(
-			false,
-		);
-		expect(dict.route.flags).toBe("");
-		const rule = dict.rules[0];
-		expect(rule?.pattern.test("5 minutes ago")).toBe(true);
-		expect(rule?.pattern.test("5 minutes")).toBe(false);
-		expect(dict.entries["Close issue"]).toBe("关闭议题");
 	});
 
-	it("rejects unknown top-level fields (typo silently empties a dict)", () => {
+	it("rejects a global module that is not last", () => {
 		expect(() =>
-			buildPageDict(
-				{ ...validPage(), entires: {} },
-				"测试",
-			),
-		).toThrow(/未知字段/);
-	});
-
-	it("rejects a missing or unanchored route", () => {
-		const { route: _route, ...withoutRoute } = validPage();
-		expect(() =>
-			buildPageDict(withoutRoute, "测试"),
-		).toThrow(/route/);
-		expect(() =>
-			buildPageDict(
-				{ ...validPage(), route: "[^/]+/issues" },
-				"测试",
-			),
-		).toThrow(/\^\/ 锚定/);
-	});
-
-	it("rejects a pattern that cannot compile", () => {
-		expect(() =>
-			buildPageDict(
+			buildModules(
 				{
-					...validPage(),
-					rules: [
-						{ pattern: "(unclosed", replacement: "替换" },
-					],
-				},
-				"测试",
-			),
-		).toThrow(/正则无法编译/);
-	});
-
-	it("rejects a rule carrying a flags field", () => {
-		expect(() =>
-			buildPageDict(
-				{
-					...validPage(),
-					rules: [
+					modules: [
+						{ name: "global", route: "^/" },
 						{
-							pattern: "^a$",
-							replacement: "甲",
-							flags: "g",
+							name: "pages/x",
+							route: "^/x",
 						},
 					],
 				},
 				"测试",
 			),
+		).toThrow(/最后一个模块必须是 global/);
+	});
+
+	it("rejects unknown fields and duplicated names", () => {
+		expect(() =>
+			buildModules({ modules: [], entires: {} }, "测试"),
+		).toThrow(/未知字段/);
+		expect(() =>
+			buildModules(
+				{
+					modules: [
+						{ name: "pages/x", route: "^/x" },
+						{ name: "pages/x", route: "^/y" },
+					],
+				},
+				"测试",
+			),
+		).toThrow(/模块名不得重复/);
+	});
+});
+
+describe("buildRuleDefs", () => {
+	const modules = buildModules(modulesRaw(), "测试");
+
+	it("compiles rule ids and patterns", () => {
+		const defs = buildRuleDefs(
+			{
+				modules: [
+					{
+						name: "global",
+						rules: [
+							{
+								id: "global/minutes-ago",
+								pattern: "^(\\d+) minutes? ago$",
+							},
+						],
+					},
+				],
+			},
+			"测试",
+			modules,
+		);
+		expect(defs).toHaveLength(1);
+		expect(defs[0]?.id).toBe("global/minutes-ago");
+		expect(defs[0]?.pattern.test("5 minutes ago")).toBe(
+			true,
+		);
+	});
+
+	it("rejects unknown module names, duplicate ids and flags", () => {
+		expect(() =>
+			buildRuleDefs(
+				{
+					modules: [
+						{
+							name: "pages/nope",
+							rules: [],
+						},
+					],
+				},
+				"测试",
+				modules,
+			),
+		).toThrow(/未在 core\/modules.jsonc 里声明/);
+		expect(() =>
+			buildRuleDefs(
+				{
+					modules: [
+						{
+							name: "global",
+							rules: [
+								{ id: "a", pattern: "^a$" },
+								{ id: "a", pattern: "^b$" },
+							],
+						},
+					],
+				},
+				"测试",
+				modules,
+			),
+		).toThrow(/规则 id 重复/);
+		expect(() =>
+			buildRuleDefs(
+				{
+					modules: [
+						{
+							name: "global",
+							rules: [
+								{
+									id: "a",
+									pattern: "^a$",
+									flags: "g",
+								},
+							],
+						},
+					],
+				},
+				"测试",
+				modules,
+			),
 		).toThrow(/flags/);
 	});
 
-	it("rejects non-string entry values", () => {
+	it("rejects rule groups that break the module order", () => {
 		expect(() =>
-			buildPageDict(
+			buildRuleDefs(
 				{
-					...validPage(),
-					entries: { Fork: 1 },
+					modules: [
+						{ name: "global", rules: [] },
+						{
+							name: "pages/issues",
+							rules: [],
+						},
+					],
 				},
 				"测试",
+				modules,
 			),
-		).toThrow(/值必须是字符串/);
-	});
-
-	it("rejects a __proto__ entry key", () => {
-		// 对象字面量里 "__proto__" 会被当成原型设置器，只能用 JSON.parse 构造真实输入
-		const raw = JSON.parse(
-			'{"route":"^/x","entries":{"__proto__":"值"},"rules":[]}',
-		);
-		expect(() => buildPageDict(raw, "测试")).toThrow(
-			/__proto__/,
-		);
+		).toThrow(/分组顺序必须与 core\/modules.jsonc 一致/);
 	});
 });
 
-describe("buildGlobalDict", () => {
-	it("accepts entries plus rules without a route", () => {
-		const dict = buildGlobalDict(
-			{ entries: { Star: "星标" }, rules: [] },
+describe("buildReplacements", () => {
+	const defs: RuleDef[] = [
+		{
+			id: "global/minutes-ago",
+			module: "global",
+			pattern: /^(\d+) minutes? ago$/,
+		},
+	];
+
+	it("accepts known rule ids", () => {
+		const replacements = buildReplacements(
+			{
+				replacements: { "global/minutes-ago": "$1 分钟前" },
+			},
+			"测试",
+			defs,
+		);
+		expect(replacements["global/minutes-ago"]).toBe(
+			"$1 分钟前",
+		);
+	});
+
+	it("rejects unknown rule ids", () => {
+		expect(() =>
+			buildReplacements(
+				{ replacements: { "global/nope": "甲" } },
+				"测试",
+				defs,
+			),
+		).toThrow(/未知规则 id/);
+	});
+});
+
+describe("validateEntries", () => {
+	const keys = new Set(["Star", "Markdown"]);
+
+	it("accepts translations whose keys are canonical", () => {
+		expect(
+			validateEntries({ Star: "星标" }, "测试", ZH, keys),
+		).toEqual([]);
+	});
+
+	it("reports keys that are not in the canonical list", () => {
+		const errors = validateEntries(
+			{ Strar: "星标" },
+			"测试",
+			ZH,
+			keys,
+		);
+		expect(errors).toHaveLength(1);
+		expect(errors[0]).toContain("canonical");
+	});
+
+	it("requires the target script and accepts kana for japanese", () => {
+		expect(
+			validateEntries({ Star: "スター" }, "测试", JA, keys),
+		).toEqual([]);
+		expect(
+			validateEntries(
+				{ Star: "Star" },
+				"测试",
+				ZH,
+				keys,
+			).some((error) => error.includes("文字系统")),
+		).toBe(true);
+	});
+});
+
+describe("template references", () => {
+	const def: RuleDef = {
+		id: "global/date",
+		module: "global",
+		pattern: /^Jan (?<day>\d{1,2}), (\d{4})$/,
+	};
+
+	it("counts positional and named groups", () => {
+		expect(countGroups(def.pattern)).toBe(2);
+		expect(namedGroups(def.pattern)).toEqual(["day"]);
+	});
+
+	it("extracts both reference styles", () => {
+		expect(extractTemplateRefs("$2 年 1 月 $1 日")).toEqual(
+			{
+				indexes: [2, 1],
+				names: [],
+			},
+		);
+		expect(extractTemplateRefs("$<day> 日")).toEqual({
+			indexes: [],
+			names: ["day"],
+		});
+	});
+
+	it("accepts in-range references", () => {
+		expect(
+			validateTemplate(
+				"$2 年 1 月 $<day> 日",
+				def,
+				"测试",
+				ZH,
+			),
+		).toEqual([]);
+	});
+
+	it("rejects out-of-range and undeclared group references", () => {
+		const errors = validateTemplate(
+			"$3 日 $<month> 月",
+			def,
+			"测试",
+			ZH,
+		);
+		expect(errors).toHaveLength(2);
+		expect(errors[0]).toContain("$3");
+		expect(errors[1]).toContain("$<month>");
+	});
+});
+
+describe("anti-loop gates", () => {
+	it("flags a translation that equals some key", () => {
+		const errors = validateNoIdentity(
+			{ Markdown: "Markdown" },
+			"测试",
+			new Set(["Markdown", "Star"]),
+			"zh-CN",
+		);
+		expect(errors).toHaveLength(1);
+		expect(errors[0]).toContain("等于某个键");
+	});
+
+	it("flags a template that another rule would translate again", () => {
+		const defs: RuleDef[] = [
+			{
+				id: "x/more",
+				module: "global",
+				pattern: /^Much more$/,
+			},
+			{
+				id: "global/stars",
+				module: "global",
+				pattern: /^(\d+) stars$/,
+			},
+		];
+		const errors = validateRulesRematch(
+			[{ id: "x/more", template: "5 stars" }],
+			defs,
 			"测试",
 		);
-		expect(dict.entries["Star"]).toBe("星标");
+		expect(errors).toHaveLength(1);
+		expect(errors[0]).toContain("global/stars");
 	});
 
-	it("rejects a route on the global dict", () => {
-		expect(() =>
-			buildGlobalDict(
-				{
-					route: "^/x",
-					entries: { Star: "星标" },
-					rules: [],
-				},
-				"测试",
-			),
-		).toThrow(/未知字段/);
+	it("accepts existing data (measured 0 hits)", () => {
+		const core = buildCore();
+		expect(core.errors).toEqual([]);
+		expect(core.core).not.toBeNull();
 	});
 });
 
-describe("buildAll", () => {
-	it("keeps good modules and reports every broken one", () => {
-		const built = buildAll({
-			global: { entries: { Star: "星标" }, rules: [] },
-			pages: [
-				["pages/ok", validPage()],
-				["pages/broken", { ...validPage(), entires: {} }],
-			],
-		});
-		expect(built.errors).toHaveLength(1);
-		expect(built.errors[0]).toContain("未知字段");
-		expect(built.pages).toHaveLength(1);
-		expect(built.pages[0]?.[0]).toBe("pages/ok");
+describe("validateAliases", () => {
+	it("requires an english source and a canonical target", () => {
+		expect(
+			validateAliases(
+				{ "Sign in with GitHub": "Sign in to GitHub" },
+				"测试",
+				new Set(["Sign in to GitHub"]),
+			),
+		).toEqual([]);
+		const errors = validateAliases(
+			{ 登录: "Nope", Same: "Same" },
+			"测试",
+			new Set(["Nope"]),
+		);
+		expect(errors).toHaveLength(3);
+	});
+});
+
+describe("validateCanonicalModules", () => {
+	it("requires the same modules in the same order", () => {
+		const canonical = [
+			{ name: "a", keys: [] },
+			{ name: "b", keys: [] },
+		];
+		expect(
+			validateCanonicalModules(canonical, [
+				{ name: "a" },
+				{ name: "b" },
+			]),
+		).toEqual([]);
+		expect(
+			validateCanonicalModules(canonical, [
+				{ name: "b" },
+				{ name: "a" },
+			]),
+		).toHaveLength(1);
 	});
 });
 
 describe("real dictionaries", () => {
-	it("builds and validates against shipped data", () => {
-		const built = buildAll({
-			global: globalRawDict,
-			pages: pageRawModules,
+	it("builds the shipped core without errors", () => {
+		const core = buildCore();
+		expect(core.errors).toEqual([]);
+		expect(core.canonical.length).toBe(
+			core.core?.modules.length ?? -1,
+		);
+	});
+
+	it("validates every shipped locale without errors", () => {
+		const core = buildCore();
+		const dictCore = core.core;
+		if (dictCore === null)
+			throw new Error("核心数据构建失败");
+		expect(localeRawDicts.map((raw) => raw.locale)).toEqual(
+			LOCALES.map((meta) => meta.id),
+		);
+		for (const raw of localeRawDicts) {
+			const built = buildLocaleData({
+				localeId: raw.locale,
+				core: dictCore,
+				canonical: core.canonical,
+				modules: raw.modules,
+				rulesRaw: raw.rules,
+			});
+			expect(built?.errors ?? []).toEqual([]);
+		}
+	});
+
+	it("compiles the shipped canonical key list", () => {
+		const canonical = buildCanonical(
+			canonicalRaw,
+			"core/canonical",
+		);
+		const keys = canonical.flatMap((module) => [
+			...module.keys,
+		]);
+		expect(keys.length).toBeGreaterThan(1600);
+	});
+
+	it("reports coverage for the shipped locales", () => {
+		const core = buildCore();
+		const dictCore = core.core;
+		if (dictCore === null)
+			throw new Error("核心数据构建失败");
+		const report = localeRawDicts.map((raw) => {
+			const built = buildLocaleData({
+				localeId: raw.locale,
+				core: dictCore,
+				canonical: core.canonical,
+				modules: raw.modules,
+				rulesRaw: raw.rules,
+			});
+			if (built === null) throw new Error("未声明的语言");
+			return { built, text: formatCoverage(built) };
 		});
-		expect(built.errors).toEqual([]);
-		expect(built.pages).toHaveLength(pageRawModules.length);
-		expect(built.global).not.toBeNull();
-		if (built.global !== null) {
-			expect(
-				validateDict(built.global, "global", ZH),
-			).toEqual([]);
-		}
-		for (const [where, dict] of built.pages) {
-			expect(validateDict(dict, where, ZH)).toEqual([]);
-		}
-		// 防循环结构门禁：现有数据实测 0 命中（译文≠键、译文再命中规则）
-		expect(validateAll(built, ZH)).toEqual([]);
+		const zh = report.find(
+			(entry) => entry.built.locale.id === "zh-CN",
+		);
+		// 中文是完整词典：覆盖率必须是 100%
+		expect(zh?.built.translated).toBe(zh?.built.total);
+		const ja = report.find(
+			(entry) => entry.built.locale.id === "ja",
+		);
+		// 日语目前只有样例，覆盖率低但必须被算出来（不是 0 也不是 100）
+		expect(ja?.built.translated).toBeGreaterThan(0);
+		expect(ja?.text).toContain("待译");
+	});
+
+	it("keeps the shipped background data loadable by the loader", () => {
+		// 门禁与运行时共用 load.ts：这里再走一遍纯函数入口，防止两侧漂移
+		const modules = buildModules(
+			coreRawDict.modules,
+			"core/modules",
+		);
+		const defs = buildRuleDefs(
+			coreRawDict.rules,
+			"core/rules",
+			modules,
+		);
+		expect(defs.length).toBeGreaterThan(200);
+		const entries = buildEntries(
+			{ entries: { Star: "星标" } },
+			"测试",
+		);
+		expect(entries["Star"]).toBe("星标");
 	});
 });

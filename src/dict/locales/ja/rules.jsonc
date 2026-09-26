@@ -1,0 +1,14 @@
+// 日本語の置換テンプレート（サンプル）：鍵は core/rules.jsonc のルール id。
+// 未訳の id は書かなくてよい（その規則はその言語では適用されない）。
+{
+	"$schema": "../../dict.schema.json",
+	"replacements": {
+		"global/now": "たった今",
+		"global/yesterday": "昨日",
+		"global/minutes-ago": "$1 分前",
+		"global/hours-ago": "$1 時間前",
+		"global/days-ago": "$1 日前",
+		"global/comments-count": "$1 件のコメント",
+		"issues/linked-prs-count": "$1 件の関連 PR"
+	}
+}

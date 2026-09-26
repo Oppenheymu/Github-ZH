@@ -92,6 +92,18 @@
 			#status.off {
 				color: #f85149;
 			}
+			/* 目标语言选择器：与 GitHub 深色表单控件观感一致 */
+			#locale {
+				flex-shrink: 0;
+				max-width: 160px;
+				padding: 3px 6px;
+				background: #21262d;
+				color: #e6edf3;
+				border: 1px solid #30363d;
+				border-radius: 6px;
+				font-size: 12px;
+				font-family: inherit;
+			}
 			.hint {
 				margin-top: 10px;
 				color: #7d8590;
@@ -180,6 +192,15 @@
 				Translation happens entirely on your device: no
 				network requests, no data collection. Switching
 				takes effect immediately (the page reloads).
+			</p>
+			<hr class="divider" />
+			<label class="switch-row" for="locale">
+				<span data-i18n="localeLabel">Translation language</span>
+				<select id="locale"></select>
+			</label>
+			<p class="hint" data-i18n="localeHint">
+				The dictionary covers some languages only partly:
+				untranslated text stays in English.
 			</p>
 			<hr class="divider" />
 			<section>

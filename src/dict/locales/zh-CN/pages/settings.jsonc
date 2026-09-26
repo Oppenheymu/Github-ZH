@@ -1,7 +1,7 @@
 // 设置模块：/settings 子树的导航与表单词条
+// 简体中文 · 模块 pages/settings（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
-	"$schema": "../../dict.schema.json",
-	"route": "^/settings",
+	"$schema": "../../../dict.schema.json",
 	"entries": {
 		"Public profile": "公开资料",
 		"Account": "账户",
@@ -20,6 +20,5 @@
 		"Bio": "个人简介",
 		"Company": "公司",
 		"Location": "位置"
-	},
-	"rules": []
+	}
 }

@@ -1,8 +1,8 @@
 // Agents 模块：/owner/repo/agents——Copilot 代理会话列表与筛选
 // 注：查询语法 token（is:open、@me 等）为可复制语义文本，不收录
+// 简体中文 · 模块 pages/agents（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
-	"$schema": "../../dict.schema.json",
-	"route": "^/[^/]+/[^/]+/agents",
+	"$schema": "../../../dict.schema.json",
 	"entries": {
 		"Agent": "代理",
 		"Agent management": "代理管理",
@@ -26,16 +26,5 @@
 		"Reset filters": "重置筛选",
 		"No sessions match your filters": "没有符合筛选条件的会话",
 		"Try adjusting your search or filters.": "请尝试调整你的搜索或筛选条件。"
-	},
-	"rules": [
-		// 会话计数与带仓库名的页头标题
-		{
-			"pattern": "^([\\d,]+) sessions?$",
-			"replacement": "$1 个会话"
-		},
-		{
-			"pattern": "^Agents \\u00B7 (.+)$",
-			"replacement": "代理 · $1"
-		}
-	]
+	}
 }

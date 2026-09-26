@@ -2,12 +2,19 @@
 // 产物为 IIFE 经典脚本（MV3 content_scripts 不支持 module）
 
 import {
+	FALLBACK_LOCALE,
+	type LocaleId,
+} from "../dict/locales.ts";
+import {
 	EXTENSION_MARKER,
 	EXTENSION_MARKER_KEY,
 } from "../shared/identity.ts";
 import {
+	effectiveLocale,
 	readDevMode,
 	readEnabled,
+	readLocale,
+	watchLocale,
 	watchToggles,
 } from "../shared/storage.ts";
 import {
@@ -26,17 +33,26 @@ Object.defineProperty(globalThis, EXTENSION_MARKER_KEY, {
 
 let enabled = false;
 let devMode = false;
+/** 用户在 popup 里选的语言；null = 自动跟随浏览器界面语言 */
+let selectedLocale: LocaleId | null = null;
+let targetLocale: LocaleId = FALLBACK_LOCALE;
 
 const engine = new TranslationEngine({
-	getView: () => viewForPath(location.pathname),
+	getView: () =>
+		viewForPath(location.pathname, targetLocale),
 	isEnabled: () => enabled,
 });
 
 async function bootstrap(): Promise<void> {
-	[enabled, devMode] = await Promise.all([
+	[enabled, devMode, selectedLocale] = await Promise.all([
 		readEnabled(),
 		readDevMode(),
+		readLocale(),
 	]);
+	targetLocale = effectiveLocale(
+		selectedLocale,
+		chrome.i18n.getUILanguage(),
+	);
 	setCollectorEnabled(devMode);
 	// 关闭状态下不启动观察器；等待 popup 切换后经 storage 联动整页刷新
 	if (enabled) engine.start(document.documentElement);
@@ -49,6 +65,11 @@ async function bootstrap(): Promise<void> {
 watchToggles((key, value) => {
 	const current = key === "enabled" ? enabled : devMode;
 	if (value !== current) location.reload();
+});
+
+// 目标语言变化同样整页刷新：词典视图按语言构建，重建比增量替换可靠
+watchLocale((next) => {
+	if (next !== selectedLocale) location.reload();
 });
 
 void bootstrap();

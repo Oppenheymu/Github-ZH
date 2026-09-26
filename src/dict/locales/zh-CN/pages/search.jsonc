@@ -1,8 +1,8 @@
 // 搜索模块：全站搜索与主题页专属词条
 // 覆盖 /search 与 /topics 两类顶级路径
+// 简体中文 · 模块 pages/search（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
-	"$schema": "../../dict.schema.json",
-	"route": "^/(search|topics)",
+	"$schema": "../../../dict.schema.json",
 	"entries": {
 		// —— 结果排序（「X最多 / X最少」与 issues.jsonc 排序菜单同款）——
 		"Best match": "最佳匹配",
@@ -120,34 +120,5 @@
 		"Topic: wifi": "主题：wifi",
 		"Topic: workflow": "主题：workflow",
 		"Topic: workflow-automation": "主题：workflow-automation"
-	},
-	"rules": [
-		// 主题页排序下拉里按子主题过滤的选项标题（主题名保留原文）
-		{
-			"pattern": "^Topic: (.+)$",
-			"replacement": "主题：$1"
-		},
-		{
-			"pattern": "^([\\d,]+) users? starred this repository$",
-			"replacement": "$1 位用户星标了此仓库"
-		},
-		{
-			"pattern": "^([\\d,]+) stars?$",
-			"replacement": "$1 个星标"
-		},
-		{
-			"pattern": "^([\\d,]+) results?$",
-			"replacement": "$1 个结果"
-		},
-		// 「Updated on <日期>」的日期段，月份缩写保留原文
-		{
-			"pattern": "^on ([A-Z][a-z]{2} \\d{1,2}(?:, \\d{4})?)$",
-			"replacement": "于 $1"
-		},
-		// 主题页导语：数量动态，查询键已把连续空白折叠为单空格
-		{
-			"pattern": "^Here are ([\\d,]+) public repositor(?:y|ies) matching this topic\\.\\.\\.$",
-			"replacement": "共有 $1 个公开仓库匹配此主题…"
-		}
-	]
+	}
 }

@@ -1,0 +1,959 @@
+// 共享正则规则（运行时）：pattern 与语言无关，只有替换模板分语言——
+// 模板在 locales/<语言>/rules.jsonc 里按 id 对应（缺 id = 该语言尚未翻译该规则，规则不生效）。
+//
+// 顺序即语义：pattern 对整段已 trim 文本 test，首条命中生效。模块分组顺序与
+// core/modules.jsonc 一致（global 兜底在最后）；模块内顺序由本文件定。
+// 规则不得带 flags 字段（g / y 的 lastIndex 会跨节点累积导致漏翻）。
+// JSONC 转义：正则 \d 在此写作 \\d（写漏一层 Bun 直接报 Syntax Error，不会静默变义）。
+{
+	"$schema": "../../dict.schema.json",
+	"modules": [
+		{
+			"name": "pages/issues",
+			"rules": [
+				// 列表行归属与文档标题（仓库名保留原文）
+				{
+					"id": "issues/in-repo",
+					"pattern": "^In ([^/]+\\/[^/]+);$"
+				},
+				{
+					"id": "issues/page-title",
+					"pattern": "^Issues \\u00B7 (.+) \\u00B7 GitHub$"
+				},
+				// 「opened on <日期>」日期段，月份缩写保留原文（与 search.jsonc 同款）
+				{
+					"id": "issues/on-date",
+					"pattern": "^on ([A-Z][a-z]{2} \\d{1,2}, \\d{4})$"
+				},
+				// 列表行「N linked PRs」关联拉取请求计数（单复数折叠；
+				// 仅覆盖文本节点，属性值不应用正则规则，见模块头注释）
+				{
+					"id": "issues/linked-prs-count",
+					"pattern": "^(\\d+) linked PRs?$"
+				}
+			]
+		},
+		{
+			"name": "pages/pulls",
+			"rules": [
+				// 合并横幅（计数可变）：wants to merge N commit(s) into <基线分支>
+				{
+					"id": "pulls/merge-commits-into",
+					"pattern": "^wants to merge (\\d+) commits? into$"
+				},
+				// 折叠时间线与侧栏参与者计数
+				{
+					"id": "pulls/hidden-items-count",
+					"pattern": "^(\\d+) hidden items?$"
+				},
+				{
+					"id": "pulls/participants-count",
+					"pattern": "^(\\d+) participants?$"
+				},
+				// 页面文档标题：列表页与详情页（仓库名 / PR 标题保留原文）
+				{
+					"id": "pulls/page-title",
+					"pattern": "^Pull requests \\u00B7 (.+) \\u00B7 GitHub$"
+				},
+				{
+					"id": "pulls/pull-request-title-with-number",
+					"pattern": "^(.+) \\u00B7 Pull Request #(\\d+) \\u00B7 ([^/]+\\/[^/]+) \\u00B7 GitHub$"
+				},
+				{
+					"id": "pulls/pull-request-title-with-number-plain",
+					"pattern": "^(.+) \\u00B7 Pull Request #(\\d+) \\u00B7 ([^/]+\\/[^/]+)$"
+				}
+			]
+		},
+		{
+			"name": "pages/repo-settings",
+			"rules": [
+				// “Sponsor” 的引号在 GitHub 文案中直弯混用，用字符类一并覆盖
+				{
+					"id": "repo-settings/sponsor-button",
+					"pattern": "^Display a [\\u201C\"]Sponsor[\\u201D\"] button$"
+				},
+				// 推送限制说明的链接若拆成「链接 + 尾句」两个节点，尾句在此兜底
+				{
+					"id": "repo-settings/send-feedback",
+					"pattern": "^, and send us your feedback\\.$"
+				},
+				// 动态计数
+				{
+					"id": "repo-settings/branch-protection-count",
+					"pattern": "^([\\d,]+) branch protection rules?$"
+				},
+				{
+					"id": "repo-settings/star-count",
+					"pattern": "^([\\d,]+) star$"
+				},
+				{
+					"id": "repo-settings/watcher-count",
+					"pattern": "^([\\d,]+) watcher$"
+				},
+				// 带仓库名的动态标题（仅匹配 owner/repo 形态，避免泛化误伤）
+				{
+					"id": "repo-settings/delete-repo",
+					"pattern": "^Delete ([^/]+\\/[^/]+)$"
+				},
+				{
+					"id": "repo-settings/make-private",
+					"pattern": "^Make ([^/]+\\/[^/]+) private$"
+				},
+				{
+					"id": "repo-settings/settings-title",
+					"pattern": "^Settings: (.+)$"
+				},
+				{
+					"id": "repo-settings/add-people",
+					"pattern": "^Add people to (.+)$"
+				},
+				// sudo 验证码提示（邮箱地址随账号变化，用规则捕获）
+				{
+					"id": "repo-settings/verification-code",
+					"pattern": "^Enter the verification code sent to (.+)\\. If it doesn\\u2019t appear within a few minutes, check your spam folder\\.$"
+				},
+				// 直接访问 / 组织访问卡片：动态计数句（数量与单复数随数据变化）。
+				// 数字在页面上是独立链接节点，句子会被切成「数字 + 尾段」，整句与尾段都收
+				{
+					"id": "repo-settings/entity-access-count",
+					"pattern": "^([\\d,]+) entit(y|ies) (?:has|have) access to this repository\\.?$"
+				},
+				{
+					"id": "repo-settings/entity-access",
+					"pattern": "^entit(y|ies) (?:has|have) access to this repository\\.?$"
+				},
+				{
+					"id": "repo-settings/user-team-access-count",
+					"pattern": "^([\\d,]+) users? and ([\\d,]+) teams? can access this repository through the organization\\.?$"
+				},
+				{
+					"id": "repo-settings/team-access",
+					"pattern": "^teams? can access this repository through the organization\\.?$"
+				},
+				{
+					"id": "repo-settings/access-through-org",
+					"pattern": "^can access this repository through the organization\\.?$"
+				},
+				// 角色下拉按钮「Role: write」等，角色值小写、随当前权限变化
+				{
+					"id": "repo-settings/role-read",
+					"pattern": "^Role: read$"
+				},
+				{
+					"id": "repo-settings/role-triage",
+					"pattern": "^Role: triage$"
+				},
+				{
+					"id": "repo-settings/role-write",
+					"pattern": "^Role: write$"
+				},
+				{
+					"id": "repo-settings/role-maintain",
+					"pattern": "^Role: maintain$"
+				},
+				{
+					"id": "repo-settings/role-admin",
+					"pattern": "^Role: admin$"
+				},
+				// 混合角色提示：经由组织所有权授予的 admin（组织名随页面变化）
+				{
+					"id": "repo-settings/admin-owner",
+					"pattern": "^Admin as owner of the (.+) organization\\.?$"
+				},
+				{
+					"id": "repo-settings/as-owner",
+					"pattern": "^as owner of the (.+) organization\\.?$"
+				}
+			]
+		},
+		{
+			"name": "pages/actions",
+			"rules": [
+				// 运行时长：12s / 3m 40s / 1h 2m 3s（长格式在前，首条命中生效）
+				{
+					"id": "actions/duration-hms",
+					"pattern": "^([\\d,]+)h ([\\d,]+)m ([\\d,]+)s$"
+				},
+				{
+					"id": "actions/duration-hm",
+					"pattern": "^([\\d,]+)h ([\\d,]+)m$"
+				},
+				{
+					"id": "actions/duration-ms",
+					"pattern": "^([\\d,]+)m ([\\d,]+)s$"
+				},
+				{
+					"id": "actions/duration-s",
+					"pattern": "^([\\d,]+)s$"
+				},
+				// 运行行菜单「查看」链接与 sr-only 页头标题
+				{
+					"id": "actions/view-number",
+					"pattern": "^View #(\\d+)$"
+				},
+				{
+					"id": "actions/page-title",
+					"pattern": "^Actions: ([^/]+\\/[^/]+)$"
+				},
+				// 运行计数与带仓库名的页头标题
+				{
+					"id": "actions/workflow-runs-count-plus",
+					"pattern": "^([\\d,]+)\\+ workflow runs?$"
+				},
+				{
+					"id": "actions/workflow-runs-count",
+					"pattern": "^([\\d,]+) workflow runs?$"
+				},
+				{
+					"id": "actions/workflow-runs-title",
+					"pattern": "^Workflow runs \\u00B7 (.+)$"
+				},
+				// 运行行「opened by <用户>」片段：内部空白随 JSX 渲染浮动，用 \s+ 容错
+				{
+					"id": "actions/opened-by",
+					"pattern": "^opened\\s+by$"
+				}
+			]
+		},
+		{
+			"name": "pages/agents",
+			"rules": [
+				// 会话计数与带仓库名的页头标题
+				{
+					"id": "agents/sessions-count",
+					"pattern": "^([\\d,]+) sessions?$"
+				},
+				{
+					"id": "agents/page-title",
+					"pattern": "^Agents \\u00B7 (.+)$"
+				}
+			]
+		},
+		{
+			"name": "pages/commits",
+			"rules": [
+				// 标签行「…」按钮的悬浮提示（tool-tip 文本节点，含标签名）
+				{
+					"id": "commits/toggle-commit-message",
+					"pattern": "^Toggle (.+)'s commit message$"
+				},
+				// 差异统计的读屏文本（含行数，单复数通吃）
+				{
+					"id": "commits/lines-changed",
+					"pattern": "^Lines changed: (\\d+) additions? & (\\d+) deletions?$"
+				},
+				// 提交行 SHA 复制按钮的悬浮提示（tool-tip 文本节点，含短哈希）
+				{
+					"id": "commits/copy-sha",
+					"pattern": "^Copy full SHA for ([0-9a-f]+)$"
+				},
+				// 提交行「…」展开按钮的悬浮提示（tool-tip 文本节点，含短哈希）
+				{
+					"id": "commits/show-description",
+					"pattern": "^Show description for ([0-9a-f]+)$"
+				},
+				// 提交列表按日期分组的标题（月份缩写逐月映射，同 global.jsonc）
+				{
+					"id": "commits/on-jan",
+					"pattern": "^Commits on Jan (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "commits/on-feb",
+					"pattern": "^Commits on Feb (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "commits/on-mar",
+					"pattern": "^Commits on Mar (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "commits/on-apr",
+					"pattern": "^Commits on Apr (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "commits/on-may",
+					"pattern": "^Commits on May (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "commits/on-jun",
+					"pattern": "^Commits on Jun (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "commits/on-jul",
+					"pattern": "^Commits on Jul (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "commits/on-aug",
+					"pattern": "^Commits on Aug (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "commits/on-sep",
+					"pattern": "^Commits on Sep (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "commits/on-oct",
+					"pattern": "^Commits on Oct (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "commits/on-nov",
+					"pattern": "^Commits on Nov (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "commits/on-dec",
+					"pattern": "^Commits on Dec (\\d{1,2}), (\\d{4})$"
+				}
+			]
+		},
+		{
+			"name": "pages/wiki",
+			"rules": [
+				// 页脚编辑记录（用户名原样保留）
+				{
+					"id": "wiki/edited-page",
+					"pattern": "^(.+) edited this page$"
+				},
+				// 页脚修订计数（单复数通吃）
+				{
+					"id": "wiki/revisions-count",
+					"pattern": "^([\\d,]+) revisions?$"
+				},
+				// 侧栏展开剩余页面的按钮
+				{
+					"id": "wiki/more-pages",
+					"pattern": "^Show (\\d+) more pages\\u2026$"
+				},
+				// 标签页标题（页面名与仓库名原样保留）
+				{
+					"id": "wiki/page-title",
+					"pattern": "^(.+) \\u00B7 ([^/]+\\/[^/]+) Wiki \\u00B7 GitHub$"
+				}
+			]
+		},
+		{
+			"name": "pages/insights",
+			"rules": [
+				// 复刻行 Created 后的裸时长与 Period 选项（无 ago 后缀，
+				// 与 global 的「N units ago」规则区分）
+				{
+					"id": "insights/hours",
+					"pattern": "^(\\d+) hours?$"
+				},
+				{
+					"id": "insights/days",
+					"pattern": "^(\\d+) days?$"
+				},
+				{
+					"id": "insights/weeks",
+					"pattern": "^(\\d+) weeks?$"
+				},
+				{
+					"id": "insights/months",
+					"pattern": "^(\\d+) months?$"
+				},
+				{
+					"id": "insights/years",
+					"pattern": "^(\\d+) years?$"
+				},
+				// 页标题与区块标题（Insights / 页面名译出，仓库名属内容原样保留）
+				{
+					"id": "insights/page-title",
+					"pattern": "^Insights: (.+)$"
+				},
+				{
+					"id": "insights/contributors-title",
+					"pattern": "^Contributors to (.+) \\u00B7 GitHub$"
+				},
+				{
+					"id": "insights/security-title",
+					"pattern": "^Security: (.+)$"
+				},
+				{
+					"id": "insights/forks-title",
+					"pattern": "^Forks \\u00B7 (.+) \\u00B7 GitHub$"
+				},
+				{
+					"id": "insights/projects-title",
+					"pattern": "^Projects \\u00B7 (.+) \\u00B7 GitHub$"
+				},
+				{
+					"id": "insights/pulse-title",
+					"pattern": "^Pulse \\u00B7 (.+) \\u00B7 GitHub$"
+				},
+				{
+					"id": "insights/overview-title",
+					"pattern": "^Overview \\u00B7 (.+) \\u00B7 GitHub$"
+				},
+				// Pulse 周期区间（全月名同月区间；跨月区间不命中保持原文）
+				{
+					"id": "insights/range-long-january",
+					"pattern": "^January (\\d{1,2}), (\\d{4}) \\u2013 January (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "insights/range-long-february",
+					"pattern": "^February (\\d{1,2}), (\\d{4}) \\u2013 February (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "insights/range-long-march",
+					"pattern": "^March (\\d{1,2}), (\\d{4}) \\u2013 March (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "insights/range-long-april",
+					"pattern": "^April (\\d{1,2}), (\\d{4}) \\u2013 April (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "insights/range-long-may",
+					"pattern": "^May (\\d{1,2}), (\\d{4}) \\u2013 May (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "insights/range-long-june",
+					"pattern": "^June (\\d{1,2}), (\\d{4}) \\u2013 June (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "insights/range-long-july",
+					"pattern": "^July (\\d{1,2}), (\\d{4}) \\u2013 July (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "insights/range-long-august",
+					"pattern": "^August (\\d{1,2}), (\\d{4}) \\u2013 August (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "insights/range-long-september",
+					"pattern": "^September (\\d{1,2}), (\\d{4}) \\u2013 September (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "insights/range-long-october",
+					"pattern": "^October (\\d{1,2}), (\\d{4}) \\u2013 October (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "insights/range-long-november",
+					"pattern": "^November (\\d{1,2}), (\\d{4}) \\u2013 November (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "insights/range-long-december",
+					"pattern": "^December (\\d{1,2}), (\\d{4}) \\u2013 December (\\d{1,2}), (\\d{4})$"
+				},
+				// 图表轴刻度：年月（Aug 2026 → 2026 年 8 月）
+				{
+					"id": "insights/month-year-jan",
+					"pattern": "^Jan (\\d{4})$"
+				},
+				{
+					"id": "insights/month-year-feb",
+					"pattern": "^Feb (\\d{4})$"
+				},
+				{
+					"id": "insights/month-year-mar",
+					"pattern": "^Mar (\\d{4})$"
+				},
+				{
+					"id": "insights/month-year-apr",
+					"pattern": "^Apr (\\d{4})$"
+				},
+				{
+					"id": "insights/month-year-may",
+					"pattern": "^May (\\d{4})$"
+				},
+				{
+					"id": "insights/month-year-jun",
+					"pattern": "^Jun (\\d{4})$"
+				},
+				{
+					"id": "insights/month-year-jul",
+					"pattern": "^Jul (\\d{4})$"
+				},
+				{
+					"id": "insights/month-year-aug",
+					"pattern": "^Aug (\\d{4})$"
+				},
+				{
+					"id": "insights/month-year-sep",
+					"pattern": "^Sep (\\d{4})$"
+				},
+				{
+					"id": "insights/month-year-oct",
+					"pattern": "^Oct (\\d{4})$"
+				},
+				{
+					"id": "insights/month-year-nov",
+					"pattern": "^Nov (\\d{4})$"
+				},
+				{
+					"id": "insights/month-year-dec",
+					"pattern": "^Dec (\\d{4})$"
+				},
+				// 图表轴刻度：月日（Aug 10 → 8 月 10 日）
+				{
+					"id": "insights/month-day-jan",
+					"pattern": "^Jan (\\d{1,2})$"
+				},
+				{
+					"id": "insights/month-day-feb",
+					"pattern": "^Feb (\\d{1,2})$"
+				},
+				{
+					"id": "insights/month-day-mar",
+					"pattern": "^Mar (\\d{1,2})$"
+				},
+				{
+					"id": "insights/month-day-apr",
+					"pattern": "^Apr (\\d{1,2})$"
+				},
+				{
+					"id": "insights/month-day-may",
+					"pattern": "^May (\\d{1,2})$"
+				},
+				{
+					"id": "insights/month-day-jun",
+					"pattern": "^Jun (\\d{1,2})$"
+				},
+				{
+					"id": "insights/month-day-jul",
+					"pattern": "^Jul (\\d{1,2})$"
+				},
+				{
+					"id": "insights/month-day-aug",
+					"pattern": "^Aug (\\d{1,2})$"
+				},
+				{
+					"id": "insights/month-day-sep",
+					"pattern": "^Sep (\\d{1,2})$"
+				},
+				{
+					"id": "insights/month-day-oct",
+					"pattern": "^Oct (\\d{1,2})$"
+				},
+				{
+					"id": "insights/month-day-nov",
+					"pattern": "^Nov (\\d{1,2})$"
+				},
+				{
+					"id": "insights/month-day-dec",
+					"pattern": "^Dec (\\d{1,2})$"
+				},
+				// Highcharts 图表无障碍描述（轴名随图表固定，直接译入句中；
+				// 双空格键经引擎空白归一后按单空格匹配）
+				{
+					"id": "insights/chart-x-axis-time",
+					"pattern": "^The chart has (\\d+) X ax(?:is|es) displaying Time\\. Data ranges from (.+) to (.+)\\.$"
+				},
+				{
+					"id": "insights/chart-x-axis-navigator",
+					"pattern": "^The chart has (\\d+) X axes displaying Time, and navigator-x-axis\\.$"
+				},
+				{
+					"id": "insights/chart-y-axis-contributions",
+					"pattern": "^The chart has (\\d+) Y ax(?:is|es) displaying Contributions\\. Data ranges from (-?[\\d.]+) to (-?[\\d.]+)\\.$"
+				},
+				{
+					"id": "insights/chart-y-axis-navigator",
+					"pattern": "^The chart has (\\d+) Y axes displaying Contributions, and navigator-y-axis\\.$"
+				},
+				{
+					"id": "insights/chart-combination-series",
+					"pattern": "^Combination chart with (\\d+) data series\\.$"
+				},
+				// Pulse 统计缩写计数（1k → 1 千）
+				{
+					"id": "insights/k-suffix",
+					"pattern": "^([\\d.]+)k$"
+				},
+				// Highcharts 无障碍文案（数字随图表变化）
+				{
+					"id": "insights/chart-bar",
+					"pattern": "^Bar chart with (\\d+) bars?\\.$"
+				},
+				{
+					"id": "insights/highcharts-credit",
+					"pattern": "^Created with Highcharts ([\\d.]+)$"
+				},
+				{
+					"id": "insights/chart-navigator-series",
+					"pattern": "^Navigator (\\d+), series (\\d+) of (\\d+) with ([\\d,]+) data points\\. Y axis, (.+)\\. X axis, (.+)\\.$"
+				}
+			]
+		},
+		{
+			"name": "pages/search",
+			"rules": [
+				// 主题页排序下拉里按子主题过滤的选项标题（主题名保留原文）
+				{
+					"id": "search/topic",
+					"pattern": "^Topic: (.+)$"
+				},
+				{
+					"id": "search/users-starred-count",
+					"pattern": "^([\\d,]+) users? starred this repository$"
+				},
+				{
+					"id": "search/stars-count",
+					"pattern": "^([\\d,]+) stars?$"
+				},
+				{
+					"id": "search/results-count",
+					"pattern": "^([\\d,]+) results?$"
+				},
+				// 「Updated on <日期>」的日期段，月份缩写保留原文
+				{
+					"id": "search/on-date",
+					"pattern": "^on ([A-Z][a-z]{2} \\d{1,2}(?:, \\d{4})?)$"
+				},
+				// 主题页导语：数量动态，查询键已把连续空白折叠为单空格
+				{
+					"id": "search/topic-repos-count",
+					"pattern": "^Here are ([\\d,]+) public repositor(?:y|ies) matching this topic\\.\\.\\.$"
+				}
+			]
+		},
+		{
+			"name": "pages/profile",
+			"rules": [
+				// 组织 / 用户仓库列表的提交动态说明（仓库名为用户内容，捕获保留）
+				{
+					"id": "profile/commit-activity-year",
+					"pattern": "^([\\w.-]+\\/[\\w.-]+)['\\u2019]s past year of commit activity$"
+				},
+				// 仓库卡片的「需要帮助」议题计数（单复数折叠）
+				{
+					"id": "profile/issues-needing-help",
+					"pattern": "^\\(([\\d,]+) issues? needs? help\\)$"
+				},
+				// 屏蔽 / 举报对话框标题带用户名（捕获保留；固定文案走静态词条）
+				{
+					"id": "profile/block-or-report",
+					"pattern": "^Block or report ([\\w.-]+)$"
+				},
+				// 仓库列表分页说明
+				{
+					"id": "profile/showing-of-repos",
+					"pattern": "^Showing (\\d+) of ([\\d,]+) repositor(?:y|ies)$"
+				}
+			]
+		},
+		{
+			"name": "pages/repo",
+			"rules": [
+				{
+					"id": "repo/commits-count",
+					"pattern": "^([\\d,]+) Commits$"
+				},
+				{
+					"id": "repo/reactions-count",
+					"pattern": "^(\\d+) reactions?$"
+				},
+				{
+					"id": "repo/people-reacted",
+					"pattern": "^([\\d,]+) people reacted$"
+				}
+			]
+		},
+		{
+			"name": "global",
+			"rules": [
+				// 跨页面通用正则规则：相对时间与计数等动态文本
+				// 语义：pattern 对整段已 trim 文本 test，命中即 replace（首条命中生效）
+				// 硬性约束：replacement 必须含 CJK（防观察器翻译循环）；规则无 flags 字段，故 g / y 不可能出现
+				// JSONC 转义：正则 \d 在此写作 \\d（写漏一层 Bun 直接报 Syntax Error，不会静默变义）
+				// 全站通用规则集合（global 兜底，页面模块规则先于它生效）
+				// 相对时间：<relative-time> 渲染的英文文本，单复数通吃
+				{ "id": "global/now", "pattern": "^now$" },
+				{
+					"id": "global/yesterday",
+					"pattern": "^yesterday$"
+				},
+				{
+					"id": "global/seconds-ago",
+					"pattern": "^(\\d+) seconds? ago$"
+				},
+				{
+					"id": "global/minutes-ago",
+					"pattern": "^(\\d+) minutes? ago$"
+				},
+				{
+					"id": "global/hours-ago",
+					"pattern": "^(\\d+) hours? ago$"
+				},
+				{
+					"id": "global/days-ago",
+					"pattern": "^(\\d+) days? ago$"
+				},
+				{
+					"id": "global/weeks-ago",
+					"pattern": "^(\\d+) weeks? ago$"
+				},
+				{
+					"id": "global/months-ago",
+					"pattern": "^(\\d+) months? ago$"
+				},
+				{
+					"id": "global/years-ago",
+					"pattern": "^(\\d+) years? ago$"
+				},
+				{
+					"id": "global/in-seconds",
+					"pattern": "^in (\\d+) seconds?$"
+				},
+				{
+					"id": "global/in-minutes",
+					"pattern": "^in (\\d+) minutes?$"
+				},
+				{
+					"id": "global/in-hours",
+					"pattern": "^in (\\d+) hours?$"
+				},
+				{
+					"id": "global/in-days",
+					"pattern": "^in (\\d+) days?$"
+				},
+				{
+					"id": "global/in-weeks",
+					"pattern": "^in (\\d+) weeks?$"
+				},
+				{
+					"id": "global/in-months",
+					"pattern": "^in (\\d+) months?$"
+				},
+				{
+					"id": "global/in-years",
+					"pattern": "^in (\\d+) years?$"
+				},
+				// 计数与统计；带修饰语的条目必须排在泛化条目之前（首条命中生效）
+				{
+					"id": "global/open-count",
+					"pattern": "^([\\d,]+) Open$"
+				},
+				{
+					"id": "global/closed-count",
+					"pattern": "^([\\d,]+) Closed$"
+				},
+				{
+					"id": "global/contributions-last-year",
+					"pattern": "^([\\d,]+) contributions in the last year$"
+				},
+				{
+					"id": "global/contributions-count",
+					"pattern": "^([\\d,]+) contributions?$"
+				},
+				{
+					"id": "global/public-repos-count",
+					"pattern": "^([\\d,]+) public repositor(?:y|ies)$"
+				},
+				{
+					"id": "global/private-repos-count",
+					"pattern": "^([\\d,]+) private repositor(?:y|ies)$"
+				},
+				{
+					"id": "global/repos-count",
+					"pattern": "^([\\d,]+) repositor(?:y|ies)$"
+				},
+				{
+					"id": "global/commits-count",
+					"pattern": "^([\\d,]+) commits?$"
+				},
+				{
+					"id": "global/contributors-count",
+					"pattern": "^([\\d,]+) contributors?$"
+				},
+				{
+					"id": "global/members-count",
+					"pattern": "^([\\d,]+) members?$"
+				},
+				{
+					"id": "global/files-changed",
+					"pattern": "^([\\d,]+) files? changed$"
+				},
+				// 全站专属规则：绝对日期、回应记录与零散计数（commonRules 兜底之外的补充）
+				// 绝对日期（月份缩写）：Sep 25, 2026 → 2026 年 9 月 25 日
+				{
+					"id": "global/short-date-jan",
+					"pattern": "^Jan (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/short-date-feb",
+					"pattern": "^Feb (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/short-date-mar",
+					"pattern": "^Mar (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/short-date-apr",
+					"pattern": "^Apr (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/short-date-may",
+					"pattern": "^May (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/short-date-jun",
+					"pattern": "^Jun (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/short-date-jul",
+					"pattern": "^Jul (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/short-date-aug",
+					"pattern": "^Aug (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/short-date-sep",
+					"pattern": "^Sep (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/short-date-oct",
+					"pattern": "^Oct (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/short-date-nov",
+					"pattern": "^Nov (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/short-date-dec",
+					"pattern": "^Dec (\\d{1,2}), (\\d{4})$"
+				},
+				// 绝对日期（月份全称，不带时刻）：October 5, 2026 → 2026 年 10 月 5 日
+				// （May 全称与缩写同形，沿用上方规则）
+				{
+					"id": "global/long-date-january",
+					"pattern": "^January (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/long-date-february",
+					"pattern": "^February (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/long-date-march",
+					"pattern": "^March (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/long-date-april",
+					"pattern": "^April (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/long-date-june",
+					"pattern": "^June (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/long-date-july",
+					"pattern": "^July (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/long-date-august",
+					"pattern": "^August (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/long-date-september",
+					"pattern": "^September (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/long-date-october",
+					"pattern": "^October (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/long-date-november",
+					"pattern": "^November (\\d{1,2}), (\\d{4})$"
+				},
+				{
+					"id": "global/long-date-december",
+					"pattern": "^December (\\d{1,2}), (\\d{4})$"
+				},
+				// 绝对日期（月份全称 + 时刻）：November 27, 2014 16:57 → 2014 年 11 月 27 日 16:57
+				{
+					"id": "global/long-date-time-january",
+					"pattern": "^January (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+				},
+				{
+					"id": "global/long-date-time-february",
+					"pattern": "^February (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+				},
+				{
+					"id": "global/long-date-time-march",
+					"pattern": "^March (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+				},
+				{
+					"id": "global/long-date-time-april",
+					"pattern": "^April (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+				},
+				{
+					"id": "global/long-date-time-may",
+					"pattern": "^May (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+				},
+				{
+					"id": "global/long-date-time-june",
+					"pattern": "^June (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+				},
+				{
+					"id": "global/long-date-time-july",
+					"pattern": "^July (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+				},
+				{
+					"id": "global/long-date-time-august",
+					"pattern": "^August (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+				},
+				{
+					"id": "global/long-date-time-september",
+					"pattern": "^September (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+				},
+				{
+					"id": "global/long-date-time-october",
+					"pattern": "^October (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+				},
+				{
+					"id": "global/long-date-time-november",
+					"pattern": "^November (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+				},
+				{
+					"id": "global/long-date-time-december",
+					"pattern": "^December (\\d{1,2}), (\\d{4}) (\\d\\d:\\d\\d)$"
+				},
+				// 回应记录：用户名原样保留，多人以 and 连接由贪婪匹配一并覆盖
+				{
+					"id": "global/reaction-heart",
+					"pattern": "^(.+) reacted with heart emoji$"
+				},
+				{
+					"id": "global/reaction-rocket",
+					"pattern": "^(.+) reacted with rocket emoji$"
+				},
+				{
+					"id": "global/reaction-thumbs-up",
+					"pattern": "^(.+) reacted with thumbs up emoji$"
+				},
+				{
+					"id": "global/reaction-eyes",
+					"pattern": "^(.+) reacted with eyes emoji$"
+				},
+				{
+					"id": "global/reaction-laugh",
+					"pattern": "^(.+) reacted with laugh emoji$"
+				},
+				{
+					"id": "global/reaction-hooray",
+					"pattern": "^(.+) reacted with hooray emoji$"
+				},
+				// 零散计数
+				{
+					"id": "global/tasks-count",
+					"pattern": "^(\\d+) tasks?$"
+				},
+				{
+					"id": "global/files-count",
+					"pattern": "^(\\d+) files?$"
+				},
+				{
+					"id": "global/forks-count",
+					"pattern": "^([\\d,]+) forks?$"
+				},
+				{
+					"id": "global/comments-count",
+					"pattern": "^([\\d,]+) comments?$"
+				},
+				// 页脚版权年份
+				{
+					"id": "global/copyright-year",
+					"pattern": "^\\u00A9 (\\d{4}) GitHub, Inc\\.$"
+				}
+			]
+		}
+	]
+}

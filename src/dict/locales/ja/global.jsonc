@@ -1,0 +1,44 @@
+// 日本語・モジュール global（サンプル）
+// 現時点ではサンプル語彙のみで、網羅的な翻訳は目標ではない（カバレッジは門禁が報告する）。
+// 鍵は core/canonical.jsonc にある英語原文の完全一致であること（綴り違いは門禁が弾く）。
+{
+	"$schema": "../../dict.schema.json",
+	"entries": {
+		"Skip to content": "コンテンツへスキップ",
+		"Homepage": "ホームページ",
+		"Dashboard": "ダッシュボード",
+		"Pull requests": "プルリクエスト",
+		"Pull request": "プルリクエスト",
+		"Issues": "イシュー",
+		"Discussions": "ディスカッション",
+		"Marketplace": "マーケットプレイス",
+		"Explore": "探索",
+		"Sponsors": "スポンサー",
+		"Sign in": "サインイン",
+		"Sign up": "サインアップ",
+		"Sign out": "サインアウト",
+		"Notifications": "通知",
+		"Settings": "設定",
+		"Help": "ヘルプ",
+		"New": "新規",
+		"New repository": "新しいリポジトリ",
+		"New issue": "新しいイシュー",
+		"New pull request": "新しいプルリクエスト",
+		"Your profile": "あなたのプロフィール",
+		"Your repositories": "あなたのリポジトリ",
+		"Your issues": "あなたのイシュー",
+		"Your pull requests": "あなたのプルリクエスト",
+		"Your stars": "あなたのスター",
+		"Your organizations": "あなたの組織",
+		"Edit": "編集",
+		"Delete": "削除",
+		"Save": "保存",
+		"Cancel": "キャンセル",
+		"Close": "閉じる",
+		"Confirm": "確認",
+		"Continue": "続行",
+		"Back": "戻る",
+		"Done": "完了",
+		"More": "もっと見る"
+	}
+}
