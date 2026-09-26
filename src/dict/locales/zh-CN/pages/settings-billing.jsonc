@@ -244,6 +244,10 @@
 		"Add specific contact or tax information to your receipts, like your full business name, VAT/GST identification number, or address of record here. We’ll make sure it shows up on every receipt.": "在这里添加会显示在收据上的具体联系或税务信息，例如你的完整企业名称、增值税/GST 识别号或注册地址。我们会确保它出现在每张收据上。",
 		// 功能卡片的产品名：与仓库页 / 个人主页的「Packages」同译（软件包）。
 		// 修掉 pages/repo 的越界路由后，这条不再能靠别的模块顺带生效，必须登记在本模块
-		"Packages": "软件包"
+		"Packages": "软件包",
+		// 付款历史页（/account/billing/history）的空态：标题与币种说明各自是独立节点。
+		// 口吻与同模块的其它空态一致（「你尚未…」/「你当前没有…」），不用「您」
+		"You have not made any payments.": "你尚未进行任何付款。",
+		"Amounts shown in USD": "金额以美元显示"
 	}
 }

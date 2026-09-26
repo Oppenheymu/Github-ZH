@@ -1124,3 +1124,42 @@ describe("付款信息页的实机节点边界", () => {
 		).toBe("付款信息");
 	});
 });
+
+/**
+ * 付款历史页（/account/billing/history）的空态。
+ *
+ * 实机 HTML（维护者提供，2026-09）：
+ *   <h2 data-view-component="true" class="blankslate-heading">        You have not made any payments.
+ *   <p class="note">Amounts shown in USD</p>
+ * 两条键都归 pages/settings-billing（与该页同一路由），故默认的账单总览视图 view 就能代表它。
+ */
+const HISTORY_NODES: readonly string[] = [
+	"You have not made any payments.",
+	"Amounts shown in USD",
+];
+
+describe("付款历史页（/account/billing/history）的空态", () => {
+	it("translates every empty-state node", () => {
+		for (const node of HISTORY_NODES) {
+			const translated = translateText(node, view);
+			expect(
+				translated,
+				`未命中：${JSON.stringify(node)}`,
+			).not.toBeNull();
+			expect(translated ?? "").toMatch(/[\u4e00-\u9fff]/);
+		}
+	});
+
+	it("keeps the heading whitespace when the node is replaced", () => {
+		// 实机 h2 的文本节点是「8 个空格 + 整句 + 行尾缩进」：替换必须原样保留首尾空白，
+		// 否则标题排版会塌；这条同时钉住「键按归一后的形态收」这个前提
+		expect(
+			renderNodes([
+				"        You have not made any payments.\n",
+			]),
+		).toBe("        你尚未进行任何付款。\n");
+		expect(
+			translateText("Amounts shown in USD", view),
+		).toBe("金额以美元显示");
+	});
+});

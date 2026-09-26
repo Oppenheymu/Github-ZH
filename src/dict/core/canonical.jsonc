@@ -792,7 +792,15 @@
 				// 「Packages」原本靠 pages/repo 的越界路由（^/[^/]+/[^/]+ 命中 /settings/**）
 				// 顺带生效；2026-09 修掉那个越界后，它必须由**真正显示它的模块**自己登记。
 				// 这条也示范了越界路由的真实代价：它让「某个键到底该归哪个模块」长期无人追问
-				"Packages"
+				"Packages",
+				// —— 付款历史页（/account/billing/history）的空态 ——
+				// 实机 HTML（维护者提供，2026-09）：
+				//   <h2 data-view-component="true" class="blankslate-heading">        You have not made any payments.
+				//   <p class="note">Amounts shown in USD</p>
+				// h2 里的文本节点带 8 个前导空格与行尾缩进，引擎的 normalizeKey 会 trim 并折叠
+				// 连续空白，故键是不带空白的整句；两句各自成节点，**不要**合并成一条键
+				"You have not made any payments.",
+				"Amounts shown in USD"
 			]
 		},
 		{
