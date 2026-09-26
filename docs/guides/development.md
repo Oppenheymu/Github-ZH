@@ -39,11 +39,11 @@ Github-i18n/
 │   ├── popup/popup.ts       # popup：UI 文案回填 + 开关 / 语言读写 + 漏翻面板
 │   └── shared/              # types.ts（词典类型）、storage.ts（开关与语言存取）、identity.ts
 ├── tooling/
-│   ├── build.ts             # Bun.build IIFE ×2 + 重命名 + 拷贝 public/ → dist/
+│   ├── pipeline/build.ts    # Bun.build IIFE ×2 + 重命名 + 拷贝 public/ → dist/
+│   ├── pipeline/pack.ts     # dist/ 压 zip（零依赖 store 模式）
 │   ├── checks/dict.ts       # 词典门禁（严格编译 + 交叉引用 + 覆盖率）
 │   ├── checks/manifest.ts   # manifest 门禁（MV3 字段 / _locales 一致性 / 资产与产物）
-│   ├── verify-live.ts       # 实机验证：无头浏览器加载 dist/ 逐页收集漏翻 → JSON（bun run verify）
-│   └── pack.ts              # dist/ 压 zip（零依赖 store 模式）
+│   └── verify-live.ts       # 实机验证：无头浏览器加载 dist/ 逐页收集漏翻 → JSON（bun run verify）
 ├── *.test.ts                # 与源码同目录，bun:test
 └── .github/workflows/ci.yml # bun install → bun run check
 ```
@@ -64,7 +64,7 @@ content script 以 `run_at: document_start` 注入：
 
 ### 关键设计决策
 
-- **IIFE 经典脚本**：MV3 的 content_scripts 不支持 module，`tooling/build.ts` 用 Bun.build `format: "iife"` 产出；Bun.build 没有 outfile，产物名靠 naming 模板输出后重命名成 manifest 引用的 `content.js` / `popup.js`；
+- **IIFE 经典脚本**：MV3 的 content_scripts 不支持 module，`tooling/pipeline/build.ts` 用 Bun.build `format: "iife"` 产出；Bun.build 没有 outfile，产物名靠 naming 模板输出后重命名成 manifest 引用的 `content.js` / `popup.js`；
 - **排除清单优先**：`src/content/filters.ts` 的 `EXCLUDE_SELECTOR` 命中元素自身或祖先即整树跳过（`code` / `pre` / `textarea` / `.markdown-body` / 代码高亮与 diff 容器等）。误伤修复永远先加排除选择器，**不得为覆盖 UI 词条而放宽排除**；
 - **词条合并「先到先得」**：`core/modules.jsonc` 的顺序是优先级，`buildView` 先放具体页词条、后放 global 兜底，因此议题页词条能压过仓库泛化词条、页面词条能压过全站词条。已知有意的跨模块同键异译（如 `Actions` 在仓库页是「操作」、在设置页是「Actions 工作流」；`Pages` 在设置页是「页面」、在 global 是「页码」）正是靠这个顺序生效，**勿当重复键清理**；
 - **词典是 JSONC 数据，不是 TS 模块**：编辑器按 `dict.schema.json` 直接给红线与补全；脚本 / AI 能安全批量追加词条，不必重写 TS 对象字面量；重复键由 Biome 的 `noDuplicateObjectKeys` 原生覆盖。代价：正则从字面量降级成字符串，反斜杠必须双写，正则语法检查从编译期挪到门禁；

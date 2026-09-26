@@ -6,8 +6,8 @@
     "packageManager": "bun@1.4.2",
     "description": "GitHub 界面本地化浏览器扩展（Chrome / Edge，Manifest V3）",
     "scripts": {
-        "build": "bun tooling/build.ts",
-        "watch": "bun tooling/build.ts --watch",
+        "build": "bun tooling/pipeline/build.ts",
+        "watch": "bun tooling/pipeline/build.ts --watch",
         "check": "bun run lint && bun run typecheck && bun run check:dict && bun run check:manifest && bun run check:view && bun run test",
         "lint": "biome check .",
         "format": "biome format --write .",
@@ -17,7 +17,7 @@
         "check:view": "bun tooling/checks/view.ts",
         "test": "bun test",
         "verify": "bun tooling/verify-live.ts",
-        "pack": "bun tooling/pack.ts"
+        "pack": "bun tooling/pipeline/pack.ts"
     },
     "devDependencies": {
         "@biomejs/biome": "^2.5.14",

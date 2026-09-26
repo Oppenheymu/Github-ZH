@@ -21,7 +21,7 @@
   - JSONC 里正则的反斜杠必须双写（`\d` 写作 `\\d`）；新增 / 改名模块要同步 `core/modules.jsonc` 与 `core/canonical.jsonc`（两者同名同序，门禁强制）。
 3. **词典键是「整节点精确匹配」语义**：收录可能与仓库名、文件名、用户名撞车的泛化短词（如 `docs` / `test` / `blog` 等小写词）前三思，优先收录多词无歧义短语；大小写必须与 GitHub 实际渲染一致。
 4. **manifest.json 手写在 `public/`**：构建时原样拷贝进 dist，不存在自动生成；改 `matches` / 权限 / 产物文件名时，同步 `tooling/checks/manifest.ts` 的断言。
-5. **content script 产物必须是经典脚本（IIFE）**：MV3 的 `content_scripts` 不支持 `type: "module"`，`tooling/build.ts` 用 Bun.build `format: "iife"` 产出，勿改回 esm。
+5. **content script 产物必须是经典脚本（IIFE）**：MV3 的 `content_scripts` 不支持 `type: "module"`，`tooling/pipeline/build.ts` 用 Bun.build `format: "iife"` 产出，勿改回 esm。
 6. **排除清单优先**：代码块 / 用户内容可能出现的容器，先加进 `src/content/filters.ts` 的排除选择器，再考虑词典侧回避；**不得为覆盖 UI 词条而放宽排除**。
 7. **dist/ 是构建产物**：不入 git；商店发布一律使用 `bun run pack` 产出的 zip。
 

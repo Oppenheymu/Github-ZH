@@ -8,9 +8,9 @@ import {
 	writeFileSync,
 } from "node:fs";
 import { join, relative } from "node:path";
-import packageJson from "../package.json";
+import packageJson from "../../package.json";
 
-const ROOT = join(import.meta.dir, "..");
+const ROOT = join(import.meta.dir, "../..");
 
 export interface ZipEntry {
 	/** zip 内相对路径，固定用 / 分隔 */
