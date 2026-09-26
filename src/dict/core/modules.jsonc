@@ -64,13 +64,21 @@
 			"name": "pages/marketing",
 			"route": "^/(features|pricing)"
 		},
+		// 用户主页是**单段路径**（/octocat）。GitHub 的保留顶层路径不是用户名，不排除它们
+		// 的话这一模块会把整包个人主页词条（Edit profile / Block or report / Contribution
+		// activity…）注入 /search、/features、/pricing、/notifications 等页面——与 pages/repo
+		// 注入 /settings 是同一类越界，只是注入量更大。新增保留路径要同步这里与 pages/repo。
 		{
 			"name": "pages/profile",
-			"route": "^/[^/]+$"
+			"route": "^/(?!(?:settings|account|billing|sessions|login|logout|signup|join|search|explore|topics|trending|collections|marketplace|apps|sponsors|codespaces|notifications|dashboard|issues|pulls|discussions|stars|watching|new|organizations|orgs|users|enterprises|features|pricing|site|security|team|events|about|contact)(?:/|$))[^/]+$"
 		},
+		// 仓库页：/owner/repo 及其任意子路径。保留顶层路径必须排除——`^/[^/]+/[^/]+` 会命中
+		// /settings/profile、/settings/appearance 等**用户账号设置页**，把 84 条仓库专属词条
+		// （Code / Clone / Blame / Raw / Release…）注入进去（实测在设置页真的会生效）。
+		// 保留清单与 pages/profile 保持同一份；新增保留路径要同步。
 		{
 			"name": "pages/repo",
-			"route": "^/[^/]+/[^/]+"
+			"route": "^/(?!(?:settings|account|billing|sessions|login|logout|signup|join|search|explore|topics|trending|collections|marketplace|apps|sponsors|codespaces|notifications|dashboard|issues|pulls|discussions|stars|watching|new|organizations|orgs|users|enterprises|features|pricing|site|security|team|events|about|contact)(?:/|$))[^/]+/[^/]+"
 		},
 		{
 			"name": "global",

@@ -4,6 +4,7 @@
 
 import {
 	cpSync,
+	existsSync,
 	watch as fsWatch,
 	mkdirSync,
 	renameSync,
@@ -21,6 +22,52 @@ const ENTRIES = [
 const OUTPUT_RENAMES = new Map([
 	["index.js", "content.js"],
 ]);
+
+/** public/ 里必须被拷进 dist/ 的静态资产（manifest 与 popup 缺一个扩展就装不上） */
+const REQUIRED_PUBLIC_ASSETS: readonly string[] = [
+	"manifest.json",
+	"popup.html",
+];
+
+/**
+ * 纯函数：入口清单 + 改名映射 → 期望的产物文件名集合。
+ * 新增入口却忘了加 OUTPUT_RENAMES 映射时，产物会以入口原名（如 index.js）落进 dist/，
+ * 并被 pack 无差别打进商店包——这里把它变成一条硬断言。
+ */
+export function expectedArtifacts(
+	entries: readonly string[] = ENTRIES,
+	renames: ReadonlyMap<string, string> = OUTPUT_RENAMES,
+): ReadonlySet<string> {
+	const expected = new Set<string>();
+	for (const entry of entries) {
+		const base = entry.split("/").pop() ?? entry;
+		const name = `${base.replace(/\.ts$/, "")}.js`;
+		expected.add(renames.get(name) ?? name);
+	}
+	return expected;
+}
+
+/** 纯函数：实际产物 vs 期望产物 → 中文问题列表（空数组 = 一致） */
+export function diffArtifacts(
+	actual: Iterable<string>,
+	expected: ReadonlySet<string>,
+): string[] {
+	const problems: string[] = [];
+	const seen = new Set(actual);
+	for (const name of expected) {
+		if (seen.has(name)) continue;
+		problems.push(
+			`dist/${name} 不存在：入口产物缺失（Bun.build 的 naming 模板或入口清单被改了？）`,
+		);
+	}
+	for (const name of seen) {
+		if (expected.has(name)) continue;
+		problems.push(
+			`dist/${name} 是意料之外的 JS 产物：新增入口后忘了在 OUTPUT_RENAMES 里给产物定名？它会原样被打进商店包`,
+		);
+	}
+	return problems;
+}
 
 async function buildOnce(): Promise<void> {
 	const result = await Bun.build({
@@ -41,10 +88,41 @@ async function buildOnce(): Promise<void> {
 		return;
 	}
 	for (const [from, to] of OUTPUT_RENAMES) {
-		renameSync(join(DIST, from), join(DIST, to));
+		const source = join(DIST, from);
+		if (!existsSync(source)) {
+			console.error(
+				`构建产物缺少 ${from}（改过入口文件名或 Bun.build 的 naming 模板？OUTPUT_RENAMES 必须同步）`,
+			);
+			process.exitCode = 1;
+			return;
+		}
+		renameSync(source, join(DIST, to));
 	}
 	// public/ 静态资产原样拷入 dist/（manifest / popup.html / icons）
 	cpSync("public", DIST, { recursive: true });
+	for (const asset of REQUIRED_PUBLIC_ASSETS) {
+		if (existsSync(join(DIST, asset))) continue;
+		console.error(
+			`dist/${asset} 不存在：public/ 里的静态资产没被拷进来`,
+		);
+		process.exitCode = 1;
+		return;
+	}
+	// 产物集合必须与入口一一对应（见 expectedArtifacts 的说明）
+	const actualJs = [
+		...new Bun.Glob("*.js").scanSync({ cwd: DIST }),
+	].sort();
+	const problems = diffArtifacts(
+		actualJs,
+		expectedArtifacts(),
+	);
+	if (problems.length > 0) {
+		console.error("构建产物集合与入口不一致：");
+		for (const problem of problems)
+			console.error(`  - ${problem}`);
+		process.exitCode = 1;
+		return;
+	}
 	const files = [
 		...new Bun.Glob("**/*").scanSync({ cwd: DIST }),
 	].sort();

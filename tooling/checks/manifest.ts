@@ -1,5 +1,6 @@
 // manifest 门禁：MV3 字段完整性 / matches / 资产与产物引用存在性 /
-// _locales 与 __MSG_*__ 占位符一致性
+// _locales 与 __MSG_*__ 占位符一致性 / 跨语言 $NAME$ 占位符一致性 /
+// popup.html 硬编码版本号一致性
 // 校验逻辑导出为纯函数供测试复用；失败置 exitCode = 1
 
 import {
@@ -47,9 +48,9 @@ export interface ValidateOptions {
 	/** dist/ 目录；null 表示尚未构建，跳过产物存在性断言 */
 	distDir: string | null;
 	packageVersion: string;
-	/** public/_locales 下各语言的消息键集合（由 loadLocaleMessages 读取） */
+	/** public/_locales 下各语言的消息键集合与占位符信息（由 loadLocaleMessages 读取） */
 	locales: readonly LocaleMessages[];
-	/** popup.html 源码；null 表示读不到，跳过 data-i18n 键校验 */
+	/** popup.html 源码；null 表示读不到，跳过 data-i18n 键与版本号校验 */
 	popupHtml: string | null;
 }
 
@@ -67,6 +68,23 @@ export function extractI18nKeys(html: string): string[] {
 	return keys;
 }
 
+/** popup.html 里带 class 含 version 的元素（含其文本；只看第一个） */
+const VERSION_ELEMENT =
+	/<[A-Za-z][A-Za-z0-9-]*\b[^>]*\bclass="[^"]*\bversion\b[^"]*"[^>]*>([^<]*)</;
+
+/**
+ * 取出 popup.html 里 class="version" 元素内的文本（已 trim）；没有该元素返回 null。
+ * 运行时 popup.ts 会用 chrome.runtime.getManifest().version 覆写它，硬编码的值只是
+ * 无脚本时的兜底，漏改就会与真实版本号不一致（记 L-07）。
+ */
+export function extractVersionText(
+	html: string,
+): string | null {
+	const text = VERSION_ELEMENT.exec(html)?.[1];
+	if (text === undefined) return null;
+	return text.trim();
+}
+
 /** 读取文本文件；不存在或读失败返回 null（由调用方转成门禁错误） */
 export function readTextOrNull(
 	path: string,
@@ -78,11 +96,87 @@ export function readTextOrNull(
 	}
 }
 
-/** 一个语言目录的消息键集合（tooling 侧读取 public/_locales/<locale>/messages.json） */
+/** 一个语言目录的消息键集合与逐条占位符信息（tooling 侧读取 public/_locales/<locale>/messages.json） */
 export interface LocaleMessages {
 	/** 目录名，即 Chrome 的 locale 标识（en / zh_CN / ja） */
 	readonly locale: string;
 	readonly keys: readonly string[];
+	/**
+	 * 消息键 → 条目详情。可选：只关心键集合的调用方可以省略，
+	 * 省略时跳过该语言的占位符断言。
+	 */
+	readonly entries?: Readonly<
+		Record<string, LocaleMessageEntry>
+	>;
+}
+
+/** messages.json 里一条消息的占位符信息 */
+export interface LocaleMessageEntry {
+	/** message 文本原文 */
+	readonly message: string;
+	/** message 里引用的 $NAME$ 名单（保持出现顺序、去重、保留原大小写） */
+	readonly referenced: readonly string[];
+	/** placeholders 里声明的占位符名（保持出现顺序、去重） */
+	readonly declared: readonly string[];
+}
+
+/**
+ * message 文本里的占位符引用：Chrome 的写法是 $NAME$，而 `$$` 是转义的字面美元符
+ * （`$$COUNT$$` 渲染成字面 `$COUNT$`，不是引用），故两个分支必须并列匹配。
+ */
+const MESSAGE_PLACEHOLDER = /\$\$|\$([A-Za-z0-9_]+)\$/g;
+
+/** 取出 message 文本引用的全部 $NAME$（去重，保持出现顺序，保留原大小写） */
+export function extractMessagePlaceholders(
+	message: string,
+): string[] {
+	const names: string[] = [];
+	for (const match of message.matchAll(
+		MESSAGE_PLACEHOLDER,
+	)) {
+		const name = match[1];
+		// 没有捕获组 = 命中的是 $$ 转义，不是占位符引用
+		if (name === undefined) continue;
+		if (!names.includes(name)) names.push(name);
+	}
+	return names;
+}
+
+/** 是否是可用于索引的普通对象（收窄 JSON 解析结果，避免显式 any） */
+function isRecord(
+	value: unknown,
+): value is Record<string, unknown> {
+	return (
+		typeof value === "object" &&
+		value !== null &&
+		!Array.isArray(value)
+	);
+}
+
+/** 解析 placeholders 声明；缺省或形态不对时返回空数组（由引用断言报错） */
+function extractDeclaredPlaceholders(
+	value: unknown,
+): string[] {
+	return isRecord(value) ? Object.keys(value) : [];
+}
+
+/**
+ * 解析一条 messages.json 条目；缺少 message 文本（非对象 / 不是字符串）返回 null，
+ * 由调用方转成门禁错误。
+ */
+export function parseMessageEntry(
+	value: unknown,
+): LocaleMessageEntry | null {
+	if (!isRecord(value)) return null;
+	const message = value["message"];
+	if (typeof message !== "string") return null;
+	return {
+		message,
+		referenced: extractMessagePlaceholders(message),
+		declared: extractDeclaredPlaceholders(
+			value["placeholders"],
+		),
+	};
 }
 
 /** manifest 里 __MSG_key__ 形式的占位符 */
@@ -101,9 +195,9 @@ export function extractPlaceholders(
 }
 
 /**
- * 读取 public/_locales 下所有语言的消息键集合。
- * 目录不存在或文件不合法即记入 errors（品牌文案整套走 _locales，缺了就会显示成
- * 裸占位符或空白，必须在门禁里响亮失败）。
+ * 读取 public/_locales 下所有语言的消息键集合与逐条占位符信息。
+ * 目录不存在 / 文件不合法 / 条目缺少 message 文本即记入 errors（品牌文案整套走
+ * _locales，缺了就会显示成裸占位符或空白，必须在门禁里响亮失败）。
  */
 export function loadLocaleMessages(localesDir: string): {
 	locales: LocaleMessages[];
@@ -141,19 +235,27 @@ export function loadLocaleMessages(localesDir: string): {
 			);
 			continue;
 		}
-		if (
-			typeof parsed !== "object" ||
-			parsed === null ||
-			Array.isArray(parsed)
-		) {
+		if (!isRecord(parsed)) {
 			errors.push(
 				`_locales/${entry.name}/messages.json 必须是对象`,
 			);
 			continue;
 		}
+		const entries: Record<string, LocaleMessageEntry> = {};
+		for (const [key, value] of Object.entries(parsed)) {
+			const item = parseMessageEntry(value);
+			if (item === null) {
+				errors.push(
+					`_locales/${entry.name}/messages.json 的 ${key} 条目缺少 message 文本`,
+				);
+				continue;
+			}
+			entries[key] = item;
+		}
 		locales.push({
 			locale: entry.name,
 			keys: Object.keys(parsed),
+			entries,
 		});
 	}
 	locales.sort((a, b) =>
@@ -163,9 +265,105 @@ export function loadLocaleMessages(localesDir: string): {
 }
 
 /**
+ * 大小写不敏感差集（Chrome 的占位符名大小写不敏感：`$COUNT$` 由
+ * `placeholders.count` 声明）；返回 names 里的原始写法，报错时保留作者书写的形态。
+ */
+function difference(
+	names: readonly string[],
+	others: readonly string[],
+): string[] {
+	const normalized = others.map((name) =>
+		name.toLowerCase(),
+	);
+	return names.filter(
+		(name) => !normalized.includes(name.toLowerCase()),
+	);
+}
+
+/** 把占位符名渲染成 Chrome 的引用写法（报错文案用） */
+function renderPlaceholders(
+	names: readonly string[],
+): string {
+	return names.map((name) => `$${name}$`).join(" / ");
+}
+
+/**
+ * 校验跨语言的 $NAME$ 占位符一致性（记 M-03）：
+ * 1. 同一条消息在所有语言里的 $NAME$ 引用集合必须一致——否则某个语言的文案会静默
+ *    丢掉数值（例如 `devCount` 写成「已收集 条」）；
+ * 2. 每个被引用的 $NAME$ 都必须在该条目的 placeholders 里声明——未声明的引用在
+ *    Chrome 里取不到值。若所有语言都没用过 placeholders（纯静态文案的写法），
+ *    则只做第 1 条，不凭空要求补声明。
+ * 省略 entries 的语言（只关心键集合的调用方）与缺键的语言跳过（缺键由键集合断言负责）。
+ */
+export function validateLocalePlaceholders(
+	locales: readonly LocaleMessages[],
+	defaultLocale: string,
+): string[] {
+	const errors: string[] = [];
+	const base = locales.find(
+		(entry) => entry.locale === defaultLocale,
+	);
+	const baseEntries = base?.entries;
+	if (baseEntries === undefined) return errors;
+	for (const entry of locales) {
+		const entries = entry.entries;
+		if (entries === undefined) continue;
+		if (entry.locale === defaultLocale) continue;
+		for (const [key, baseEntry] of Object.entries(
+			baseEntries,
+		)) {
+			const target = entries[key];
+			if (target === undefined) continue;
+			const missing = difference(
+				baseEntry.referenced,
+				target.referenced,
+			);
+			if (missing.length > 0) {
+				errors.push(
+					`_locales/${entry.locale} 的消息键 ${key} 缺少占位符：${renderPlaceholders(missing)}`,
+				);
+			}
+			const extra = difference(
+				target.referenced,
+				baseEntry.referenced,
+			);
+			if (extra.length > 0) {
+				errors.push(
+					`_locales/${entry.locale} 的消息键 ${key} 多出占位符（默认语言 ${defaultLocale} 里没有）：${renderPlaceholders(extra)}`,
+				);
+			}
+		}
+	}
+	const usesPlaceholders = locales.some((entry) =>
+		Object.values(entry.entries ?? {}).some(
+			(item) => item.declared.length > 0,
+		),
+	);
+	if (!usesPlaceholders) return errors;
+	for (const entry of locales) {
+		for (const [key, item] of Object.entries(
+			entry.entries ?? {},
+		)) {
+			const undeclared = difference(
+				item.referenced,
+				item.declared,
+			);
+			if (undeclared.length > 0) {
+				errors.push(
+					`_locales/${entry.locale} 的消息键 ${key} 引用了未在 placeholders 里声明的占位符：${renderPlaceholders(undeclared)}`,
+				);
+			}
+		}
+	}
+	return errors;
+}
+
+/**
  * 校验 _locales 的一致性：default_locale 必须有对应目录，manifest 里引用的
- * 每个 __MSG_key__ 必须在默认语言里存在，且所有语言的消息键集合完全相同
- * （缺键会让某语言的界面出现空文案；键集合很小，要求翻译齐全是合理的）。
+ * 每个 __MSG_key__ 必须在默认语言里存在，所有语言的消息键集合完全相同
+ * （缺键会让某语言的界面出现空文案；键集合很小，要求翻译齐全是合理的），
+ * 且同一条消息的 $NAME$ 占位符引用集合与 placeholders 声明一致。
  */
 export function validateLocales(
 	locales: readonly LocaleMessages[],
@@ -209,6 +407,9 @@ export function validateLocales(
 			);
 		}
 	}
+	errors.push(
+		...validateLocalePlaceholders(locales, defaultLocale),
+	);
 	return errors;
 }
 
@@ -277,6 +478,20 @@ export function validateManifest(
 		errors.push(
 			`version（${manifest.version}）须与 package.json（${options.packageVersion}）一致`,
 		);
+	}
+	// popup.html 的版本号是运行时覆写前的兜底文案：存在就必须与 package.json 同步（记 L-07）
+	if (options.popupHtml !== null) {
+		const versionText = extractVersionText(
+			options.popupHtml,
+		);
+		if (
+			versionText !== null &&
+			versionText !== options.packageVersion
+		) {
+			errors.push(
+				`popup.html 的 class="version" 文本（${versionText}）须与 package.json（${options.packageVersion}）一致`,
+			);
+		}
 	}
 	const permissions = manifest.permissions ?? [];
 	if (!permissions.includes("storage")) {
@@ -383,7 +598,7 @@ function main(): void {
 		return;
 	}
 	console.log(
-		`manifest 门禁通过：MV3 字段完整，资产与产物引用有效，_locales ${loaded.locales.map((entry) => entry.locale).join(" / ")} 键集合一致`,
+		`manifest 门禁通过：MV3 字段完整，资产与产物引用有效，_locales ${loaded.locales.map((entry) => entry.locale).join(" / ")} 键集合与占位符一致，popup.html 版本号与 package.json 相符（若存在 class="version"）`,
 	);
 }
 

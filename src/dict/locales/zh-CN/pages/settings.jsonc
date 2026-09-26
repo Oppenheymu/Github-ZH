@@ -41,12 +41,10 @@
 		"You can @mention other users and organizations to link to them.": "你可以 @提及其他用户和组织来链接他们。",
 		"Company": "公司",
 		// 公司提示句同样被 `<strong>@mention</strong>` 切开（You can / @mention / 末段）。
-		// 末段在源码里可能带缩进换行，故「末段」与「@mention 之后全长」各收一条，
-		// 译文以「公司」收尾，与链接/加粗节点衔接自然
+		// 末段的译文要能直接接在「你可以 @mention 」后面读通——walker 会保留原节点的前导空格，
+		// 实机拼出来是「你可以 @mention 你公司的 GitHub 组织来链接它。」
 		"You can @mention your company’s GitHub organization to link it.": "你可以 @提及公司的 GitHub 组织来链接它。",
-		"your company’s GitHub organization to link it.": "的 GitHub 组织，以便链接它。",
-		"other your company’s GitHub organization to link it.": "其他公司的 GitHub 组织来链接它。",
-		"your your company’s GitHub organization to link it.": "你公司的 GitHub 组织来链接它。",
+		"your company’s GitHub organization to link it.": "你公司的 GitHub 组织来链接它。",
 		"Location": "位置",
 		"Display current local time": "显示当前本地时间",
 		"Other users will see the time difference from their local time.": "其他用户将看到与其本地时间的时差。",

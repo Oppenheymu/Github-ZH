@@ -1,4 +1,4 @@
-# 自动分诊流水线（形态照搬 Koishi-CE 的 .github/workflows/triage.yml）。
+# 自动分诊流水线（issue 分诊 + PR 按路径打标）。
 #
 # 两个独立 job：
 # - triage-issue 新 issue 自动分诊：assign 给仓库维护者并打「状态:待确认」作为
@@ -31,12 +31,13 @@ jobs:
     steps:
       - name: 自动指派并标记待确认
         run: |
-          gh issue edit "${{ github.event.issue.number }}" \
+          gh issue edit "$ISSUE_NUMBER" \
             --repo "$GITHUB_REPOSITORY" \
             --add-assignee "Oppenheymu" \
             --add-label "状态:待确认"
         env:
           GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
 
   label-pr:
     if: github.event_name == 'pull_request'
@@ -46,7 +47,7 @@ jobs:
       pull-requests: write
     steps:
       - name: 按路径自动打标
-        uses: actions/labeler@v5
+        uses: actions/labeler@8558fd74291d67161a8a78ce36a881fa63b766a9 # v5.0.0
         with:
           configuration-path: .github/labeler.yml
           sync-labels: false

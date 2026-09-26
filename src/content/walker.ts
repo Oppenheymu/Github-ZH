@@ -1,6 +1,9 @@
 // TreeWalker 翻译核心：文本节点查静态词典与正则规则，元素查属性词条
 // DOM 相关部分保持薄层；纯函数 translateText 导出供测试复用
 
+// 归一化函数住在无 DOM 依赖的 shared/text.ts：门禁要用同一份实现，
+// 而门禁的工程不含 DOM（不能 import 本文件这条链路）
+import { normalizeKey } from "../shared/text.ts";
 import type { DictView } from "../shared/types.ts";
 import { recordAttr, recordText } from "./collector.ts";
 import {
@@ -76,11 +79,6 @@ export function translateText(
 		);
 	}
 	return null;
-}
-
-/** 查询键归一：trim 并折叠连续空白为单空格 */
-function normalizeKey(text: string): string {
-	return text.trim().replace(/\s+/g, " ");
 }
 
 /** 替换单个文本节点，保留原文首尾空白；返回是否发生了替换 */

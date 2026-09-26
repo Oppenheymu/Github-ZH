@@ -131,10 +131,14 @@ const MUST_STAY_ENGLISH: readonly string[] = [
 ];
 
 /**
- * 账单页会命中 pages/repo（泛化仓库模块）的词条：「Packages」在仓库导航里已译作
- * 「软件包」，账单页的 Packages 卡片沿用同一术语，这里锁住这个跨模块胜出关系。
+ * 账单页的功能卡片里的共享产品名。
+ *
+ * 「Packages」曾经靠 pages/repo 的**越界路由**（`^/[^/]+/[^/]+` 也命中 `/settings/**`）
+ * 顺带生效；2026-09 修掉那个越界后，它已下沉登记进 pages/settings-billing 自己
+ * （见 core/canonical.jsonc 该模块末尾的说明）。这里锁住「本页仍能译出同一个词」，
+ * 防止后人误以为它又是别人提供的。
  */
-const REPO_MODULE_WINS: readonly [string, string][] = [
+const SHARED_PRODUCT_NAMES: readonly [string, string][] = [
 	["Packages", "软件包"],
 ];
 
@@ -186,11 +190,11 @@ describe("账单页的实机节点边界", () => {
 		}
 	});
 
-	it("falls through to the repo module for shared product names", () => {
-		for (const [raw, expected] of REPO_MODULE_WINS) {
+	it("translates the shared product names registered in this module", () => {
+		for (const [raw, expected] of SHARED_PRODUCT_NAMES) {
 			expect(
 				translateText(raw, view),
-				`期望由 pages/repo 提供译文：${JSON.stringify(raw)}`,
+				`期望由 pages/settings-billing 提供译文：${JSON.stringify(raw)}`,
 			).toBe(expected);
 		}
 	});
@@ -793,10 +797,11 @@ describe("预算与提醒页的实机节点边界", () => {
 		).toBeNull();
 	});
 
-	it("falls through to the settings and repo modules for shared labels", () => {
+	it("reuses the settings modules' labels instead of duplicating them", () => {
 		// 标题、账户 / 名称列名与产品名来自更靠前的模块：跨模块复用正是不重复登记的理由。
 		// 「Name」在本路由由 pages/settings 胜出（「姓名」），不是仓库页的「名称」——
-		// 这正是视图骨架里「赢家覆盖」锁住的那类事实
+		// 这正是视图骨架里「赢家覆盖」锁住的那类事实。
+		// 「Packages」原先靠 pages/repo 越界顺带生效，2026-09 起已登记在本模块（见上）
 		const expectations: readonly [string, string][] = [
 			["Budgets and alerts", "预算与提醒"],
 			["Account", "账户"],

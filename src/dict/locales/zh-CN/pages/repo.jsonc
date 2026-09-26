@@ -45,7 +45,7 @@
 		"Additional navigation options": "更多导航选项",
 		"Name": "名称",
 		"This path skips through empty directories": "此路径跳过了空目录",
-		"View commit history for this file.": "查看此文件的提交历史",
+		"View commit history for this file.": "查看此文件的提交历史。",
 		// —— 仓库首页概览（文件区与 About 侧栏）——
 		"Latest commit": "最新提交",
 		"Last commit message": "最新提交信息",

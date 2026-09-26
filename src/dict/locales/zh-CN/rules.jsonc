@@ -419,7 +419,7 @@
 		"settings/usage-range-short-same-month-feb": "$<year> 年 2 月 $<startDay> 日 – $<endDay> 日",
 		"settings/usage-range-short-same-month-mar": "$<year> 年 3 月 $<startDay> 日 – $<endDay> 日",
 		"settings/usage-range-short-same-month-apr": "$<year> 年 4 月 $<startDay> 日 – $<endDay> 日",
-		"settings/usage-range-short-same-month-may": "$<year> 年 5 月 $<startDay> 日 – $<endDay> 日",
+		// 5 月没有 short 那条：缩写与全称同形，用 settings/usage-range-same-month-may 那条
 		"settings/usage-range-short-same-month-jun": "$<year> 年 6 月 $<startDay> 日 – $<endDay> 日",
 		"settings/usage-range-short-same-month-jul": "$<year> 年 7 月 $<startDay> 日 – $<endDay> 日",
 		"settings/usage-range-short-same-month-aug": "$<year> 年 8 月 $<startDay> 日 – $<endDay> 日",

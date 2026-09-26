@@ -770,10 +770,10 @@
 					"id": "settings/usage-range-short-same-month-apr",
 					"pattern": "^Apr (?<startDay>\\d{1,2}) - Apr (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
 				},
-				{
-					"id": "settings/usage-range-short-same-month-may",
-					"pattern": "^May (?<startDay>\\d{1,2}) - May (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
-				},
+				// May 的缩写与全称同形（都是 May），pattern 会与上方
+				// settings/usage-range-same-month-may 逐字符重复。同模块内首条命中生效，
+				// 再建一条只会是永不生效的死规则——与 global 里刻意不收 long-date-may 同理
+				// （check:dict 现在会拦下同模块内的重复 pattern）。
 				{
 					"id": "settings/usage-range-short-same-month-jun",
 					"pattern": "^Jun (?<startDay>\\d{1,2}) - Jun (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"

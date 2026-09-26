@@ -7,7 +7,7 @@ end_of_line = lf
 charset = utf-8
 trim_trailing_whitespace = true
 
-# 文档与工作流用 2 空格（与 Koishi-CE 惯例一致，代码归 Biome 管）
+# 文档与工作流用 2 空格（代码归 Biome 管）
 [*.{md,yml,yaml}]
 indent_style = space
 indent_size = 2

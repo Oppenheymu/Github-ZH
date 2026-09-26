@@ -24,9 +24,11 @@ import {
 	formatCoverage,
 	namedGroups,
 	validateAliases,
+	validateCanonicalKeys,
 	validateCanonicalModules,
 	validateEntries,
 	validateNoIdentity,
+	validateRulePatternUniqueness,
 	validateRulesRematch,
 	validateTemplate,
 } from "../dict.ts";
@@ -393,6 +395,83 @@ describe("validateCanonicalModules", () => {
 				{ name: "a" },
 			]),
 		).toHaveLength(1);
+	});
+});
+
+describe("canonical key shape", () => {
+	const module = (keys: string[]) => ({ name: "m", keys });
+
+	it("accepts keys already in the engine's normalized form", () => {
+		expect(
+			validateCanonicalKeys(
+				module([
+					"Star",
+					"Any repository that has not been created or updated during this period will be excluded.",
+				]),
+				"测试",
+			),
+		).toEqual([]);
+	});
+
+	it("rejects a key that contains a real newline", () => {
+		// 引擎查表前会 normalizeKey 节点文本，键里的换行永远对不上（曾经的 insights 词条）
+		const errors = validateCanonicalKeys(
+			module([
+				"Any repository that has not been created or\n    updated during this period will be excluded.",
+			]),
+			"测试",
+		);
+		expect(errors).toHaveLength(1);
+		expect(errors[0]).toContain("归一化");
+	});
+
+	it("rejects a key with collapsed-away whitespace", () => {
+		expect(
+			validateCanonicalKeys(module(["Load  more"]), "测试"),
+		).toHaveLength(1);
+		expect(
+			validateCanonicalKeys(module(["Load\tmore"]), "测试"),
+		).toHaveLength(1);
+	});
+});
+
+describe("validateRulePatternUniqueness", () => {
+	const def = (
+		id: string,
+		module: string,
+		pattern: string,
+	): RuleDef => ({
+		id,
+		module,
+		pattern: new RegExp(pattern),
+	});
+
+	it("reports two identical patterns inside one module", () => {
+		const errors = validateRulePatternUniqueness([
+			def("m/same-may", "m", "^May (?<d>\\d)$"),
+			def("m/short-may", "m", "^May (?<d>\\d)$"),
+		]);
+		expect(errors).toHaveLength(1);
+		expect(errors[0]).toContain("m/short-may");
+		expect(errors[0]).toContain("m/same-may");
+	});
+
+	it("keeps cross-module duplicates legal", () => {
+		// 路由互斥的模块各自收同形规则是有意设计（settings/month-year-* 与 insights/month-year-*）
+		expect(
+			validateRulePatternUniqueness([
+				def(
+					"settings/month-year-jan",
+					"pages/settings-billing",
+					"^Jan (?<y>\\d{4})$",
+				),
+				def(
+					"insights/month-year-jan",
+					"pages/insights",
+					"^Jan (?<y>\\d{4})$",
+				),
+			]),
+		).toEqual([]);
 	});
 });
 

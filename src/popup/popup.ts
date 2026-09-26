@@ -25,8 +25,9 @@ import {
 import type { MissItem } from "../shared/types.ts";
 
 /**
- * 取扩展 UI 文案；键不存在时返回空串（_locales 键集合一致性由
- * tooling/checks/manifest.ts 门禁保证），故这里显式报错，避免静默空界面。
+ * 取扩展 UI 文案；取不到时记录并降级为消息键本身（例如 devCount），绝不抛错——
+ * renderMessages() 是初始化路径上最早的调用点，任何一处缺键都不该让整个 popup
+ * 空白（键集合与占位符一致性由 tooling/checks/manifest.ts 门禁保证，这里只兜底）。
  */
 function msg(
 	name: string,
@@ -37,7 +38,10 @@ function msg(
 		substitutions ?? [],
 	);
 	if (text.length === 0) {
-		throw new Error(`缺少扩展 UI 文案：${name}`);
+		console.warn(
+			`缺少扩展 UI 文案 ${name}，已降级显示消息键`,
+		);
+		return name;
 	}
 	return text;
 }
@@ -210,4 +214,12 @@ function main(): void {
 	});
 }
 
-main();
+// 最外层兜底：初始化期间任何未预期的同步错误只记日志，不再让 popup 整页空白。
+// 注意：模块顶部的 DOM 断言（assertFound）仍在 main() 之外抛出——popup.html 与
+// popup.js 同包发布，缺元素属打包错误，且缺了 #toggle / #status 也渲染不出可用界面，
+// 故刻意不吞掉它（避免掩盖真实问题）。
+try {
+	main();
+} catch (error) {
+	console.error("popup 初始化失败：", error);
+}

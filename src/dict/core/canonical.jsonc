@@ -210,11 +210,9 @@
 				"Company",
 				"You can @mention your company’s GitHub organization to link it.",
 				// 公司提示句的第三段（@mention 之后）。键不得含首尾空白——引擎匹配前会
-				// normalizeKey（trim + 折叠空白），原节点的前导空格由 walker 保留拼接。
-				// 两种片段边界各收一条，兼容源码换行缩进落在哪一侧
+				// normalizeKey（trim + 折叠空白），原节点的前导空格由 walker 保留拼接；
+				// 源码换行缩进落在这段文本内部也会被折叠，故键只写折叠后的形态
 				"your company’s GitHub organization to link it.",
-				"other your company’s GitHub organization to link it.",
-				"your your company’s GitHub organization to link it.",
 				"Location",
 				"Display current local time",
 				"Other users will see the time difference from their local time.",
@@ -774,7 +772,12 @@
 				"Redeem a coupon",
 				"You don't have an active coupon.",
 				"Add information",
-				"No additional information added to your receipts."
+				"No additional information added to your receipts.",
+				// —— 账单总览 / 预算页的功能卡片 ——
+				// 「Packages」原本靠 pages/repo 的越界路由（^/[^/]+/[^/]+ 命中 /settings/**）
+				// 顺带生效；2026-09 修掉那个越界后，它必须由**真正显示它的模块**自己登记。
+				// 这条也示范了越界路由的真实代价：它让「某个键到底该归哪个模块」长期无人追问
+				"Packages"
 			]
 		},
 		{
@@ -1300,7 +1303,10 @@
 				"Repositories with no push activity",
 				"Repositories with at least 1 star",
 				"Switch to tree view",
-				"Any repository that has not been created or\n    updated during this period will be excluded.",
+				// 键必须写成引擎归一化后的形态（trim + 连续空白折叠为单空格）：源码里的
+				// 换行缩进由 walker 的 normalizeKey 折叠，键里带换行符就永远命中不了
+				// （check:dict 现在会拦下这类键——它曾让覆盖率虚高）
+				"Any repository that has not been created or updated during this period will be excluded.",
 				// —— graphs 图表（contributors 等）——
 				"Contributions",
 				"Period",

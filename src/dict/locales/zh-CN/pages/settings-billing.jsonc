@@ -224,6 +224,9 @@
 		"Redeem a coupon": "兑换优惠券",
 		"You don't have an active coupon.": "你当前没有生效中的优惠券。",
 		"Add information": "添加信息",
-		"No additional information added to your receipts.": "尚未添加任何附加信息到你的收据。"
+		"No additional information added to your receipts.": "尚未添加任何附加信息到你的收据。",
+		// 功能卡片的产品名：与仓库页 / 个人主页的「Packages」同译（软件包）。
+		// 修掉 pages/repo 的越界路由后，这条不再能靠别的模块顺带生效，必须登记在本模块
+		"Packages": "软件包"
 	}
 }

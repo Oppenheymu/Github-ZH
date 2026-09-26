@@ -4,15 +4,20 @@ import { join } from "node:path";
 import packageJson from "../../../package.json";
 import manifestJson from "../../../public/manifest.json";
 import type {
+	LocaleMessageEntry,
 	LocaleMessages,
 	ManifestLike,
 } from "../manifest.ts";
 import {
 	BUILD_OUTPUTS,
 	extractI18nKeys,
+	extractMessagePlaceholders,
 	extractPlaceholders,
+	extractVersionText,
 	loadLocaleMessages,
+	parseMessageEntry,
 	readTextOrNull,
+	validateLocalePlaceholders,
 	validateLocales,
 	validateManifest,
 } from "../manifest.ts";
@@ -33,6 +38,27 @@ const options = {
 	locales: shippedLocales.locales,
 	popupHtml: readTextOrNull(join(publicDir, "popup.html")),
 };
+
+/** 构造一条 locale（entries 走真实解析路径，供占位符断言复用） */
+function localeOf(
+	locale: string,
+	messages: Record<
+		string,
+		{
+			message: string;
+			placeholders?: Record<string, unknown>;
+		}
+	>,
+): LocaleMessages {
+	const entries: Record<string, LocaleMessageEntry> = {};
+	for (const [key, value] of Object.entries(messages)) {
+		const parsed = parseMessageEntry(value);
+		if (parsed === null)
+			throw new Error(`测试数据缺少 message 文本：${key}`);
+		entries[key] = parsed;
+	}
+	return { locale, keys: Object.keys(messages), entries };
+}
 
 const validManifest: ManifestLike = {
 	manifest_version: 3,
@@ -70,12 +96,108 @@ describe("extractPlaceholders", () => {
 	});
 });
 
+describe("extractMessagePlaceholders", () => {
+	it("collects $NAME$ references once, in order", () => {
+		expect(
+			extractMessagePlaceholders(
+				"Collected $COUNT$ of $TOTAL$ items",
+			),
+		).toEqual(["COUNT", "TOTAL"]);
+		expect(
+			extractMessagePlaceholders("$COUNT$ 件 / $COUNT$ 件"),
+		).toEqual(["COUNT"]);
+		expect(extractMessagePlaceholders("已启用")).toEqual(
+			[],
+		);
+	});
+
+	it("treats $$ as an escaped literal dollar sign", () => {
+		expect(extractMessagePlaceholders("价格 $$5")).toEqual(
+			[],
+		);
+		expect(extractMessagePlaceholders("$$COUNT$$")).toEqual(
+			[],
+		);
+		expect(
+			extractMessagePlaceholders("$$x$$ 与 $COUNT$"),
+		).toEqual(["COUNT"]);
+	});
+});
+
+describe("parseMessageEntry", () => {
+	it("parses message text and declared placeholders", () => {
+		expect(
+			parseMessageEntry({
+				message: "已收集 $COUNT$ 条",
+				placeholders: { count: { content: "$1" } },
+			}),
+		).toEqual({
+			message: "已收集 $COUNT$ 条",
+			referenced: ["COUNT"],
+			declared: ["count"],
+		});
+	});
+
+	it("returns null when the entry has no message text", () => {
+		expect(
+			parseMessageEntry({ description: "只有描述" }),
+		).toBeNull();
+		expect(parseMessageEntry("文本")).toBeNull();
+		expect(parseMessageEntry(null)).toBeNull();
+	});
+});
+
+describe("extractVersionText", () => {
+	it('reads the text of the class="version" element', () => {
+		expect(
+			extractVersionText(
+				'<span class="version">0.2.0</span>',
+			),
+		).toBe("0.2.0");
+		expect(
+			extractVersionText(
+				'<span id="v" class="badge version"> 1.2.3 </span>',
+			),
+		).toBe("1.2.3");
+	});
+
+	it("ignores non-elements and lookalike class names", () => {
+		expect(
+			extractVersionText(
+				'<span class="versioned">x</span>',
+			),
+		).toBeNull();
+		expect(
+			extractVersionText("header .version { color: red }"),
+		).toBeNull();
+		expect(extractVersionText("")).toBeNull();
+	});
+
+	it("matches the shipped popup.html version with package.json", () => {
+		expect(
+			extractVersionText(options.popupHtml ?? ""),
+		).toBe(packageVersion);
+	});
+});
+
 describe("loadLocaleMessages", () => {
 	it("reads the shipped locale key sets", () => {
 		expect(shippedLocales.errors).toEqual([]);
 		expect(
 			shippedLocales.locales.map((entry) => entry.locale),
 		).toEqual(["en", "ja", "zh_CN"]);
+	});
+
+	it("parses message text and placeholder declarations", () => {
+		const en = shippedLocales.locales.find(
+			(entry) => entry.locale === "en",
+		);
+		expect(en?.entries?.["devCount"]?.referenced).toEqual([
+			"COUNT",
+		]);
+		expect(en?.entries?.["devCount"]?.declared).toEqual([
+			"count",
+		]);
 	});
 
 	it("reports a missing _locales directory", () => {
@@ -135,6 +257,131 @@ describe("validateLocales", () => {
 			1,
 		);
 		expect(validateLocales([en], "de")).toHaveLength(1);
+	});
+});
+
+describe("validateLocalePlaceholders", () => {
+	const withCount = (message: string) => ({
+		message,
+		placeholders: { count: { content: "$1" } },
+	});
+	const en = localeOf("en", {
+		devCount: withCount("Collected $COUNT$ items"),
+		devCopy: { message: "Copy" },
+	});
+	const ja = localeOf("ja", {
+		devCount: withCount("$COUNT$ 件を収集"),
+		devCopy: { message: "コピー" },
+	});
+
+	it("accepts identical reference sets across locales", () => {
+		expect(
+			validateLocalePlaceholders([en, ja], "en"),
+		).toEqual([]);
+	});
+
+	it("matches declared names case-insensitively", () => {
+		expect(ja.entries?.["devCount"]?.declared).toEqual([
+			"count",
+		]);
+	});
+
+	it("flags a language that dropped a placeholder", () => {
+		const broken = localeOf("ja", {
+			devCount: withCount("件を収集"),
+			devCopy: { message: "コピー" },
+		});
+		const errors = validateLocalePlaceholders(
+			[en, broken],
+			"en",
+		);
+		expect(errors).toHaveLength(1);
+		expect(
+			errors.some(
+				(error) =>
+					error.includes("ja") &&
+					error.includes("devCount") &&
+					error.includes("$COUNT$"),
+			),
+		).toBe(true);
+	});
+
+	it("flags a language that invented a placeholder", () => {
+		const broken = localeOf("ja", {
+			devCount: withCount("$COUNT$ 件 / $TOTAL$ 件"),
+			devCopy: { message: "コピー" },
+		});
+		const errors = validateLocalePlaceholders(
+			[en, broken],
+			"en",
+		);
+		// 两条：跨语言多出 $TOTAL$，且 $TOTAL$ 没在 placeholders 里声明
+		expect(errors).toHaveLength(2);
+		expect(
+			errors.some(
+				(error) =>
+					error.includes("多出占位符") &&
+					error.includes("$TOTAL$"),
+			),
+		).toBe(true);
+		expect(
+			errors.some(
+				(error) =>
+					error.includes("placeholders") &&
+					error.includes("$TOTAL$"),
+			),
+		).toBe(true);
+	});
+
+	it("flags a referenced placeholder with no declaration", () => {
+		const undeclared = localeOf("ja", {
+			devCount: { message: "$COUNT$ 件を収集" },
+			devCopy: { message: "コピー" },
+		});
+		const errors = validateLocalePlaceholders(
+			[en, undeclared],
+			"en",
+		);
+		expect(errors).toHaveLength(1);
+		expect(
+			errors.some(
+				(error) =>
+					error.includes("ja") &&
+					error.includes("placeholders") &&
+					error.includes("$COUNT$"),
+			),
+		).toBe(true);
+	});
+
+	it("skips the declaration assertion when nobody uses placeholders", () => {
+		const plainEn = localeOf("en", {
+			devCount: { message: "Collected $COUNT$ items" },
+		});
+		const plainJa = localeOf("ja", {
+			devCount: { message: "$COUNT$ 件を収集" },
+		});
+		expect(
+			validateLocalePlaceholders([plainEn, plainJa], "en"),
+		).toEqual([]);
+	});
+
+	it("is wired into validateLocales", () => {
+		const broken = localeOf("ja", {
+			devCount: withCount("件を収集"),
+			devCopy: { message: "コピー" },
+		});
+		expect(
+			validateLocales([en, broken], "en"),
+		).toHaveLength(1);
+	});
+
+	it("accepts the shipped locales", () => {
+		expect(
+			validateLocalePlaceholders(
+				shippedLocales.locales,
+				"en",
+			),
+		).toEqual([]);
 	});
 });
 
@@ -234,6 +481,38 @@ describe("validateManifest", () => {
 				manifestJson as ManifestLike,
 				options,
 			),
+		).toEqual([]);
+	});
+
+	it("rejects a popup.html version drifted from package.json", () => {
+		const errors = validateManifest(validManifest, {
+			...options,
+			popupHtml: '<span class="version">9.9.9</span>',
+		});
+		expect(
+			errors.some(
+				(error) =>
+					error.includes("popup.html") &&
+					error.includes("9.9.9"),
+			),
+		).toBe(true);
+	});
+
+	it("skips the popup.html version assertion without that element", () => {
+		expect(
+			validateManifest(validManifest, {
+				...options,
+				popupHtml: "<html><body></body></html>",
+			}),
+		).toEqual([]);
+	});
+
+	it("skips both popup.html assertions when it cannot be read", () => {
+		expect(
+			validateManifest(validManifest, {
+				...options,
+				popupHtml: null,
+			}),
 		).toEqual([]);
 	});
 

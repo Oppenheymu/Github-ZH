@@ -502,10 +502,21 @@ describe("有意同键异译（跨模块同键的胜出）", () => {
 		}
 	});
 
-	it("resolves Name to pages/settings on /settings/profile", () => {
-		expect(winner("/settings/profile", "Name")).toBe(
-			"pages/settings",
-		);
+	it("keeps Name free of cross-module collisions on /settings/profile", () => {
+		// 2026-09 修掉 pages/repo 的越界路由之前，「Name」在用户设置页是同键异译
+		// （pages/settings 的「姓名」压过 pages/repo 的「名称」）；越界修好后它只由
+		// pages/settings 提供，不再是碰撞键——这条用例锁的正是「越界不再回来」
+		expect(
+			winner("/settings/profile", "Name"),
+		).toBeUndefined();
+		// 越界清单不该顺手删掉**有意**的同键异译：设置页自己的栏目名仍压过 global
+		expect(
+			winner("/settings/profile", "Accessibility"),
+		).toBe("pages/settings");
+		// 仓库设置页仍是真正的同键异译，赢家固定（越界清单同样不该误伤它）
+		expect(
+			winner("/microsoft/vscode/settings", "Write"),
+		).toBe("pages/repo-settings");
 	});
 
 	it("resolves Actions to pages/repo-settings on /owner/repo/settings", () => {

@@ -1,5 +1,5 @@
 {
-	// 脚本侧工程：tooling（构建 / 门禁 / 图标 / 打包），bun 直跑
+	// 脚本侧工程：tooling（构建 / 门禁 / 打包），bun 直跑
 	// 编译选项在本文件内完整维护，与根 tsconfig.json 各自独立（不用共享 extends 基座）
 	"compilerOptions": {
 		"target": "ES2022",

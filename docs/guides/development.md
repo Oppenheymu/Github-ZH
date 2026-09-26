@@ -12,7 +12,7 @@ Github-i18n/
 │   ├── manifest.json        # MV3：content_scripts + action.popup + storage 权限（name 走 __MSG_*__）
 │   ├── popup.html           # 开关弹窗（样式内联，文案用 data-i18n 占位）
 │   ├── _locales/            # 扩展自身 UI 文案（en / zh_CN / ja）——与「翻译目标语言」无关
-│   └── icons/               # 16/32/48/128 PNG（静态资产，改图标直接替换这四个文件）
+│   └── icons/               # 16/32/48/128 JPG（静态资产，改图标直接替换这四个文件）
 ├── src/
 │   ├── content/             # 翻译引擎（浏览器侧）
 │   │   ├── index.ts         # 入口：身份标记 + 语言解析 + 观察器启动 + storage 联动
@@ -53,13 +53,13 @@ Github-i18n/
 
 content script 以 `run_at: document_start` 注入：
 
-1. **入口**（`src/content/index.ts`）：先在 isolated world 的全局写一个身份标记（`src/shared/identity.ts`），再读 `chrome.storage.local`（`enabled` / `devMode` / `locale`）；开启时把 `MutationObserver` 挂到 `document.documentElement`（childList + subtree + characterData），天然覆盖 GitHub 的 Turbo SPA 导航，无需单独路由钩子；
+1. **入口**（`src/content/index.ts`）：先在 isolated world 的全局写一个身份标记（`src/shared/identity.ts`），再读 `chrome.storage.local`（`enabled` / `devMode` / `locale`）；开启时把 `MutationObserver` 挂到 `document.documentElement`（`childList` + `subtree` + `characterData` + `attributes`，并用 `attributeFilter: ["value", "data-disable-with"]` 把属性噪音压到最小），天然覆盖 GitHub 的 Turbo SPA 导航，无需单独路由钩子；
 2. **目标语言**：`locale` 有值即用它；没设过则取 `chrome.i18n.getUILanguage()` 并按 `src/dict/locales.ts` 的声明解析（`ja-JP` → ja、`zh-Hans-CN` → zh-CN、未支持即回退 zh-CN）。popup 改语言会触发整页刷新重建视图；
 3. **调度**（`engine.ts`）：mutation 只收集 `record.target` 入队，微任务合并后统一 flush，避免高频抖动；flush 时跳过已脱离文档的节点；
 4. **路由与视图**（`pages.ts`）：flush 前按 `location.pathname` + 目标语言取词典视图（单槽缓存，二者任一变化才重建）。视图 = `core/modules.jsonc` 顺序下所有命中路由的模块合并结果：词条「先到先得」（具体页压过泛化页、页面压过 global 兜底），规则「首条命中生效」；
 5. **翻译**（`walker.ts`）：TreeWalker 遍历元素与文本节点——
    - 文本节点：trim 后先查静态词条 Map（O(1)），未命中再查 `core/aliases.jsonc` 的改名映射并按规范键重查一次，仍未命中才按序试正则规则，替换保留原首尾空白；
-   - 元素：`title` / `aria-label` / `placeholder` / `alt` 属性值精确命中词条（含别名）才替换（属性不应用正则规则）；
+   - 元素：`title` / `aria-label` / `placeholder` / `alt` / 按钮类 `value` / `data-disable-with` 共 6 项属性（`walker.ts` 的 `TRANSLATABLE_ATTRS`）值精确命中词条（含别名）才替换（属性不应用正则规则）；
    - 已翻译判定是**语言无关**的「含非拉丁字母」（`filters.ts`），自身修改触发的观察器循环会在下一轮立刻收敛；
 6. **开关**：popup 写 `chrome.storage.local` → content script 的 `storage.onChanged` 监听触发整页 `location.reload()`（开启重建翻译 / 关闭还原英文，简单可靠）。
 
@@ -70,7 +70,7 @@ content script 以 `run_at: document_start` 注入：
 - **词条合并「先到先得」**：`core/modules.jsonc` 的顺序是优先级，`buildView` 先放具体页词条、后放 global 兜底，因此议题页词条能压过仓库泛化词条、页面词条能压过全站词条。已知有意的跨模块同键异译（如 `Actions` 在仓库页是「操作」、在设置页是「Actions 工作流」；`Pages` 在设置页是「页面」、在 global 是「页码」）正是靠这个顺序生效，**勿当重复键清理**；
 - **词典是 JSONC 数据，不是 TS 模块**：编辑器按 `types/dict.schema.json` 直接给红线与补全；脚本 / AI 能安全批量追加词条，不必重写 TS 对象字面量；重复键由 Biome 的 `noDuplicateObjectKeys` 原生覆盖。代价：正则从字面量降级成字符串，反斜杠必须双写，正则语法检查从编译期挪到门禁；
 - **词典数据两条消费路径**：`index.ts`（运行时）与 `tooling/checks/dict.ts`（门禁）都从 `registry.ts` 取原始数据、都走 `load.ts` 编译，只有失败策略不同——运行时单模块失败只跳过 + `console.error`，避免整站翻译失效；门禁严格报错并一次列全。**门禁不得 import `index.ts`**，否则坏数据被静默跳过后门禁反而变绿；
-- **图标**：`public/icons/` 下的 16/32/48/128 PNG 是**直接提交在仓库里的静态资产**，改图标就替换这四个文件（四个尺寸都要换），没有生成脚本、也没有 `bun run icons`。历史原因：图标曾由 `assets/icon.svg` 经 `tooling/gen-icons.ts` 用系统浏览器无头 CDP 栅格化，新版无头浏览器的 `--screenshot` 不支持透明背景、必须走 `Emulation.setDefaultBackgroundColorOverride`；后来这条链路整体删除，SVG 源文件也不在仓库里了。
+- **图标**：`public/icons/` 下的 16/32/48/128 JPG 是**直接提交在仓库里的静态资产**，改图标就替换这四个文件（四个尺寸都要换），没有生成脚本、也没有 `bun run icons`。历史原因：图标曾由 `assets/icon.svg` 经 `tooling/gen-icons.ts` 用系统浏览器无头 CDP 栅格化，新版无头浏览器的 `--screenshot` 不支持透明背景、必须走 `Emulation.setDefaultBackgroundColorOverride`；后来这条链路整体删除，SVG 源文件也不在仓库里了。
 
 ## 多语言词典形态
 
@@ -94,9 +94,15 @@ content script 以 `run_at: document_start` 注入：
 覆盖率由 `bun run check:dict` 报告（分母是 `core/canonical.jsonc`）：
 
 ```
-词典门禁通过：17 模块 / 2066 规范键 / 447 条共享规则 / 2116 条译文
-覆盖率：zh-CN 2066/2066（100.0%，全部已译） | ja 50/2066（2.4%，16 个模块待译）
+词典门禁通过：17 模块 / 2086 规范键 / 446 条共享规则 / 2136 条译文
+覆盖率：zh-CN 2086/2086（100.0%，全部已译） | ja 50/2086（2.4%，16 个模块待译）
 ```
+
+上面这段是 2026-09 的实测输出，**数字随词典增长，一律以本机跑出来的为准**（这一节只解释口径，不维护数字）。口径说明：
+
+- 「规范键」是 `core/canonical.jsonc` 里 **模块 × 键** 的**槽位数**——同一段英文原文若在两个模块各登记一次就算两处；**去重后的唯一键更少**（当前 2086 个槽位 / 2019 个唯一键），「N / 2086」这类覆盖率数字用的都是槽位数；
+- 「条译文」是各语言实际给出的词条数之和（zh-CN 满覆盖 + ja 样例），不等于规范键数；
+- 「条共享规则」是 `core/rules.jsonc` 里 `id` + `pattern` 的条数（语言无关，只有一份），各语言只是给它配模板。
 
 ### 规则为什么按 id 拆
 
@@ -124,6 +130,8 @@ content script 以 `run_at: document_start` 注入：
 
 键是**当前 DOM 文本**，值是**已存译文的规范键**。引擎先按 DOM 文本直查当前语言词典，未命中才查别名，所以这条映射加完，所有语言的译文都不用动（O(1)）。JSONC 注释就是这条断言的理由，请写上判断依据（何时改的、为什么认定语义未变）。
 
+**现状（2026-09 实读文件）**：`core/aliases.jsonc` 里一条别名都没有，内容就是 `"aliases": {}`——这条通道自建立起从未被使用过，至今真实遇到的「上游改文案」都是靠「新增键 + 旧整句键变死键 + 各语言重译」处理的（改名同时伴随拆节点，别名救不了）。它的价值在未来：上游做**纯改词**时，加一行就能让所有语言的既有译文继续生效。
+
 两个边界：
 
 - **拆节点不能靠别名**。上游把 `Collaborators 3` 拆成 `<span>Collaborators</span><span>3</span>` 时，整句译文无法复用，必须新增 `Collaborators` 碎片词条（配合计数规则），旧整句键从 canonical 删掉；
@@ -137,6 +145,8 @@ content script 以 `run_at: document_start` 注入：
 
 - 结构：字段白名单、`route` 以 `^/` 锚定、正则可编译、规则无 `flags`、`global` 必须最后、规则分组顺序与模块顺序一致；
 - 交叉引用：词条的键必须在 `core/canonical.jsonc` 里（**拼错即报**，旧结构下拼错只会静默不翻）、规范清单与模块清单同名同序、规则模板的 id 必须存在、模板引用的捕获组必须存在、别名目标必须是规范键；
+- **键形态**（`validateCanonicalKeys`）：键必须等于引擎 `normalizeKey` 后的形态（trim + 连续空白折叠为单空格）。判定直接调用引擎自己那个无 DOM 依赖的 `normalizeKey`（`src/shared/text.ts`，引擎与门禁共用），保证「门禁认的形态」就是「引擎查的形态」——带换行符 / 制表符 / 连续空格的键**在实机上永不命中**，却照样算进覆盖率分母。这条是 2026-09 事故的补丁：`insights` 的过滤说明句就是带着真实换行混进「100% 已译」的，覆盖率因此虚高；
+- **同模块 pattern 唯一**（`validateRulePatternUniqueness`）：运行时的规则按模块排列、**同模块内首条命中即返回**，所以同模块里两条 pattern 相同的规则，后者是永不生效的死规则，白占 `core/rules.jsonc` 与各语言模板，还让「规则总数」失真（2026-09 实例：5 月的全称与缩写同形，`settings/usage-range-same-month-may` 与 `settings/usage-range-short-same-month-may` 逐字符相同）。**跨模块重复是合法的**（路由互斥的模块可以各自收同形规则，如 `settings/month-year-*` 与 `insights/month-year-*`），故只查同模块内；
 - 译文形态：必须含该语言的文字系统（声明在 `src/dict/locales.ts`），**不得等于任何键**（含别名源文本）——这是与语言无关的防循环结构门禁，也是拉丁语系目标唯一的依靠；
 - 防循环：规则的替换产物不得再命中任何规则（实测现有数据命中数为 0）；
 - 覆盖率报告。
@@ -154,6 +164,18 @@ content script 以 `run_at: document_start` 注入：
 - **`--update` 写出的文件必须同时满足 `biome check`**：`serializeSkeleton` 按 Biome 的规则自己排版（tab 缩进、超过 `lineWidth` 就竖排、内联对象带空格、tab 按 `indentWidth` 折算列数）。历史上它用 `JSON.stringify(…, null, 2)`，产物必然被 `biome check` 报格式错误，于是「重生成快照」这条流程只能靠手工补一次 `biome format --write`；改这里的排版逻辑时，验收标准是 `bun run check:view --update` 之后 `biome check tooling/fixtures/` 零改动；
 - 与词典门禁一样走 `registry.ts` + `load.ts` 的严格路径，**不 import 软失败的 `src/dict/index.ts`**。
 
+`tooling/checks/manifest.ts`（`bun run check:manifest`）：
+
+- MV3 字段完整性：`manifest_version` 必须为 3、`default_locale` 必填、`permissions` 必须含 `storage`、`action.default_popup` 必须存在且指向的文件真的在 `public/` 里；`manifest.version` 必须等于 `package.json` 的 `version`；
+- public 资产与产物引用：`icons` 每个尺寸引用的文件、`action.default_popup`、`content_scripts.js`（必须在内置的 `BUILD_OUTPUTS` 映射里、源码入口存在、且 `dist/` 里真的有该产物——所以这条断言要在 `bun run build` 之后跑）、`content_scripts.matches` 必须含 `https://github.com/*` 与 `https://gist.github.com/*`、`run_at` 必须是 `document_start`（改文件名漏同步即红灯，见硬性约束 4）；
+- `_locales` 键集合一致：`__MSG_*__` 引用的键必须在默认语言里存在，各语言的消息键集合必须完全相同（缺键会让某语言的界面出现空文案）；
+- **`_locales` 占位符一致性**（`validateLocalePlaceholders`）：同一条消息在所有语言里的 `$NAME$` 引用集合必须一致（否则某语言静默丢掉数值，例如 `devCount` 写成「已收集 条」），且每个被引用的 `$NAME$` 都必须在该条目的 `placeholders` 里声明（未声明的引用在 Chrome 里取不到值）。若所有语言都没用过 `placeholders`，则只做前一条，不凭空要求补声明；
+- **`popup.html` 版本号**：`class="version"` 元素的文本（存在时）必须等于 `package.json` 的 `version`。它是 `chrome.runtime.getManifest().version` 覆写前的兜底文案，改了 `package.json` 忘了改它就会出现「关于里版本对不上」。
+
+### 构建产物集合断言（`tooling/pipeline/build.ts`）
+
+`bun run build` 结束后会把 `dist/*.js` 的实际集合与入口清单逐一比对（`expectedArtifacts` / `diffArtifacts`，纯函数，用例在 `tooling/pipeline/build.test.ts`）：**每个入口必须有恰好一个产物，且产物名必须是 manifest 引用的那个**。Bun.build 没有 `outfile`、产物名靠 `naming` 模板 + 一张 `OUTPUT_RENAMES` 改名表，所以「新增入口却忘了定名」时产物会以入口原名（如 `index.js`）落进 `dist/` 并被 `bun run pack` 无差别打进商店包——这条断言把那种静默错误变成红灯。
+
 ## 词典维护指南
 
 ### 归档规则（硬性约束）
@@ -165,6 +187,33 @@ content script 以 `run_at: document_start` 注入：
 - `route` 与 `pattern` 都是**字符串形态的正则源**，因此 `/` 无需转义：`"route": "^/owner/repo/issues"`。`route` 必须以 `^/` 锚定 pathname；
 - 顶层字段是白名单：`modules` / `rules` / `aliases` / `entries` / `replacements`（哪个文件用哪个见 `types/dict.schema.json`）。多写一个字段（例如把 `entries` 拼成 `entires`）会被 `load.ts` 拒绝——否则整块词典会静默变成空对象；
 - **JSONC 里正则的反斜杠必须双写**：TS 字面量 `/^(\d+) minutes? ago$/` 在 JSONC 里写作 `"^(\\d+) minutes? ago$"`。写漏一层 Bun 会直接报 `Syntax Error`（响亮失败，不会静默变成别的正则）。
+
+### 路由保留清单（`pages/repo` 与 `pages/profile`）
+
+这两个模块的路由是**通配形式**，而 GitHub 有一批**保留顶层路径**不是用户名、也不是仓库：
+
+- `pages/profile` 是单段路径（`/octocat`）：裸写 `^/[^/]+$` 会把整包个人主页词条（`Edit profile` / `Block or report` / `Contribution activity`…）注入 `/search`、`/features`、`/pricing`、`/notifications` 等保留路径——注进去的就是该模块当时的全部词条（实测 149 条）；
+- `pages/repo` 是两段路径（`/owner/repo`）：裸写 `^/[^/]+/[^/]+` 会命中 `/settings/profile`、`/settings/appearance` 等**用户账号设置页**，把仓库专属词条（`Code` / `Clone` / `Blame` / `Raw`…）注入进去（实测 86 条，且在实机上真的会生效）。
+
+这两条里的条数口径都是「该模块在 zh-CN 数据层当前的词条数」，会随词典增长——复核办法：`bun run check:view` 的输出里，`/settings/profile` 这类路径突然多出几十上百条词条，就是越界了。
+
+所以两者的路由都带**同一份保留名单**的负向前瞻：
+
+```
+^/(?!(?:settings|account|billing|sessions|login|logout|signup|join|search|explore|topics|
+trending|collections|marketplace|apps|sponsors|codespaces|notifications|dashboard|issues|
+pulls|discussions|stars|watching|new|organizations|orgs|users|enterprises|features|pricing|
+site|security|team|events|about|contact)(?:/|$))[^/]+
+```
+
+（上面为便于阅读折了行，`.jsonc` 里是单行；`profile` 末尾是 `[^/]+$`，`repo` 末尾是 `[^/]+/[^/]+`。）
+
+维护约定：
+
+- **新增 GitHub 保留顶层路径时必须同步改两处**（`core/modules.jsonc` 的 `pages/profile` 与 `pages/repo`），只改一处就会留下一个方向的越界；
+- 名单里每一项后面都跟着 `(?:/|$)`：既排除路径本身（`/settings`），也排除它的子路径（`/settings/profile`），但不会误伤形如 `/settings-archive` 的合法用户名；
+- 路由属于模块定义，改了必然动 `check:view` 的命中序列快照——用 `bun run check:view --update` 重生成并说明原因；
+- 判断某路径是否被越界覆盖的快速办法：`bun run check:view` 的输出会逐条打印「路径 → 命中的模块 + 词条数」，词条数突然变大往往就是注入了不该命的模块。
 
 ### 加一条静态词条
 
@@ -198,6 +247,37 @@ for (const p of probes) {
 2. **`sr-only` 文本照常翻译**（它不在排除清单里），所以像 `alt upAlt↑` 这种「无障碍文本 + `<kbd>` 序列」在实机里是三段以上，键要按段收；翻译时按视觉意图处理即可（例如 `按 Alt ↑`）；
 3. **纯符号 / 纯数字节点翻不了**：可翻译判定要求「含至少一个拉丁字母」（`isTranslatableText`），所以单独的 `.`、`↑`、`1.2` 永远保持原样——**不要为它们收词条**（收了也不会生效，只会变成 canonical 里的死键）；
 4. **查询键会 trim + 折叠空白**（`walker.ts` 的 `normalizeKey`），故键里不要写源码缩进；但**不换行空格 `\u00a0` 会被 trim 掉**，按实际文本收键时按「无前导空格」的形态写（本次实测：`"\u00a0to paste a link…"` 收不中，`"to paste a link…"` 才中）。
+
+### 实机节点边界测试（把抓下来的节点锁进仓库）
+
+抓取只是第一步：**节点边界必须落成仓库里的测试**，否则下次 GitHub 改版没人知道它断了。现有的实机节点回归都在 `src/content/__tests__/`，命名与页面一一对应：
+
+| 文件 | 覆盖的路径 | 说明 |
+| --- | --- | --- |
+| `settings-admin.test.ts` | `/settings/admin` | 账号管理页（Turbo frame，长句被链接切碎） |
+| `settings-appearance.test.ts` | `/settings/appearance` | 外观设置页（下拉 / 分段控件的当前值本身是节点） |
+| `settings-accessibility.test.ts` | `/settings/accessibility` | 辅助功能设置页（按键名 + `kbd` + `sr-only` 拼接） |
+| `settings-notifications.test.ts` | `/settings/notifications` | 通知设置页（四处拼接必须成立） |
+| `settings-billing.test.ts` | `/settings/billing`、`/settings/billing/usage` | 账单 / 用量页（含日期区间规则的顺序语义） |
+| `repo.test.ts` | `/owner/repo` 及子页 | 仓库页（导航、文件列表、README 与 README.md 的区分） |
+| `issues.test.ts` | `/owner/repo/issues` | 议题列表页 |
+| `pulls.test.ts` | `/owner/repo/pulls` | 拉取请求列表页 |
+| `global.test.ts` | 任意路径 | 全站外壳与动态时间文本 |
+
+其余新增用例不再是「实机节点」而是纯逻辑回归：`pages.test.ts`（视图单槽缓存：缓存键写错会表现为「换页后一半英文」）、`src/shared/__tests__/storage.test.ts`（storage 脏数据收窄与开关 / 语言监听）、`src/dict/__tests__/locales.test.ts`（`resolveLocale` 对 `zh-Hans-CN` / `zh_TW` / `en-US` 的归属），另有门禁自身与构建脚本的测试（`tooling/checks/__tests__/`、`tooling/pipeline/build.test.ts`）。
+
+**已知空缺：`repo-settings`（`/owner/repo/settings`）需要登录，尚未采集**，所以仓库设置页没有实机节点回归——它的词条目前只有视图骨架层的保护（命中模块序列 + 碰撞赢家）。
+
+每个实机测试文件的结构都一样：文件头写明节点来源与日期，然后是一份**逐字录入的 `nodeValue` 清单**（带源码缩进 / 换行的按原样保留，因为实机里长句的节点自带缩进），用 `translateText(节点, 该路径的 buildView(...))` 断言命中与译文，另有一组**反例**断言用户内容（文件名、仓库名、`README.md`、小写常用词）**必须不被翻译**。
+
+怎么抓（简述，不需要装任何依赖）：
+
+1. **无扩展的无头 Edge**：用 `msedge --headless=new --remote-debugging-port=<端口> --user-data-dir=<临时目录>` 打开目标页面，**不要加载 `dist/`**——要的是 GitHub 的原始英文渲染，不是翻译后的结果；
+2. **CDP 采集文本节点**：连上 DevTools 协议，用 `Runtime.evaluate` 跑一次 `document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)`，把每个文本节点的 `nodeValue` 与父元素路径（tag + class 链）一起打出来；需要元素属性时另跑一遍 `title` / `aria-label` / `placeholder` / `alt` / 按钮类 `value` / `data-disable-with`；
+3. **在仓库内判定命中**：把采集结果喂给 `translateText(text, buildView(pathname, dictForLocale("zh-CN"), 别名映射))`——命中即为「这条节点已经有词条」，未命中且确实是 UI 文案就是待补的漏翻；**采集时会自然暴露出「哪些整句在实机上被拆过」**，这是登记键的唯一依据；
+4. 把清单连同反例一起写进 `src/content/__tests__/<页名>.test.ts`，`bun test` 全绿后提交。
+
+**M-02 的实机结论（`repo.test.ts` 的反例就是它的回归保护）**：仓库页的文件 / 目录列表**确实**渲染成孤立文本节点（`div.react-directory-filename-cell > a.Link--primary` 里的 `src` / `test` / `build` / `extensions` / `resources` / `scripts` / `.github`…），而它们**全部没被翻译**——因为小写常用词没收录。也就是说硬性约束 3 那条「宁可漏翻也不误伤用户内容」的权衡在实机成立；残留风险是「仓库里真有一个叫 `Docs` / `Assets` / `Star` 的目录」这类**条件性误伤**，唯一的保护是继续不收录可疑短词，而不是加白名单。
 
 ### 加一条动态规则
 
@@ -236,17 +316,21 @@ for (const p of probes) {
 
 `/settings/billing`（账单总览）与 `/settings/billing/usage`（用量页）把同一个账期写成**两套**英文形态：
 账单总览是长月份（`September 1 - September 30, 2026`），用量页是短月份（`Sep 1 - Sep 30, 2026`）。
-两者都只能靠 `settings/usage-range-*` 规则覆盖，且**必须逐组合展开**（同月 12 条 + 跨月 132 条，每种语言各写一份模板）：
+两者都只能靠 `settings/usage-range-*` 规则覆盖，且**必须逐组合展开**（2026-09 实测：长月份
+`settings/usage-range-*` 共 144 条 = 同月 12 + 跨月 132；短月份 `settings/usage-range-short-same-month-*`
+11 条；两组合计 155 条，每种语言各写一份模板）：
 
 - 引擎的替换模板不支持「捕获组 → 中文月份」的映射，模板里引用捕获组会渲染出英文 `September`，
   所以月份必须写死在 pattern 与模板里；
-- **全展开的代价如实记在此处**：这 144 条规则挂在 `pages/settings-billing` 模块下，而该模块的
-  路由是 `^/settings/billing`（只有这一个探针），所以视图骨架快照只膨胀这一处；若挂到 `pages/settings`
-  下，每条 `/settings` 探针都会背上这一百多条永不使用的 id；
-- 跨月短月份（如 `Sep 1 - Oct 1, 2026`）**暂无实证**，故目前只收同月 12 条：未命中只是保留英文，
-  不会产出中英残句（`global/short-date-*` 两端都以 `^…$` 锚定，不做部分替换）；
-- 用量页的实机译文对照图（按区域重建的无头浏览器渲染，非真实页面截图）：
-  `docs/guides/assets/settings-billing-usage.zh-CN.png`。
+- **全展开的代价如实记在此处**：这 144 条长月份规则挂在 `pages/settings-billing` 模块下，而该模块的
+  路由是 `^/settings/billing`——当前命中 **4 条探针**（`/settings/billing`、`/settings/billing/ai_usage`、
+  `/settings/billing/budgets`、`/settings/billing/licensing`），所以视图骨架快照会在这 4 处各膨胀一百多个
+  永不使用的规则 id；把它们上提到 `pages/settings` 更糟：每条 `/settings*` 探针都会背上这一百多条；
+- 跨月短月份（如 `Sep 1 - Oct 1, 2026`）**暂无实证**，故目前只收同月 11 条：未命中只是保留英文，
+  不会产出中英残句（`global/short-date-*` 两端都以 `^…$` 锚定，不做部分替换）。短月份里 5 月的全称与缩写
+  同形（`May` 就是 `May`），原先两条 pattern 逐字符相同，后一条永不生效——已删除死规则
+  `settings/usage-range-short-same-month-may`，并由词典门禁的「同模块 pattern 唯一」断言接管；
+- 用量页原先的实机译文对照图**已随该页改造删除**（`71ba590` 删掉了那张图与整个图片目录，仓库里不再有该资产、也没有任何页面引用它）；需要对照时按「实机节点边界测试」一节的方法自己抓一轮，或用 popup 的开发者模式看漏翻。
 
 ### 上游改版时怎么办
 
@@ -290,12 +374,12 @@ popup 底部的「开发者模式」开关**默认关闭**，用于系统性发�
 2. 正常浏览仓库 / 议题 / PR 等页面，引擎每 5 秒（以及页面隐藏 / 卸载时）把缓冲合并写入本机 `chrome.storage.local`；
 3. 回到 popup 查看「已收集 N 条」，点「复制」得到 JSON，粘贴给 AI 会话或按下方归档规则手工补词条；
 4. 点「清空」重新攒一批；
-5. 需要覆盖更多页面时，重复上面 1–4 步（`bun run verify` 的自动化探针已在 `48bf519` 删除，尚未重建）。
+5. 需要覆盖更多页面时，重复上面 1–4 步。**当前只有这条采集路径**：自动化实机探针（原先的 `tooling/verify-live.ts`，由 `bun run verify` 调用）已于 `48bf519` 删除、**尚未重建**，`package.json` 里也已删掉那个脚本，仓库里不存在任何可跑的自动化探针命令。
 
 ### 收集范围与导出格式
 
 - 文本节点：未命中静态词条与正则规则的可见 UI 文本（trim 后原文）；
-- 属性：`title` / `aria-label` / `placeholder` / `alt` 未命中词条的原值；
+- 属性：`title` / `aria-label` / `placeholder` / `alt` 未命中词条的原值（引擎另外还翻译按钮类 `value` / `data-disable-with`，共 6 项；收集时这两项归到 `aria-label` 这一类，故 `MissKind` 只有 4 个属性名）；
 - 记录的 `text` 就是「GitHub 渲染的精确英文原文」，可直接作为 canonical 候选键（`kind: "text"` 为文本节点，其余 kind 为属性名）；
 - 缓冲上限 300 条、落盘上限 500 条（满了保留先收集的），同键累加出现次数、`path` 取首次出现页面的 pathname。
 
@@ -322,7 +406,11 @@ popup 底部的「开发者模式」开关**默认关闭**，用于系统性发�
 
 ## 包体与分发
 
-- content script 必须内联全部词典（现在是同步注入、天然无闪烁），实测数据占产物大头：迁移到 core/locales 形态后数据紧凑 JSON 约 **144 KB**（content.js 约 **195 KB**，`minify: false`）。相比单语言形态增加约 13 KB，来自共享结构（207 条规则 id + 模块名）与 ja 样例；
+- content script 必须内联全部词典（现在是同步注入、天然无闪烁），所以数据是产物的大头。口径与实测（2026-09）：
+  - **content.js 约 291 KiB**（`minify: false`，即不压缩、便于在浏览器里排查漏翻）——复核：`bun run build` 之后取 `(Get-Item dist/content.js).Length`（快照时是 297,717 字节）；
+  - **词典数据本身**（编译后模块词典 + 规则模板的紧凑 JSON）约 **132 KiB**：zh-CN 约 130 KiB（17 个模块槽 / 2086 条词条 / 446 条规则）+ ja 样例约 2 KiB。这个口径不含引擎、调度与收集器代码，也不是磁盘上的某个文件；
+  - **规则与键的条数别再手抄**：随词典增长，一律看 `bun run check:dict` 的输出（「N 模块 / N 规范键 / N 条共享规则 / N 条译文」，口径见「稀疏覆盖」一节）。
+  上面两个体积同样随词典增长，改动词典后如需引用数字请重新测量；
 - 因此 N 种语言**全量打包**在 N=2 时仍是最优解（无闪烁、零风险）；待到 N≥4 再考虑按 locale 分发（`chrome.scripting.registerContentScripts` 按语言注册是唯一能保持同步注入、无闪烁的方案，代价是引入 background service worker 与 `scripting` 权限）；
 - 发布一律用 `bun run pack` 产出的 zip：仓库根目录下的 `github-i18n-v<版本>.zip`（store 模式、零依赖打包）。
 

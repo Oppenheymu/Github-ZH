@@ -33,7 +33,8 @@
 		"Repositories with no push activity": "无推送活动的仓库",
 		"Repositories with at least 1 star": "至少有 1 个星标的仓库",
 		"Switch to tree view": "切换到树状视图",
-		"Any repository that has not been created or\n    updated during this period will be excluded.": "在此期间未创建或未更新的仓库将被排除。",
+		// 键写归一化后的单空格形态（源码里的换行缩进由 normalizeKey 折叠，键里的换行永不命中）
+		"Any repository that has not been created or updated during this period will be excluded.": "在此期间未创建或未更新的仓库将被排除。",
 		// —— graphs 图表（contributors 等）——
 		"Contributions": "贡献",
 		"Period": "时间段",

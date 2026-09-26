@@ -6,17 +6,23 @@ on:
       - main
   pull_request:
 
+# 最小权限：CI 只需要读仓库内容（不写 PR、不写 issue）
+permissions:
+  contents: read
+
 jobs:
   check:
     runs-on: ubuntu-latest
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: 安装 Bun
-        uses: oven-sh/setup-bun@v2
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: 1.4.2
       - name: 安装依赖
         run: bun install --frozen-lockfile
-      - name: 全量门禁（lint + typecheck + check:dict + check:manifest + test）
+      - name: 全量门禁（lint + typecheck + check:dict + check:manifest + check:view + test）
         run: bun run check
+      - name: 构建扩展产物（dist/，构建链断裂即红灯）
+        run: bun run build

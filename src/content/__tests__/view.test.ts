@@ -47,8 +47,67 @@ describe("matchModules", () => {
 			"pages/repo",
 			"global",
 		]);
+		expect(routes("/owner/repo/settings")).toEqual([
+			"pages/repo-settings",
+			"pages/repo",
+			"global",
+		]);
+	});
+
+	it("keeps reserved top-level paths out of the repo and profile modules", () => {
+		// 2026-09 修的越界：`^/[^/]+/[^/]+` 会把 84 条仓库词条注入用户设置页
+		// （实测在 /settings/profile 上真的会把 Code / Clone 译成中文），
+		// `^/[^/]+$` 则会把 149 条个人主页词条注入搜索页 / 营销页。
+		// 保留路径清单在 core/modules.jsonc 里两个模块各一份，这条用例是它的回归保护。
 		expect(routes("/settings/profile")).toEqual([
 			"pages/settings",
+			"global",
+		]);
+		expect(routes("/settings/appearance")).toEqual([
+			"pages/settings",
+			"global",
+		]);
+		expect(routes("/settings/billing")).toEqual([
+			"pages/settings",
+			"pages/settings-billing",
+			"global",
+		]);
+		expect(routes("/search")).toEqual([
+			"pages/search",
+			"global",
+		]);
+		expect(routes("/topics")).toEqual([
+			"pages/search",
+			"global",
+		]);
+		expect(routes("/features")).toEqual([
+			"pages/marketing",
+			"global",
+		]);
+		expect(routes("/pricing")).toEqual([
+			"pages/marketing",
+			"global",
+		]);
+		// 纯保留路径：只剩兜底模块（此前会命中 pages/profile）
+		expect(routes("/notifications")).toEqual(["global"]);
+		expect(routes("/explore")).toEqual(["global"]);
+	});
+
+	it("still matches real profiles, repos and non-reserved two-segment paths", () => {
+		// 排除保留路径不能把正常的用户名 / 仓库名一起排掉
+		expect(routes("/torvalds")).toEqual([
+			"pages/profile",
+			"global",
+		]);
+		expect(routes("/owner/repo")).toEqual([
+			"pages/repo",
+			"global",
+		]);
+		expect(
+			routes("/owner/repo/blob/main/src/index.ts"),
+		).toEqual(["pages/repo", "global"]);
+		// 不存在的两段路径仍按仓库页处理（故意保持宽泛，避免漏掉未登记的子页）
+		expect(routes("/not-a-real-page/x")).toEqual([
 			"pages/repo",
 			"global",
 		]);

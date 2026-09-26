@@ -10,6 +10,9 @@
 //   * core/canonical.jsonc 是键的权威清单——各语言词条的键不在清单里即报错（拼错即报），
 //     它同时是覆盖率的分母与「译文不得等于任何键」的键集合；
 //   * 译文必须含目标语言的文字系统（语言声明见 src/dict/locales.ts，不写死汉字）；
+//   * 规范键必须等于引擎 normalizeKey 后的形态——带换行 / 制表符 / 连续空格的键永不命中，
+//     只会虚高覆盖率（引擎自己的 normalizeKey 是唯一真源）；
+//   * 同模块内规则 pattern 必须唯一——同模块首条命中生效，重复的那条永不生效；
 //   * 规则模板引用的捕获组（$1 / $<name>）必须在对应 pattern 里存在；
 //   * 防翻译循环的两条结构门禁（译文≠键、替换产物不再命中规则）。
 //
@@ -36,6 +39,9 @@ import {
 	coreRawDict,
 	localeRawDicts,
 } from "../../src/dict/registry.ts";
+// 用引擎自己的归一化函数判定规范键形态（唯一真源，避免两套判定标准）。
+// 它住在无 DOM 依赖的 shared/text.ts——脚本侧 tsconfig 不含 DOM，不能 import walker.ts
+import { normalizeKey } from "../../src/shared/text.ts";
 import type {
 	DictCore,
 	LocaleDict,
@@ -131,7 +137,15 @@ export function buildCanonical(
 	});
 }
 
-/** 校验规范键自身形态（键是英文原文，不得含目标语言文字系统） */
+/**
+ * 校验规范键自身形态（键是英文原文，不得含目标语言文字系统）。
+ *
+ * 其中「键必须等于引擎归一化后的形态」这条是 2026-09 事故的补丁：键里若带换行符 /
+ * 制表符 / 连续空格，引擎查表前会先对**节点文本**做 normalizeKey（trim + 折叠空白），
+ * 归一化后的文本永远不可能等于这样的键——于是该词条在实机永不命中，却仍然计入
+ * 覆盖率分母（`insights` 的过滤说明句就是这样混进 100% 的）。这里用引擎自己的
+ * normalizeKey 判定，保证「门禁认的形态」与「引擎查的形态」是同一个。
+ */
 export function validateCanonicalKeys(
 	module: CanonicalModule,
 	where: string,
@@ -144,6 +158,11 @@ export function validateCanonicalKeys(
 			errors.push(`${label}：键不能为空`);
 		if (key !== key.trim())
 			errors.push(`${label}：键不得含首尾空白`);
+		if (normalizeKey(key) !== key) {
+			errors.push(
+				`${label}：键必须是引擎归一化后的形态（trim + 连续空白折叠为单空格），实为 ${JSON.stringify(normalizeKey(key))}——带换行符 / 制表符 / 连续空格的键永不命中，只会虚高覆盖率`,
+			);
+		}
 		if (hasNonLatinLetter(key))
 			errors.push(
 				`${label}：键必须保持英文原文，不得含非拉丁字母`,
@@ -156,6 +175,37 @@ export function validateCanonicalKeys(
 		if (seen.has(key))
 			errors.push(`${label}：同一模块内键重复`);
 		seen.add(key);
+	}
+	return errors;
+}
+
+/**
+ * 同模块内的规则 pattern 必须唯一。
+ *
+ * 运行时的规则按模块顺序排列，**同模块内首条命中即返回**（见 walker.ts 的 translateText），
+ * 因此同模块里两条 pattern 相同的规则，后者是永不生效的死规则——它照样占着
+ * core/rules.jsonc 与各语言模板，还会让「规则总数」这个数字失真
+ * （2026-09 实例：5 月的全称与缩写同形，`usage-range-same-month-may` 与
+ * `usage-range-short-same-month-may` 逐字符相同）。
+ *
+ * 跨模块重复是**合法**的：路由互斥的模块可以各自收同形规则
+ * （例如 settings/month-year-* 与 insights/month-year-*），故只查同模块内。
+ */
+export function validateRulePatternUniqueness(
+	defs: readonly RuleDef[],
+): string[] {
+	const errors: string[] = [];
+	const firstByModuleAndPattern = new Map<string, string>();
+	for (const def of defs) {
+		const at = `${def.module}\u0000${def.pattern.source}`;
+		const first = firstByModuleAndPattern.get(at);
+		if (first === undefined) {
+			firstByModuleAndPattern.set(at, def.id);
+			continue;
+		}
+		errors.push(
+			`core/rules ${JSON.stringify(def.id)}：pattern 与同模块的 ${JSON.stringify(first)} 完全相同（${JSON.stringify(def.pattern.source)}）——同模块内首条命中生效，这条永不生效（May 这类全称与缩写同形的月份，只留一条）`,
+		);
 	}
 	return errors;
 }
@@ -456,6 +506,11 @@ export function buildCore(raw?: {
 				module,
 				`core/canonical ${module.name}`,
 			),
+		);
+	}
+	if (core !== null) {
+		errors.push(
+			...validateRulePatternUniqueness(core.rules),
 		);
 	}
 	if (core !== null && canonical.length > 0) {

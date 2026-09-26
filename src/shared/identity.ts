@@ -1,5 +1,9 @@
 // 扩展身份标记：content script 在 isolated world 的全局上留一个常量，
-// 实机探针（tooling/verify-live.ts）据此认出「本扩展的 content script 上下文」。
+// 实机探针据此认出「本扩展的 content script 上下文」。
+//
+// 现状（2026-09）：自动化实机探针 tooling/verify-live.ts 已在 48bf519 删除、**尚未重建**，
+// 因此当前仓库内没有任何读取方——这是**有意保留**的能力，不是死代码：
+// 重建探针时第一时间就会用到它（AGENTS.md 已删掉对 bun run verify 的引用）。
 //
 // 为什么不能再用 manifest.name（AGENTS.md 已知坑）：品牌改走 __MSG_*__ 之后，
 // chrome.runtime.getManifest().name 会随浏览器界面语言变化，用它做身份匹配会

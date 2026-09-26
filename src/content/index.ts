@@ -24,7 +24,7 @@ import {
 import { TranslationEngine } from "./engine.ts";
 import { viewForPath } from "./pages.ts";
 
-// 在 isolated world 的全局上留下身份标记，供实机探针（bun run verify）识别本扩展上下文。
+// 在 isolated world 的全局上留下身份标记，供（待重建的）实机探针识别本扩展上下文。
 // 必须同步执行、早于任何 await：探针在页面加载后立即求值，晚了会被判成「扩展未注入」。
 Object.defineProperty(globalThis, EXTENSION_MARKER_KEY, {
 	value: EXTENSION_MARKER,

@@ -805,23 +805,18 @@
 		{
 			"name": "settings/profile",
 			"path": "/settings/profile",
-			"matched": ["pages/settings", "pages/repo", "global"],
+			"matched": ["pages/settings", "global"],
 			"collisions": [
 				{
 					"key": "Accessibility",
 					"module": "pages/settings"
 				},
-				{ "key": "Actions", "module": "pages/settings" },
 				{ "key": "Appearance", "module": "pages/settings" },
-				{ "key": "Company", "module": "pages/settings" },
-				{ "key": "Name", "module": "pages/settings" }
+				{ "key": "Company", "module": "pages/settings" }
 			],
 			"rules": [
 				"settings/export-available",
 				"settings/owner-organizations",
-				"repo/commits-count",
-				"repo/reactions-count",
-				"repo/people-reacted",
 				"global/now",
 				"global/yesterday",
 				"global/seconds-ago",
@@ -901,23 +896,18 @@
 		{
 			"name": "settings/accessibility",
 			"path": "/settings/accessibility",
-			"matched": ["pages/settings", "pages/repo", "global"],
+			"matched": ["pages/settings", "global"],
 			"collisions": [
 				{
 					"key": "Accessibility",
 					"module": "pages/settings"
 				},
-				{ "key": "Actions", "module": "pages/settings" },
 				{ "key": "Appearance", "module": "pages/settings" },
-				{ "key": "Company", "module": "pages/settings" },
-				{ "key": "Name", "module": "pages/settings" }
+				{ "key": "Company", "module": "pages/settings" }
 			],
 			"rules": [
 				"settings/export-available",
 				"settings/owner-organizations",
-				"repo/commits-count",
-				"repo/reactions-count",
-				"repo/people-reacted",
 				"global/now",
 				"global/yesterday",
 				"global/seconds-ago",
@@ -997,23 +987,18 @@
 		{
 			"name": "settings/notifications",
 			"path": "/settings/notifications",
-			"matched": ["pages/settings", "pages/repo", "global"],
+			"matched": ["pages/settings", "global"],
 			"collisions": [
 				{
 					"key": "Accessibility",
 					"module": "pages/settings"
 				},
-				{ "key": "Actions", "module": "pages/settings" },
 				{ "key": "Appearance", "module": "pages/settings" },
-				{ "key": "Company", "module": "pages/settings" },
-				{ "key": "Name", "module": "pages/settings" }
+				{ "key": "Company", "module": "pages/settings" }
 			],
 			"rules": [
 				"settings/export-available",
 				"settings/owner-organizations",
-				"repo/commits-count",
-				"repo/reactions-count",
-				"repo/people-reacted",
 				"global/now",
 				"global/yesterday",
 				"global/seconds-ago",
@@ -1096,7 +1081,6 @@
 			"matched": [
 				"pages/settings",
 				"pages/settings-billing",
-				"pages/repo",
 				"global"
 			],
 			"collisions": [
@@ -1104,10 +1088,8 @@
 					"key": "Accessibility",
 					"module": "pages/settings"
 				},
-				{ "key": "Actions", "module": "pages/settings" },
 				{ "key": "Appearance", "module": "pages/settings" },
-				{ "key": "Company", "module": "pages/settings" },
-				{ "key": "Name", "module": "pages/settings" }
+				{ "key": "Company", "module": "pages/settings" }
 			],
 			"rules": [
 				"settings/export-available",
@@ -1116,7 +1098,7 @@
 				"settings/usage-range-same-month-feb",
 				"settings/usage-range-same-month-mar",
 				"settings/usage-range-same-month-apr",
-				"settings/usage-range-short-same-month-may",
+				"settings/usage-range-same-month-may",
 				"settings/usage-range-same-month-jun",
 				"settings/usage-range-same-month-jul",
 				"settings/usage-range-same-month-aug",
@@ -1275,7 +1257,6 @@
 				"settings/usage-range-short-same-month-feb",
 				"settings/usage-range-short-same-month-mar",
 				"settings/usage-range-short-same-month-apr",
-				"settings/usage-range-short-same-month-may",
 				"settings/usage-range-short-same-month-jun",
 				"settings/usage-range-short-same-month-jul",
 				"settings/usage-range-short-same-month-aug",
@@ -1323,9 +1304,6 @@
 				"settings/licensing-packages-storage",
 				"settings/licensing-codespaces-compute",
 				"settings/licensing-codespaces-storage",
-				"repo/commits-count",
-				"repo/reactions-count",
-				"repo/people-reacted",
 				"global/now",
 				"global/yesterday",
 				"global/seconds-ago",
@@ -1408,7 +1386,6 @@
 			"matched": [
 				"pages/settings",
 				"pages/settings-billing",
-				"pages/repo",
 				"global"
 			],
 			"collisions": [
@@ -1416,10 +1393,8 @@
 					"key": "Accessibility",
 					"module": "pages/settings"
 				},
-				{ "key": "Actions", "module": "pages/settings" },
 				{ "key": "Appearance", "module": "pages/settings" },
-				{ "key": "Company", "module": "pages/settings" },
-				{ "key": "Name", "module": "pages/settings" }
+				{ "key": "Company", "module": "pages/settings" }
 			],
 			"rules": [
 				"settings/export-available",
@@ -1428,7 +1403,7 @@
 				"settings/usage-range-same-month-feb",
 				"settings/usage-range-same-month-mar",
 				"settings/usage-range-same-month-apr",
-				"settings/usage-range-short-same-month-may",
+				"settings/usage-range-same-month-may",
 				"settings/usage-range-same-month-jun",
 				"settings/usage-range-same-month-jul",
 				"settings/usage-range-same-month-aug",
@@ -1587,7 +1562,6 @@
 				"settings/usage-range-short-same-month-feb",
 				"settings/usage-range-short-same-month-mar",
 				"settings/usage-range-short-same-month-apr",
-				"settings/usage-range-short-same-month-may",
 				"settings/usage-range-short-same-month-jun",
 				"settings/usage-range-short-same-month-jul",
 				"settings/usage-range-short-same-month-aug",
@@ -1635,9 +1609,6 @@
 				"settings/licensing-packages-storage",
 				"settings/licensing-codespaces-compute",
 				"settings/licensing-codespaces-storage",
-				"repo/commits-count",
-				"repo/reactions-count",
-				"repo/people-reacted",
 				"global/now",
 				"global/yesterday",
 				"global/seconds-ago",
@@ -1720,7 +1691,6 @@
 			"matched": [
 				"pages/settings",
 				"pages/settings-billing",
-				"pages/repo",
 				"global"
 			],
 			"collisions": [
@@ -1728,10 +1698,8 @@
 					"key": "Accessibility",
 					"module": "pages/settings"
 				},
-				{ "key": "Actions", "module": "pages/settings" },
 				{ "key": "Appearance", "module": "pages/settings" },
-				{ "key": "Company", "module": "pages/settings" },
-				{ "key": "Name", "module": "pages/settings" }
+				{ "key": "Company", "module": "pages/settings" }
 			],
 			"rules": [
 				"settings/export-available",
@@ -1740,7 +1708,7 @@
 				"settings/usage-range-same-month-feb",
 				"settings/usage-range-same-month-mar",
 				"settings/usage-range-same-month-apr",
-				"settings/usage-range-short-same-month-may",
+				"settings/usage-range-same-month-may",
 				"settings/usage-range-same-month-jun",
 				"settings/usage-range-same-month-jul",
 				"settings/usage-range-same-month-aug",
@@ -1899,7 +1867,6 @@
 				"settings/usage-range-short-same-month-feb",
 				"settings/usage-range-short-same-month-mar",
 				"settings/usage-range-short-same-month-apr",
-				"settings/usage-range-short-same-month-may",
 				"settings/usage-range-short-same-month-jun",
 				"settings/usage-range-short-same-month-jul",
 				"settings/usage-range-short-same-month-aug",
@@ -1947,9 +1914,6 @@
 				"settings/licensing-packages-storage",
 				"settings/licensing-codespaces-compute",
 				"settings/licensing-codespaces-storage",
-				"repo/commits-count",
-				"repo/reactions-count",
-				"repo/people-reacted",
 				"global/now",
 				"global/yesterday",
 				"global/seconds-ago",
@@ -2032,7 +1996,6 @@
 			"matched": [
 				"pages/settings",
 				"pages/settings-billing",
-				"pages/repo",
 				"global"
 			],
 			"collisions": [
@@ -2040,10 +2003,8 @@
 					"key": "Accessibility",
 					"module": "pages/settings"
 				},
-				{ "key": "Actions", "module": "pages/settings" },
 				{ "key": "Appearance", "module": "pages/settings" },
-				{ "key": "Company", "module": "pages/settings" },
-				{ "key": "Name", "module": "pages/settings" }
+				{ "key": "Company", "module": "pages/settings" }
 			],
 			"rules": [
 				"settings/export-available",
@@ -2052,7 +2013,7 @@
 				"settings/usage-range-same-month-feb",
 				"settings/usage-range-same-month-mar",
 				"settings/usage-range-same-month-apr",
-				"settings/usage-range-short-same-month-may",
+				"settings/usage-range-same-month-may",
 				"settings/usage-range-same-month-jun",
 				"settings/usage-range-same-month-jul",
 				"settings/usage-range-same-month-aug",
@@ -2211,7 +2172,6 @@
 				"settings/usage-range-short-same-month-feb",
 				"settings/usage-range-short-same-month-mar",
 				"settings/usage-range-short-same-month-apr",
-				"settings/usage-range-short-same-month-may",
 				"settings/usage-range-short-same-month-jun",
 				"settings/usage-range-short-same-month-jul",
 				"settings/usage-range-short-same-month-aug",
@@ -2259,9 +2219,6 @@
 				"settings/licensing-packages-storage",
 				"settings/licensing-codespaces-compute",
 				"settings/licensing-codespaces-storage",
-				"repo/commits-count",
-				"repo/reactions-count",
-				"repo/people-reacted",
 				"global/now",
 				"global/yesterday",
 				"global/seconds-ago",
@@ -3820,11 +3777,7 @@
 		{
 			"name": "search",
 			"path": "/search",
-			"matched": [
-				"pages/search",
-				"pages/profile",
-				"global"
-			],
+			"matched": ["pages/search", "global"],
 			"collisions": [],
 			"rules": [
 				"search/topic",
@@ -3833,37 +3786,6 @@
 				"search/results-count",
 				"search/on-date",
 				"search/topic-repos-count",
-				"profile/commit-activity-year",
-				"profile/issues-needing-help",
-				"profile/block-or-report",
-				"profile/showing-of-repos",
-				"profile/contributions-in-year",
-				"profile/contributions-of-year",
-				"profile/pins-remaining",
-				"profile/created-commits",
-				"profile/created-repositories",
-				"profile/opened-other-pulls",
-				"profile/opened-other-issues",
-				"profile/reviewed-pulls",
-				"profile/started-discussions",
-				"profile/answered-discussions",
-				"profile/and-other-repositories",
-				"profile/that-received-comments",
-				"profile/created-pull-request",
-				"profile/created-issue",
-				"profile/joined-organization",
-				"profile/short-date-jan",
-				"profile/short-date-feb",
-				"profile/short-date-mar",
-				"profile/short-date-apr",
-				"profile/short-date-may",
-				"profile/short-date-jun",
-				"profile/short-date-jul",
-				"profile/short-date-aug",
-				"profile/short-date-sep",
-				"profile/short-date-oct",
-				"profile/short-date-nov",
-				"profile/short-date-dec",
 				"global/now",
 				"global/yesterday",
 				"global/seconds-ago",
@@ -3943,11 +3865,7 @@
 		{
 			"name": "topics",
 			"path": "/topics",
-			"matched": [
-				"pages/search",
-				"pages/profile",
-				"global"
-			],
+			"matched": ["pages/search", "global"],
 			"collisions": [],
 			"rules": [
 				"search/topic",
@@ -3956,37 +3874,6 @@
 				"search/results-count",
 				"search/on-date",
 				"search/topic-repos-count",
-				"profile/commit-activity-year",
-				"profile/issues-needing-help",
-				"profile/block-or-report",
-				"profile/showing-of-repos",
-				"profile/contributions-in-year",
-				"profile/contributions-of-year",
-				"profile/pins-remaining",
-				"profile/created-commits",
-				"profile/created-repositories",
-				"profile/opened-other-pulls",
-				"profile/opened-other-issues",
-				"profile/reviewed-pulls",
-				"profile/started-discussions",
-				"profile/answered-discussions",
-				"profile/and-other-repositories",
-				"profile/that-received-comments",
-				"profile/created-pull-request",
-				"profile/created-issue",
-				"profile/joined-organization",
-				"profile/short-date-jan",
-				"profile/short-date-feb",
-				"profile/short-date-mar",
-				"profile/short-date-apr",
-				"profile/short-date-may",
-				"profile/short-date-jun",
-				"profile/short-date-jul",
-				"profile/short-date-aug",
-				"profile/short-date-sep",
-				"profile/short-date-oct",
-				"profile/short-date-nov",
-				"profile/short-date-dec",
 				"global/now",
 				"global/yesterday",
 				"global/seconds-ago",
@@ -4066,46 +3953,11 @@
 		{
 			"name": "features",
 			"path": "/features",
-			"matched": [
-				"pages/marketing",
-				"pages/profile",
-				"global"
-			],
+			"matched": ["pages/marketing", "global"],
 			"collisions": [
 				{ "key": "Free", "module": "pages/marketing" }
 			],
 			"rules": [
-				"profile/commit-activity-year",
-				"profile/issues-needing-help",
-				"profile/block-or-report",
-				"profile/showing-of-repos",
-				"profile/contributions-in-year",
-				"profile/contributions-of-year",
-				"profile/pins-remaining",
-				"profile/created-commits",
-				"profile/created-repositories",
-				"profile/opened-other-pulls",
-				"profile/opened-other-issues",
-				"profile/reviewed-pulls",
-				"profile/started-discussions",
-				"profile/answered-discussions",
-				"profile/and-other-repositories",
-				"profile/that-received-comments",
-				"profile/created-pull-request",
-				"profile/created-issue",
-				"profile/joined-organization",
-				"profile/short-date-jan",
-				"profile/short-date-feb",
-				"profile/short-date-mar",
-				"profile/short-date-apr",
-				"profile/short-date-may",
-				"profile/short-date-jun",
-				"profile/short-date-jul",
-				"profile/short-date-aug",
-				"profile/short-date-sep",
-				"profile/short-date-oct",
-				"profile/short-date-nov",
-				"profile/short-date-dec",
 				"global/now",
 				"global/yesterday",
 				"global/seconds-ago",
@@ -4185,46 +4037,11 @@
 		{
 			"name": "pricing",
 			"path": "/pricing",
-			"matched": [
-				"pages/marketing",
-				"pages/profile",
-				"global"
-			],
+			"matched": ["pages/marketing", "global"],
 			"collisions": [
 				{ "key": "Free", "module": "pages/marketing" }
 			],
 			"rules": [
-				"profile/commit-activity-year",
-				"profile/issues-needing-help",
-				"profile/block-or-report",
-				"profile/showing-of-repos",
-				"profile/contributions-in-year",
-				"profile/contributions-of-year",
-				"profile/pins-remaining",
-				"profile/created-commits",
-				"profile/created-repositories",
-				"profile/opened-other-pulls",
-				"profile/opened-other-issues",
-				"profile/reviewed-pulls",
-				"profile/started-discussions",
-				"profile/answered-discussions",
-				"profile/and-other-repositories",
-				"profile/that-received-comments",
-				"profile/created-pull-request",
-				"profile/created-issue",
-				"profile/joined-organization",
-				"profile/short-date-jan",
-				"profile/short-date-feb",
-				"profile/short-date-mar",
-				"profile/short-date-apr",
-				"profile/short-date-may",
-				"profile/short-date-jun",
-				"profile/short-date-jul",
-				"profile/short-date-aug",
-				"profile/short-date-sep",
-				"profile/short-date-oct",
-				"profile/short-date-nov",
-				"profile/short-date-dec",
 				"global/now",
 				"global/yesterday",
 				"global/seconds-ago",
