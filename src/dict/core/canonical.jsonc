@@ -360,7 +360,58 @@
 				// —— 按钮 ——
 				"Connect with Patreon",
 				"Start export",
-				"Delete your account"
+				"Delete your account",
+				// —— 外观（/settings/appearance）——
+				// 键逐字抄自实机渲染文本（本页由 React 分部渲染，节点边界见
+				// src/content/__tests__/settings-appearance.test.ts）。
+				// 「主题模式」「对比度」两个下拉/分段控件的当前值本身就是文本节点
+				// （Rails 的 <details><summary> 结构），故各主题名单独成条。
+				"Theme preferences",
+				"Choose how GitHub looks to you. Select a single theme, or sync with your system and automatically switch between day and night themes. Selections are applied immediately and saved automatically.",
+				"Theme mode",
+				// 主题模式下拉的三项与「单主题 / 跟随系统」两个分组标题
+				"Single theme",
+				"Sync with system",
+				"GitHub theme will match your system active settings",
+				"Light theme",
+				// 引号是上游原样的弯引号 “ ”
+				"This theme will be active when your system is set to “light mode”",
+				"Dark theme",
+				"This theme will be active when your system is set to “dark mode”",
+				// 选中态徽标与各页面下拉的当前值（“Selected theme:” 紧跟主题名，故以冒号收尾）
+				"Selected theme:",
+				"Light default",
+				"Light protanopia and deuteranopia",
+				"Light tritanopia",
+				"Dark default",
+				"Dark protanopia and deuteranopia",
+				"Dark tritanopia",
+				"Soft dark",
+				// 「对比度」分段控件：标题 + 说明 + 两侧的浅色 / 深色模式标签
+				"Contrast",
+				"Increase contrast",
+				"Enable high contrast for light or dark mode (or both) based on your system settings",
+				"Light mode",
+				"Dark mode",
+				// 分段控件与开关的两态文案（pages/settings 内另有同键，译文由本模块决定）
+				"Off",
+				"On",
+				// 表情符号肤色偏好（选项文本含 emoji 前缀，故整串收录）
+				"Preferred default emoji skin tone",
+				"👋 Neutral",
+				"👋🏻 Light Skin Tone",
+				"👋🏼 Medium-Light Skin Tone",
+				"👋🏽 Medium Skin Tone",
+				"👋🏾 Medium-Dark Skin Tone",
+				"👋🏿 Dark Skin Tone",
+				// 制表符宽度偏好
+				"Tab size preference",
+				"Choose the number of spaces a tab is equal to when rendering code",
+				"4 (Default)",
+				// Markdown 编辑器字体偏好
+				"Markdown editor font preference",
+				"Font preference for plain text editors that support Markdown styling (e.g. pull request and issue descriptions, comments.)",
+				"Use a fixed-width (monospace) font when editing Markdown"
 			]
 		},
 		{

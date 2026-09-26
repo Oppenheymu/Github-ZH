@@ -178,6 +178,51 @@
 		// —— 按钮 ——
 		"Connect with Patreon": "关联 Patreon",
 		"Start export": "开始导出",
-		"Delete your account": "删除你的账户"
+		"Delete your account": "删除你的账户",
+		// —— 外观（/settings/appearance）——
+		// 本页两个下拉与两个分段控件的「当前值」本身就是独立文本节点
+		// （Rails <details><summary> 结构），故主题名与「开 / 关」各成一条。
+		// 主题名里的 protanopia / deuteranopia / tritanopia 是色觉障碍的临床名，
+		// 中文界面惯用「红色盲和绿色盲」「蓝色盲」（GitHub 官方中文文档用词）
+		"Theme preferences": "主题偏好",
+		"Choose how GitHub looks to you. Select a single theme, or sync with your system and automatically switch between day and night themes. Selections are applied immediately and saved automatically.": "选择 GitHub 对你的呈现方式。你可以选定单一主题，也可以跟随系统在日间与夜间主题之间自动切换。选择会立即生效并自动保存。",
+		"Theme mode": "主题模式",
+		"Single theme": "单主题",
+		"Sync with system": "跟随系统",
+		"GitHub theme will match your system active settings": "GitHub 主题将匹配你系统的当前设置",
+		"Light theme": "浅色主题",
+		"This theme will be active when your system is set to “light mode”": "当你的系统设为「浅色模式」时，将使用此主题",
+		"Dark theme": "深色主题",
+		"This theme will be active when your system is set to “dark mode”": "当你的系统设为「深色模式」时，将使用此主题",
+		"Selected theme:": "选中的主题：",
+		"Light default": "浅色默认",
+		"Light protanopia and deuteranopia": "浅色（红色盲和绿色盲）",
+		"Light tritanopia": "浅色（蓝色盲）",
+		"Dark default": "深色默认",
+		"Dark protanopia and deuteranopia": "深色（红色盲和绿色盲）",
+		"Dark tritanopia": "深色（蓝色盲）",
+		"Soft dark": "柔和深色",
+		"Contrast": "对比度",
+		"Increase contrast": "提高对比度",
+		"Enable high contrast for light or dark mode (or both) based on your system settings": "按你的系统设置，为浅色模式或深色模式（或两者）启用高对比度",
+		"Light mode": "浅色模式",
+		"Dark mode": "深色模式",
+		// 分段控件 / 开关的两态：本页用「开启 / 关闭」比仓库设置页的「开 / 关」更自然
+		"Off": "关闭",
+		"On": "开启",
+		"Preferred default emoji skin tone": "默认表情符号肤色",
+		// 选项文本带 emoji 前缀，译文保留 emoji 与原有空格
+		"👋 Neutral": "👋 中性",
+		"👋🏻 Light Skin Tone": "👋🏻 浅肤色",
+		"👋🏼 Medium-Light Skin Tone": "👋🏼 中浅肤色",
+		"👋🏽 Medium Skin Tone": "👋🏽 中等肤色",
+		"👋🏾 Medium-Dark Skin Tone": "👋🏾 中深肤色",
+		"👋🏿 Dark Skin Tone": "👋🏿 深肤色",
+		"Tab size preference": "制表符宽度偏好",
+		"Choose the number of spaces a tab is equal to when rendering code": "选择渲染代码时一个制表符等于多少个空格",
+		"4 (Default)": "4（默认）",
+		"Markdown editor font preference": "Markdown 编辑器字体偏好",
+		"Font preference for plain text editors that support Markdown styling (e.g. pull request and issue descriptions, comments.)": "支持 Markdown 样式的纯文本编辑器（例如拉取请求与议题的描述、评论）的字体偏好",
+		"Use a fixed-width (monospace) font when editing Markdown": "编辑 Markdown 时使用等宽（monospace）字体"
 	}
 }
