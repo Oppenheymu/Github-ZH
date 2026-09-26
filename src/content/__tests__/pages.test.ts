@@ -1,6 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { globalDict } from "../../dict/global.ts";
-import { pageDicts } from "../../dict/index.ts";
+import { globalDict, pageDicts } from "../../dict/index.ts";
 import type {
 	GlobalDict,
 	PageDict,

@@ -11,7 +11,7 @@
 ## 硬性约束（违反 = 错误）
 
 1. **许可证纪律**：全仓 MIT（见 LICENSE 与 NOTICE）。**严禁引入任何 GPL / AGPL 系汉化项目的词典或代码**（包括但不限于 maboloshi/github-chinese）；词典 100% 原创，逐条手写。
-2. **词典归档纪律**：词条只进 `src/dict/`——全站通用进 `global.ts`，仅特定页面出现的进对应 `pages/<页名>.ts`（页面范围靠路由正则表达，模块头注释说明）；动态文本用正则规则，**字符串替换值必须含 CJK**（防替换循环，`check:dict` 强制）；键必须保持 GitHub 实际渲染的英文原文精确串，不得含 CJK。
+2. **词典归档纪律**：词条只进 `src/dict/data/`——全站通用进 `global.jsonc`，仅特定页面出现的进 `pages/<页名>.jsonc`（页面范围靠路由正则表达，模块头注释说明）；动态文本用正则规则，**字符串替换值必须含 CJK**（防替换循环，`check:dict` 强制）；键必须保持 GitHub 实际渲染的英文原文精确串，不得含 CJK。JSONC 里正则的反斜杠必须双写（`\d` 写作 `\\d`）；规则不得带 `flags` 字段（`g` / `y` 的 `lastIndex` 会跨节点累积导致漏翻）；新增 / 改名模块要同步 `src/dict/registry.ts` 注册表——**顺序即优先级**，具体页在前。
 3. **词典键是「整节点精确匹配」语义**：收录可能与仓库名、文件名、用户名撞车的泛化短词（如 `docs` / `test` / `blog` 等小写词）前三思，优先收录多词无歧义短语；大小写必须与 GitHub 实际渲染一致。
 4. **manifest.json 手写在 `public/`**：构建时原样拷贝进 dist，不存在自动生成；改 `matches` / 权限 / 产物文件名时，同步 `tooling/checks/manifest.ts` 的断言。
 5. **content script 产物必须是经典脚本（IIFE）**：MV3 的 `content_scripts` 不支持 `type: "module"`，`tooling/build.ts` 用 Bun.build `format: "iife"` 产出，勿改回 esm。
@@ -26,7 +26,7 @@ bun run check                   # 全量门禁：lint + typecheck + check:dict +
 bun run lint                    # biome check .（格式 + lint 唯一权威）
 bun run format                  # biome format --write .
 bun run typecheck               # 两条 tsc：src（浏览器侧）+ tooling（脚本侧）
-bun run check:dict              # 词典门禁（键值合法性 / CJK 约束 / 正则规则 / 路由正则）
+bun run check:dict              # 词典门禁（JSONC 结构编译 / 键值合法性 / CJK 约束）
 bun run check:manifest          # manifest 门禁（MV3 字段完整性与 public 资产存在性）
 bun test                        # 全量用例（bun test）
 bun run build                   # 构建 dist/（Bun.build IIFE ×2 + 拷贝 public/）
@@ -53,6 +53,10 @@ bun run pack                    # dist/ 打 zip（Chrome Web Store / Edge Add-on
 - **翻译收敛依赖 CJK 守卫**：替换结果不含 CJK 的正则规则会随 MutationObserver 无限循环，字符串替换值必须含 CJK。
 - **`<relative-time>` 等自定义元素会自行重渲染英文**：靠观察器再翻一遍收敛，勿试图一次性翻译。
 - **词典误伤权衡**：静态词典按「整节点精确匹配」工作，任何词条都可能命中同名的用户内容（仓库名 / 文件名），高风险短词靠不收录来回避（见硬性约束 3）。
+- **JSONC 正则的反斜杠必须双写**：`\d` 在 `.jsonc` 里要写 `\\d`；写漏一层 Bun 直接报 `Syntax Error`（响亮失败，不会静默变成别的正则）。另注意 `RegExp#source` 会把 `/` 转义回 `\/`，断言路由 / 规则请断言行为，别断言 `source`。
+- **tsc 不认 `.jsonc`**：开了 `resolveJsonModule` 也报 TS2307，靠 `src/dict/jsonc.d.ts` 的 ambient 声明；`tooling/tsconfig.json` 的 include 必须含 `../src/**/*.d.ts`，否则脚本侧工程拿不到该声明。
+- **词典数据由两条路消费同一个注册表**：`src/dict/index.ts` 单模块编译失败只跳过 + 打日志（保整站翻译），`tooling/checks/dict.ts` 走同一套 `load.ts` 但严格报错。**禁止让门禁 import `index.ts`**——那样坏数据被静默跳过后门禁反而变绿。
+- **`.jsonc` 的重复键归 Biome 管**：`biome check .` 会扫 `.jsonc`，`noDuplicateObjectKeys` 对加引号 / 裸键两种写法都报，故 `check:dict` 不再扫源码。编辑器侧另有 `src/dict/dict.schema.json`（`$schema` 只对编辑器生效，CI 不读它；它也无法从形状区分页面模块与全站模块）。
 
 ## git 提交流程
 

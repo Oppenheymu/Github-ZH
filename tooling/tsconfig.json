@@ -7,5 +7,5 @@
 		// 门禁脚本要 import public/manifest.json 做断言
 		"resolveJsonModule": true
 	},
-	"include": ["**/*.ts"]
+	"include": ["**/*.ts", "../src/**/*.d.ts"]
 }

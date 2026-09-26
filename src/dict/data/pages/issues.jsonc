@@ -3,32 +3,29 @@
 // 注：查询语法 token（is:open、sort:comments-desc 等）不收录；
 // 「View X profile」「N comments」等含动态值的属性也不收录
 // （属性值只查静态词条、不应用正则规则，见 src/content/walker.ts）
-
-import type { PageDict } from "../../shared/types.ts";
-
-export const issuesDict: PageDict = {
-	route: /^\/[^/]+\/[^/]+\/issues/,
-	entries: {
+{
+	"$schema": "../../dict.schema.json",
+	"route": "^/[^/]+/[^/]+/issues",
+	"entries": {
 		// —— 列表行元信息（状态徽标与打开时间）——
-		opened: "打开",
+		"opened": "打开",
 		"Status: Open.": "状态：打开。",
-		"Status: Closed (completed).":
-			"状态：已关闭（已完成）。",
+		"Status: Closed (completed).": "状态：已关闭（已完成）。",
 		"More information available below.": "更多信息见下方。",
 		"new release": "新版本",
 		// —— 侧栏导航与保存视图 ——
 		"Assigned to me": "指派给我的",
 		"Created by me": "我创建的",
-		Mentioned: "提及我的",
+		"Mentioned": "提及我的",
 		"Recent activity": "最近动态",
-		Views: "视图",
-		Types: "类型",
+		"Views": "视图",
+		"Types": "类型",
 		"Open Issues sidebar navigation": "打开议题侧栏导航",
 		"Issues sidebar navigation": "议题侧栏导航",
 		"Collapse sidebar": "收起侧栏",
 		// —— 搜索与筛选 ——
 		"Search Issues": "搜索议题",
-		Suggestions: "建议",
+		"Suggestions": "建议",
 		"Issue filters": "议题筛选器",
 		"Filter all issues": "筛选全部议题",
 		"Filter by author": "按作者筛选",
@@ -39,8 +36,8 @@ export const issuesDict: PageDict = {
 		"Filter by labels": "按标签筛选",
 		", descending": "，降序",
 		// —— 列表排序菜单与新建入口（既有词条，恢复保留）——
-		Newest: "最新",
-		Oldest: "最早",
+		"Newest": "最新",
+		"Oldest": "最早",
 		"Most commented": "评论最多",
 		"Least commented": "评论最少",
 		"Recently updated": "最近更新",
@@ -53,83 +50,63 @@ export const issuesDict: PageDict = {
 		"Submit new issue": "提交新议题",
 		"Assign yourself": "指派给自己",
 		// —— 置顶议题与创建限制 ——
-		"Issue creation is restricted in this repository":
-			"此仓库已限制创建议题",
-		"Drag and drop pinned issues list.":
-			"拖放置顶议题列表。",
+		"Issue creation is restricted in this repository": "此仓库已限制创建议题",
+		"Drag and drop pinned issues list.": "拖放置顶议题列表。",
 		// —— 标签描述（筛选列表 / 悬停提示展示）——
-		"Request for new features or functionality":
-			"请求新功能或特性",
-		"Issue identified by VS Code Team member as probable bug":
-			"由 VS Code 团队成员认定为疑似缺陷的议题",
-		"Issues found in a recent release of VS Code":
-			"在 VS Code 近期版本中发现的问题",
+		"Request for new features or functionality": "请求新功能或特性",
+		"Issue identified by VS Code Team member as probable bug": "由 VS Code 团队成员认定为疑似缺陷的议题",
+		"Issues found in a recent release of VS Code": "在 VS Code 近期版本中发现的问题",
 		"VS Code keybinding issues": "VS Code 快捷键问题",
 		"Editor column selection issues": "编辑器列选择问题",
 		"Code quality issues": "代码质量问题",
 		"Editor basic functionality": "编辑器基础功能",
-		"General VS Code workbench layout issues":
-			"VS Code 工作台布局的一般问题",
-		"General terminal issues that don't fall under another label":
-			"不属于其他标签的终端一般问题",
-		"Issue identified as 'upstream' component related (exists outside of VS Code)":
-			"认定为与上游组件相关的问题（存在于 VS Code 之外）",
-		"Issue is under discussion for relevance, priority, approach":
-			"议题的相关性、优先级与方案正在讨论中",
-		"Issues and items related to Electron":
-			"与 Electron 相关的议题与事项",
+		"General VS Code workbench layout issues": "VS Code 工作台布局的一般问题",
+		"General terminal issues that don't fall under another label": "不属于其他标签的终端一般问题",
+		"Issue identified as 'upstream' component related (exists outside of VS Code)": "认定为与上游组件相关的问题（存在于 VS Code 之外）",
+		"Issue is under discussion for relevance, priority, approach": "议题的相关性、优先级与方案正在讨论中",
+		"Issues and items related to Electron": "与 Electron 相关的议题与事项",
 		"Issues concerning extensions": "与扩展相关的问题",
-		"Issues with VS Code on Linux":
-			"VS Code 在 Linux 上的问题",
+		"Issues with VS Code on Linux": "VS Code 在 Linux 上的问题",
 		"Native OS integration issues": "操作系统原生集成问题",
-		"This is an upstream issue that has been reported upstream":
-			"这是已上报至上游的上游议题",
-		"VS Code installation and upgrade system issues":
-			"VS Code 安装与升级系统的问题",
-		"VS Code on Windows issues":
-			"VS Code 在 Windows 上的问题",
+		"This is an upstream issue that has been reported upstream": "这是已上报至上游的上游议题",
+		"VS Code installation and upgrade system issues": "VS Code 安装与升级系统的问题",
+		"VS Code on Windows issues": "VS Code 在 Windows 上的问题",
 		"Explorer widget issues": "资源管理器小组件问题",
 		"File glob engine": "文件 glob 引擎",
-		"Issue requires more information from poster":
-			"议题需要提交者补充更多信息",
+		"Issue requires more information from poster": "议题需要提交者补充更多信息",
 		"VS Code configuration, settings": "VS Code 配置与设置",
-		"Editor Right-To-Left or Bi-Di issues":
-			"编辑器从右向左或双向文字问题",
+		"Editor Right-To-Left or Bi-Di issues": "编辑器从右向左或双向文字问题",
 		"Editor rendering issues": "编辑器渲染问题",
 		"File I/O": "文件 I/O",
-		"Function, method and class parameter hint widget":
-			"函数、方法与类的参数提示小组件",
-		"Issues regarding network proxies":
-			"与网络代理相关的问题",
-		"Multi-root (multiple folders) issues":
-			"多根工作区（多文件夹）问题",
+		"Function, method and class parameter hint widget": "函数、方法与类的参数提示小组件",
+		"Issues regarding network proxies": "与网络代理相关的问题",
+		"Multi-root (multiple folders) issues": "多根工作区（多文件夹）问题",
 		"Remote system operations issues": "远程系统操作问题",
 		"Typescript support issues": "TypeScript 支持问题",
 		"VS Code editor tab issues": "VS Code 编辑器标签页问题",
 		// —— 拖放辅助说明（键按引擎空白归一写为单空格形式）——
-		"To pick up a draggable item, press the space bar. While dragging, use the arrow keys to move the item. Press space again to drop the item in its new position, or press escape to cancel.":
-			"要拾取可拖动项，请按空格键。拖动时，使用方向键移动该项。再次按空格键将其放置到新位置，或按 Esc 取消。",
+		"To pick up a draggable item, press the space bar. While dragging, use the arrow keys to move the item. Press space again to drop the item in its new position, or press escape to cancel.": "要拾取可拖动项，请按空格键。拖动时，使用方向键移动该项。再次按空格键将其放置到新位置，或按 Esc 取消。"
 	},
-	rules: [
+	"rules": [
 		// 列表行归属与文档标题（仓库名保留原文）
 		{
-			pattern: /^In ([^/]+\/[^/]+);$/,
-			replacement: "位于 $1；",
+			"pattern": "^In ([^/]+\\/[^/]+);$",
+			"replacement": "位于 $1；"
 		},
 		{
-			pattern: /^Issues · (.+) · GitHub$/,
-			replacement: "议题 · $1 · GitHub",
+			"pattern": "^Issues \\u00B7 (.+) \\u00B7 GitHub$",
+			"replacement": "议题 · $1 · GitHub"
 		},
-		// 「opened on <日期>」日期段，月份缩写保留原文（与 search.ts 同款）
+		// 「opened on <日期>」日期段，月份缩写保留原文（与 search.jsonc 同款）
 		{
-			pattern: /^on ([A-Z][a-z]{2} \d{1,2}, \d{4})$/,
-			replacement: "于 $1",
+			"pattern": "^on ([A-Z][a-z]{2} \\d{1,2}, \\d{4})$",
+			"replacement": "于 $1"
 		},
 		// 列表行「N linked PRs」关联拉取请求计数（单复数折叠；
 		// 仅覆盖文本节点，属性值不应用正则规则，见模块头注释）
 		{
-			pattern: /^(\d+) linked PRs?$/,
-			replacement: "$1 个关联拉取请求",
-		},
-	],
-};
+			"pattern": "^(\\d+) linked PRs?$",
+			"replacement": "$1 个关联拉取请求"
+		}
+	]
+}

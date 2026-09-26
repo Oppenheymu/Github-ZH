@@ -1,12 +1,10 @@
 // 搜索模块：全站搜索与主题页专属词条
 // 覆盖 /search 与 /topics 两类顶级路径
-
-import type { PageDict } from "../../shared/types.ts";
-
-export const searchDict: PageDict = {
-	route: /^\/(search|topics)/,
-	entries: {
-		// —— 结果排序（「X最多 / X最少」与 issues.ts 排序菜单同款）——
+{
+	"$schema": "../../dict.schema.json",
+	"route": "^/(search|topics)",
+	"entries": {
+		// —— 结果排序（「X最多 / X最少」与 issues.jsonc 排序菜单同款）——
 		"Best match": "最佳匹配",
 		"Most stars": "星标最多",
 		"Fewest stars": "星标最少",
@@ -21,16 +19,16 @@ export const searchDict: PageDict = {
 		"Filter by type": "按类型筛选",
 		"Filter by language": "按语言筛选",
 		"Open column options": "打开列选项",
-		Advanced: "高级",
+		"Advanced": "高级",
 		"Advanced search": "高级搜索",
 		"Date created": "创建日期",
 		"Date pushed": "推送日期",
 		"Number of followers": "关注者数量",
 		"Number of forks": "复刻数量",
 		"Number of stars": "星标数量",
-		Size: "大小",
-		Topic: "主题",
-		Users: "用户",
+		"Size": "大小",
+		"Topic": "主题",
+		"Users": "用户",
 		"More languages...": "更多语言…",
 		// —— 语言筛选项（语言名本身为专有名词，保留原文）——
 		"Python language": "Python 语言",
@@ -41,13 +39,10 @@ export const searchDict: PageDict = {
 		// —— ProTip 快捷键提示（实机整句拆为多节点，逐段兜底）——
 		"ProTip!": "小贴士！",
 		"Press the": "按下",
-		"key to activate the search input again and adjust your query.":
-			"键以再次激活搜索输入框并调整你的查询。",
+		"key to activate the search input again and adjust your query.": "键以再次激活搜索输入框并调整你的查询。",
 		// —— 赞助推广卡 ——
-		"Sponsor open source projects you depend on":
-			"赞助你依赖的开源项目",
-		"Contributors are working behind the scenes to make open source better for everyone—give them the help and recognition they deserve.":
-			"贡献者在幕后默默付出，让开源惠及每一个人——请给予他们应有的帮助与认可。",
+		"Sponsor open source projects you depend on": "赞助你依赖的开源项目",
+		"Contributors are working behind the scenes to make open source better for everyone—give them the help and recognition they deserve.": "贡献者在幕后默默付出，让开源惠及每一个人——请给予他们应有的帮助与认可。",
 		"Explore sponsorable projects": "探索可赞助的项目",
 		"Package icon": "软件包图标",
 		// —— 主题页相关主题链接的 title 提示 ——
@@ -57,8 +52,7 @@ export const searchDict: PageDict = {
 		"Topic: ant-design": "主题：ant-design",
 		"Topic: antd": "主题：antd",
 		"Topic: apis": "主题：apis",
-		"Topic: artificial-intelligence":
-			"主题：artificial-intelligence",
+		"Topic: artificial-intelligence": "主题：artificial-intelligence",
 		"Topic: automation": "主题：automation",
 		"Topic: awesome": "主题：awesome",
 		"Topic: backup-tool": "主题：backup-tool",
@@ -79,14 +73,12 @@ export const searchDict: PageDict = {
 		"Topic: flutter": "主题：flutter",
 		"Topic: generative-ai": "主题：generative-ai",
 		"Topic: google-photos": "主题：google-photos",
-		"Topic: google-photos-alternative":
-			"主题：google-photos-alternative",
+		"Topic: google-photos-alternative": "主题：google-photos-alternative",
 		"Topic: gpt": "主题：gpt",
 		"Topic: gpt-4": "主题：gpt-4",
 		"Topic: home-assistant": "主题：home-assistant",
 		"Topic: home-automation": "主题：home-automation",
-		"Topic: integration-framework":
-			"主题：integration-framework",
+		"Topic: integration-framework": "主题：integration-framework",
 		"Topic: integrations": "主题：integrations",
 		"Topic: iot": "主题：iot",
 		"Topic: ipaas": "主题：ipaas",
@@ -127,34 +119,35 @@ export const searchDict: PageDict = {
 		"Topic: web-performance": "主题：web-performance",
 		"Topic: wifi": "主题：wifi",
 		"Topic: workflow": "主题：workflow",
-		"Topic: workflow-automation":
-			"主题：workflow-automation",
+		"Topic: workflow-automation": "主题：workflow-automation"
 	},
-	rules: [
+	"rules": [
 		// 主题页排序下拉里按子主题过滤的选项标题（主题名保留原文）
-		{ pattern: /^Topic: (.+)$/, replacement: "主题：$1" },
 		{
-			pattern: /^([\d,]+) users? starred this repository$/,
-			replacement: "$1 位用户星标了此仓库",
+			"pattern": "^Topic: (.+)$",
+			"replacement": "主题：$1"
 		},
 		{
-			pattern: /^([\d,]+) stars?$/,
-			replacement: "$1 个星标",
+			"pattern": "^([\\d,]+) users? starred this repository$",
+			"replacement": "$1 位用户星标了此仓库"
 		},
 		{
-			pattern: /^([\d,]+) results?$/,
-			replacement: "$1 个结果",
+			"pattern": "^([\\d,]+) stars?$",
+			"replacement": "$1 个星标"
+		},
+		{
+			"pattern": "^([\\d,]+) results?$",
+			"replacement": "$1 个结果"
 		},
 		// 「Updated on <日期>」的日期段，月份缩写保留原文
 		{
-			pattern: /^on ([A-Z][a-z]{2} \d{1,2}(?:, \d{4})?)$/,
-			replacement: "于 $1",
+			"pattern": "^on ([A-Z][a-z]{2} \\d{1,2}(?:, \\d{4})?)$",
+			"replacement": "于 $1"
 		},
 		// 主题页导语：数量动态，查询键已把连续空白折叠为单空格
 		{
-			pattern:
-				/^Here are ([\d,]+) public repositor(?:y|ies) matching this topic\.\.\.$/,
-			replacement: "共有 $1 个公开仓库匹配此主题…",
-		},
-	],
-};
+			"pattern": "^Here are ([\\d,]+) public repositor(?:y|ies) matching this topic\\.\\.\\.$",
+			"replacement": "共有 $1 个公开仓库匹配此主题…"
+		}
+	]
+}

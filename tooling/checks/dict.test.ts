@@ -1,13 +1,31 @@
 import { describe, expect, it } from "bun:test";
-import { globalDict } from "../../src/dict/global.ts";
-import { pageDicts } from "../../src/dict/index.ts";
 import {
-	findDuplicateKeys,
+	buildGlobalDict,
+	buildPageDict,
+} from "../../src/dict/load.ts";
+import {
+	globalRawDict,
+	pageRawModules,
+} from "../../src/dict/registry.ts";
+import {
+	buildAll,
+	validateDict,
 	validateEntries,
-	validateGlobalDict,
-	validatePageDict,
 	validateRule,
 } from "./dict.ts";
+
+/** 一个合法页面模块的最小形态，反例在其上做单点破坏 */
+const validPage = () => ({
+	$schema: "../../dict.schema.json",
+	route: "^/owner/repo/issues",
+	entries: { "Close issue": "关闭议题" },
+	rules: [
+		{
+			pattern: "^(\\d+) minutes? ago$",
+			replacement: "$1 分钟前",
+		},
+	],
+});
 
 describe("validateRule", () => {
 	it("accepts a well-formed rule", () => {
@@ -19,16 +37,6 @@ describe("validateRule", () => {
 			"测试",
 		);
 		expect(errors).toEqual([]);
-	});
-
-	it("rejects g / y flags (stateful lastIndex)", () => {
-		const errors = validateRule(
-			{ pattern: /x/g, replacement: "替换" },
-			"测试",
-		);
-		expect(
-			errors.some((error) => error.includes("g / y")),
-		).toBe(true);
 	});
 
 	it("requires CJK in the replacement", () => {
@@ -75,67 +83,168 @@ describe("validateEntries", () => {
 		);
 		expect(errors.length).toBeGreaterThanOrEqual(2);
 	});
-});
 
-describe("validatePageDict", () => {
-	it("accepts a well-formed page module", () => {
-		const errors = validatePageDict(
-			{
-				route: /^\/owner\/repo/,
-				entries: { Code: "代码" },
-				rules: [],
-			},
+	it("rejects keys with leading or trailing whitespace", () => {
+		const errors = validateEntries(
+			{ " Open": "打开", "Close ": "关闭" },
 			"测试",
-		);
-		expect(errors).toEqual([]);
-	});
-
-	it("rejects unanchored or flagged routes", () => {
-		const flagged = validatePageDict(
-			{ route: /^\/a/i, entries: {}, rules: [] },
-			"测试",
-		);
-		expect(flagged.length).toBe(1);
-		const unanchored = validatePageDict(
-			{ route: /owner/, entries: {}, rules: [] },
-			"测试",
-		);
-		expect(unanchored.length).toBe(1);
+		).filter((error) => error.includes("首尾空白"));
+		expect(errors).toHaveLength(2);
 	});
 });
 
-describe("findDuplicateKeys", () => {
-	it("finds duplicated entry keys in dict source", () => {
-		const source = [
-			"export const x = {",
-			"\tentries: {",
-			'\t\t"A": "甲",',
-			'\t\t"B": "乙",',
-			'\t\t"A": "丙",',
-			"\t},",
-			"};",
-		].join("\n");
-		expect(findDuplicateKeys(source)).toEqual(["A"]);
+describe("buildPageDict", () => {
+	it("compiles route and rules from JSONC shapes", () => {
+		const dict = buildPageDict(validPage(), "测试");
+		// 断言行为而非 source：RegExp#source 会把 / 转义成 \/（规范要求可用于字面量）
+		expect(dict.route.test("/owner/repo/issues")).toBe(
+			true,
+		);
+		expect(dict.route.test("/owner/repo/issues/12")).toBe(
+			true,
+		);
+		expect(dict.route.test("/owner/repo/pulls")).toBe(
+			false,
+		);
+		expect(dict.route.flags).toBe("");
+		const rule = dict.rules[0];
+		expect(rule?.pattern.test("5 minutes ago")).toBe(true);
+		expect(rule?.pattern.test("5 minutes")).toBe(false);
+		expect(dict.entries["Close issue"]).toBe("关闭议题");
 	});
 
-	it("ignores non-entry lines", () => {
-		const source = [
-			'\trules: [{ pattern: /^a$/, replacement: "替换" }],',
-			'\t\t"Only": "唯一",',
-		].join("\n");
-		expect(findDuplicateKeys(source)).toEqual([]);
+	it("rejects unknown top-level fields (typo silently empties a dict)", () => {
+		expect(() =>
+			buildPageDict(
+				{ ...validPage(), entires: {} },
+				"测试",
+			),
+		).toThrow(/未知字段/);
+	});
+
+	it("rejects a missing or unanchored route", () => {
+		const { route: _route, ...withoutRoute } = validPage();
+		expect(() =>
+			buildPageDict(withoutRoute, "测试"),
+		).toThrow(/route/);
+		expect(() =>
+			buildPageDict(
+				{ ...validPage(), route: "[^/]+/issues" },
+				"测试",
+			),
+		).toThrow(/\^\/ 锚定/);
+	});
+
+	it("rejects a pattern that cannot compile", () => {
+		expect(() =>
+			buildPageDict(
+				{
+					...validPage(),
+					rules: [
+						{ pattern: "(unclosed", replacement: "替换" },
+					],
+				},
+				"测试",
+			),
+		).toThrow(/正则无法编译/);
+	});
+
+	it("rejects a rule carrying a flags field", () => {
+		expect(() =>
+			buildPageDict(
+				{
+					...validPage(),
+					rules: [
+						{
+							pattern: "^a$",
+							replacement: "甲",
+							flags: "g",
+						},
+					],
+				},
+				"测试",
+			),
+		).toThrow(/flags/);
+	});
+
+	it("rejects non-string entry values", () => {
+		expect(() =>
+			buildPageDict(
+				{
+					...validPage(),
+					entries: { Fork: 1 },
+				},
+				"测试",
+			),
+		).toThrow(/值必须是字符串/);
+	});
+
+	it("rejects a __proto__ entry key", () => {
+		// 对象字面量里 "__proto__" 会被当成原型设置器，只能用 JSON.parse 构造真实输入
+		const raw = JSON.parse(
+			'{"route":"^/x","entries":{"__proto__":"值"},"rules":[]}',
+		);
+		expect(() => buildPageDict(raw, "测试")).toThrow(
+			/__proto__/,
+		);
+	});
+});
+
+describe("buildGlobalDict", () => {
+	it("accepts entries plus rules without a route", () => {
+		const dict = buildGlobalDict(
+			{ entries: { Star: "星标" }, rules: [] },
+			"测试",
+		);
+		expect(dict.entries["Star"]).toBe("星标");
+	});
+
+	it("rejects a route on the global dict", () => {
+		expect(() =>
+			buildGlobalDict(
+				{
+					route: "^/x",
+					entries: { Star: "星标" },
+					rules: [],
+				},
+				"测试",
+			),
+		).toThrow(/未知字段/);
+	});
+});
+
+describe("buildAll", () => {
+	it("keeps good modules and reports every broken one", () => {
+		const built = buildAll({
+			global: { entries: { Star: "星标" }, rules: [] },
+			pages: [
+				["pages/ok", validPage()],
+				["pages/broken", { ...validPage(), entires: {} }],
+			],
+		});
+		expect(built.errors).toHaveLength(1);
+		expect(built.errors[0]).toContain("未知字段");
+		expect(built.pages).toHaveLength(1);
+		expect(built.pages[0]?.[0]).toBe("pages/ok");
 	});
 });
 
 describe("real dictionaries", () => {
-	it("passes all validators against shipped data", () => {
-		expect(
-			validateGlobalDict(globalDict, "global"),
-		).toEqual([]);
-		for (const dict of pageDicts) {
-			expect(
-				validatePageDict(dict, dict.route.source),
-			).toEqual([]);
+	it("builds and validates against shipped data", () => {
+		const built = buildAll({
+			global: globalRawDict,
+			pages: pageRawModules,
+		});
+		expect(built.errors).toEqual([]);
+		expect(built.pages).toHaveLength(pageRawModules.length);
+		expect(built.global).not.toBeNull();
+		if (built.global !== null) {
+			expect(validateDict(built.global, "global")).toEqual(
+				[],
+			);
+		}
+		for (const [where, dict] of built.pages) {
+			expect(validateDict(dict, where)).toEqual([]);
 		}
 	});
 });

@@ -1,8 +1,7 @@
 // 路由解析：按 location.pathname 合并 global 与命中的页面模块
 // buildView / matchPageModules 为纯函数；viewForPath 用单槽缓存热路径
 
-import { globalDict } from "../dict/global.ts";
-import { pageDicts } from "../dict/index.ts";
+import { globalDict, pageDicts } from "../dict/index.ts";
 import type {
 	DictView,
 	GlobalDict,
