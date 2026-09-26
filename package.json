@@ -17,7 +17,8 @@
         "test": "bun test",
         "icons": "bun tooling/gen-icons.ts",
         "verify": "bun tooling/verify-live.ts",
-        "pack": "bun tooling/pack.ts"
+        "pack": "bun tooling/pack.ts",
+        "labels": "bun tooling/labels.ts"
     },
     "devDependencies": {
         "@biomejs/biome": "^2.5.14",

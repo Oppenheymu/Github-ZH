@@ -1,0 +1,49 @@
+# 标签同步流水线
+#
+# 词表 `.github/labels.yml` 是唯一权威来源，本流水线把它推到仓库标签（新增 +
+# 更新，默认不删除）。网页上被改乱、或本地漏跑脚本时，手动 dispatch 一次即可收敛。
+#
+# 为什么自己写脚本而不用现成的 label-sync action：本仓工具链纪律是零第三方依赖
+# + bun 直跑（见 AGENTS.md），同步逻辑落在 tooling/labels.ts 里且带用例，本地
+# `bun run labels -- --dry-run` 可以先看差异再落盘。
+#
+# prune 只在手动触发时可用且默认关闭：删除标签不可逆，而 `good first issue` /
+# `help wanted` 是 GitHub 按名字特殊渲染的标签（仓库首页 Contribute 入口），
+# 删掉即失去该入口。
+
+name: Labels
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/labels.yml
+      - tooling/labels.ts
+      - .github/workflows/labels.yml
+  workflow_dispatch:
+    inputs:
+      prune:
+        description: 删除词表里没有的标签（不可逆）
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+      - name: 安装 Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: 同步标签
+        run: bun run labels -- ${{ inputs.prune && '--prune' || '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
