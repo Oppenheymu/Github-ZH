@@ -48,6 +48,7 @@ export const PROBE_PATHS: readonly string[] = [
 	"/microsoft/vscode/pulls",
 	"/microsoft/vscode/settings",
 	"/settings/profile",
+	"/settings/accessibility",
 	"/microsoft/vscode/actions",
 	"/microsoft/vscode/agents",
 	"/microsoft/vscode/commits",

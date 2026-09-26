@@ -223,6 +223,52 @@
 		"4 (Default)": "4（默认）",
 		"Markdown editor font preference": "Markdown 编辑器字体偏好",
 		"Font preference for plain text editors that support Markdown styling (e.g. pull request and issue descriptions, comments.)": "支持 Markdown 样式的纯文本编辑器（例如拉取请求与议题的描述、评论）的字体偏好",
-		"Use a fixed-width (monospace) font when editing Markdown": "编辑 Markdown 时使用等宽（monospace）字体"
+		"Use a fixed-width (monospace) font when editing Markdown": "编辑 Markdown 时使用等宽（monospace）字体",
+		// —— 辅助功能（/settings/accessibility）——
+		// 键必须与 GitHub 实际渲染的文本逐字符一致（含疑问号、<kbd> 之间的空格与
+		// alt upAlt↑ 这类「按键名 + 符号」的组合），故整串照抄英文原文；
+		// 译文里 Ctrl / ⇧ / V / Alt↑ / gn / ? / Markdown / URL / GitHub 按键名与专名一律不译。
+		"Accessibility settings": "辅助功能设置",
+		"General": "常规",
+		// 「Character keys」指不使用修饰键的单字母快捷键（GitHub 官方文档称 character keys）
+		"Keyboard shortcuts": "键盘快捷键",
+		"Character keys": "字符快捷键",
+		"Enable GitHub shortcuts that don't use modifier keys in their activation. For example, the gn shortcut to navigate notifications, or question mark? to view context relevant shortcuts.": "启用 GitHub 中激活时不需要修饰键的快捷键。例如用 gn 快捷键跳转到通知，或用 ? 查看与当前上下文相关的快捷键。",
+		"Motion": "动态效果",
+		"Autoplay animated images": "自动播放动画图片",
+		"Select whether animated images should play automatically.": "选择动画图片是否应自动播放。",
+		"Follow system": "跟随系统",
+		"Adopts your system preference for reduced motion": "采用系统对减少动态效果的首选项",
+		"Enabled": "启用",
+		"Automatically plays animated images": "自动播放动画图片",
+		"Disabled": "禁用",
+		"Prevents animated images from playing automatically": "阻止动画图片自动播放",
+		"Content": "内容",
+		"Link underlines": "链接下划线",
+		"Toggle the visibility of underlines on links that are adjacent to text.": "切换与文本相邻的链接是否显示下划线。",
+		"Hide link underlines": "隐藏链接下划线",
+		"Show link underlines": "显示链接下划线",
+		"Hovercards": "悬停卡片",
+		"Hovercards preview information about other parts of GitHub.": "悬停卡片可预览 GitHub 其他部分的信息。",
+		"Show hovercards": "显示悬停卡片",
+		"Enable previewing link content via mouse hover or keyboard focus before navigation. Move focus to hovercard content using alt upAlt↑.": "启用后，可在导航前通过鼠标悬停或键盘聚焦预览链接内容。使用 Alt ↑ 将焦点移到悬停卡片的内容上。",
+		"Editor settings": "编辑器设置",
+		"URL paste behavior": "URL 粘贴行为",
+		"Select if URLs should be formatted on paste. You can use control shift and VCtrl ⇧ V to paste a link in the opposite way.": "选择粘贴 URL 时是否进行格式化。你可以使用 Ctrl ⇧ V 以相反的方式粘贴链接。",
+		"Formatted link": "格式化链接",
+		"Pasting a URL while having text selected will format to a Markdown link": "在选中文本时粘贴 URL，会格式化为 Markdown 链接",
+		"Plain text": "纯文本",
+		"Pasting a URL while having text selected will replace the text": "在选中文本时粘贴 URL，会替换所选文本",
+		"Assistive technology hints": "辅助技术提示",
+		"Add or remove instructions for how to operate complex controls.": "添加或移除如何操作复杂控件的说明。",
+		"Enable screen reader hint": "启用屏幕阅读器提示",
+		"Disable screen reader hint": "禁用屏幕阅读器提示",
+		// —— 各区块与整页的保存按钮 ——
+		"Save keyboard shortcut preferences": "保存键盘快捷键偏好设置",
+		"Save motion preferences": "保存动态效果偏好设置",
+		"Save content preferences": "保存内容偏好设置",
+		"Save hovercard preferences": "保存悬停卡片偏好设置",
+		"Save editor settings": "保存编辑器设置",
+		"Save assistive technology hint preferences": "保存辅助技术提示偏好设置"
 	}
 }
