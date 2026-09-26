@@ -1,0 +1,27 @@
+{
+	// TSGo
+	"js/ts.experimental.useTsgo": true,
+	// Editor
+	"editor.defaultFormatter": "biomejs.biome",
+	"editor.formatOnSave": true,
+	"editor.codeActionsOnSave": {
+		"source.fixAll.biome": "explicit",
+		"source.organizeImports.biome": "explicit"
+	},
+	// Material Icon Theme
+	"material-icon-theme.folders.associations": {
+		// tooling
+		"checks": "guard",
+		// docs
+		"decisions": "policy",
+		"guides": "instructions",
+		"process": "ci",
+		"reference": "toc"
+	},
+	"material-icon-theme.files.associations": {
+		"NOTICE": "certificate",
+		// templates
+		"env": "tune",
+		"gitignore": "git"
+	}
+}

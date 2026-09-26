@@ -1,0 +1,11 @@
+{
+	"recommendations": [
+		// 1. UI & Icons
+		"pkief.material-icon-theme",
+		// 2. Editor Styles
+		"editorconfig.editorconfig",
+		"biomejs.biome",
+		// 3. Languages & Formats
+		"typescriptteam.native-preview"
+	]
+}
