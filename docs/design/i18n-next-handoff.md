@@ -8,6 +8,8 @@
 > 本文件是**可直接整段粘贴到新会话的提示词**，也是本轮的设计记录。
 > 上一份交接见 `docs/design/i18n-handoff.md`（i18n 架构落地，已完成并附实施记录）；
 > 本文件只覆盖尚未做的三项：C / D / F。新会话请先全文读完，再动手。
+> ⚠️ 后续变更：**实机探针 `tooling/verify-live.ts`（`bun run verify`）已移除**，本文出现该命令的地方
+> 只作历史记录，不再可跑；漏翻采集改用 popup 的开发者模式导出 JSON（见第 6.4 节）。
 
 ---
 
@@ -69,8 +71,7 @@ src/dict/
   `src/content/pages.ts` 的 `viewForPath(pathname, locale)` 单槽缓存；`src/content/walker.ts` 的 `translateText` 先直查词条、
   未命中再查 `aliases` 换规范键重查，最后按序试规则。
 - 门禁：`tooling/checks/dict.ts`（`check:dict`）、`tooling/checks/manifest.ts`（`check:manifest`）、
-  `tooling/checks/view.ts`（`check:view`，任务 C 新增）；实机探针 `tooling/verify-live.ts`
-  （`bun run verify`，支持 `--locale <id>`，浏览器可用 `GITHUB_I18N_BROWSER_PATH` 指定）。
+  `tooling/checks/view.ts`（`check:view`，任务 C 新增）。
 - 实测数字（供判断，别当教条）：1618 规范键 / 207 共享规则（其中 ≥2 组 72 条）/ 16 模块；
   zh-CN 覆盖率 100%、ja 50/1618（3.1%）；content.js 194649 字节（`minify: false`），数据紧凑 JSON 144273 字节。
 
@@ -253,7 +254,7 @@ src/dict/
 2. **模板等价**：用合成捕获值渲染旧模板与新模板，输出必须相同。
    做法：由 pattern 的组数造合成 match（`[整串, ⟨1⟩, ⟨2⟩, …]` 且 `groups = { name: ⟨i⟩ }`），
    自己实现 `$N` / `$<name>` 的替换（或直接 `template.replace(pattern, ...)` 配一个能匹配的合成输入）；
-3. **行为抽样**：对一批真实文本（例如用 `bun run verify` 采集的漏翻清单、或所有 canonical 键）
+3. **行为抽样**：对一批真实文本（例如用开发者模式导出的漏翻清单、或所有 canonical 键）
    分别用「旧视图」与「新视图」跑 `translateText`，结果必须完全一致。
    旧视图可在改动前先 dump 一份 JSON 快照到临时目录作为对照。
 
@@ -411,4 +412,7 @@ src/dict/
 - 本地 `main` 领先 `origin/main` 若干提交（**未推送**）：需要用户决定何时推。
 - ja 覆盖率 50/1618（翻译工作，非工程任务）。
 - 骨架门禁的 `global`-last 分支实际不可达（由 `load.ts` 兜住），保留作为纵深防御。
+- **实机探针已移除**：`tooling/verify-live.ts`、其单测与 `bun run verify` 脚本已删除，本文第 1 / 2.3 / 4.1 节
+  与 6.3 里提到探针的命令、环境变量与验收项**均已作废**（6.3 是当时的实施记录，不重写历史）；
+  漏翻采集改用 popup 的开发者模式导出 JSON，`GITHUB_I18N_BROWSER_PATH` 若仍被别的脚本使用请另行确认。
 
