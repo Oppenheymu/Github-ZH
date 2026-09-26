@@ -626,6 +626,112 @@
 				{
 					"id": "profile/showing-of-repos",
 					"pattern": "^Showing (?<count>\\d+) of (?<total>[\\d,]+) repositor(?:y|ies)$"
+				},
+				// 贡献动态时间线的分类折叠汇总：计数与仓库数都动态、单复数折叠。
+				// 节点内换行缩进在匹配前已折叠为单空格（见 content/walker.ts 的 normalizeKey），
+				// 故 pattern 按单空格书写。
+				{
+					"id": "profile/created-commits",
+					"pattern": "^Created (?<count>[\\d,]+) commits? in (?<repos>[\\d,]+) repositor(?:y|ies)$"
+				},
+				{
+					"id": "profile/created-repositories",
+					"pattern": "^Created ([\\d,]+) repositor(?:y|ies)$"
+				},
+				{
+					"id": "profile/opened-other-pulls",
+					"pattern": "^Opened (?<count>[\\d,]+) other pull requests? in (?<repos>[\\d,]+) repositor(?:y|ies)$"
+				},
+				{
+					"id": "profile/opened-other-issues",
+					"pattern": "^Opened (?<count>[\\d,]+) other issues? in (?<repos>[\\d,]+) repositor(?:y|ies)$"
+				},
+				{
+					"id": "profile/reviewed-pulls",
+					"pattern": "^Reviewed (?<count>[\\d,]+) pull requests? in (?<repos>[\\d,]+) repositor(?:y|ies)$"
+				},
+				{
+					"id": "profile/started-discussions",
+					"pattern": "^Started (?<count>[\\d,]+) discussions? in (?<repos>[\\d,]+) repositor(?:y|ies)$"
+				},
+				{
+					"id": "profile/answered-discussions",
+					"pattern": "^Answered (?<count>[\\d,]+) discussions? in (?<repos>[\\d,]+) repositor(?:y|ies)$"
+				},
+				// 亮点区尾段：「…, <仓库链接> and 32 other repositories」（独立节点，计数动态）
+				{
+					"id": "profile/and-other-repositories",
+					"pattern": "^and ([\\d,]+) other repositor(?:y|ies)$"
+				},
+				// 时间线条目被仓库链接拆开后的后半句：「…<仓库链接> that received 4 comments」
+				{
+					"id": "profile/that-received-comments",
+					"pattern": "^that received ([\\d,]+) comments?$"
+				},
+				// 登录态若把整句渲染成单个节点（没有链接拆分的形态），用整句规则兜底：
+				// 与上面两条「碎片路径」互斥，命中其一即止，两条路径都不至于漏翻
+				{
+					"id": "profile/created-pull-request",
+					"pattern": "^Created a pull request in ([\\w.-]+\\/[\\w.-]+) that received ([\\d,]+) comments?$"
+				},
+				{
+					"id": "profile/created-issue",
+					"pattern": "^Created an issue in ([\\w.-]+\\/[\\w.-]+) that received ([\\d,]+) comments?$"
+				},
+				// 组织动态：「Joined the <组织链接> organization」同样可能整句成节点
+				{
+					"id": "profile/joined-organization",
+					"pattern": "^Joined the (\\S+) organization$"
+				},
+				// 时间线日期（月份缩写 + 日；个别条目带 "on " 前缀）。
+				// 带年份的日期（「Sep 25, 2025」）由 global 的 short-date-* 规则接手。
+				{
+					"id": "profile/short-date-jan",
+					"pattern": "^(?:on )?Jan (\\d{1,2})$"
+				},
+				{
+					"id": "profile/short-date-feb",
+					"pattern": "^(?:on )?Feb (\\d{1,2})$"
+				},
+				{
+					"id": "profile/short-date-mar",
+					"pattern": "^(?:on )?Mar (\\d{1,2})$"
+				},
+				{
+					"id": "profile/short-date-apr",
+					"pattern": "^(?:on )?Apr (\\d{1,2})$"
+				},
+				{
+					"id": "profile/short-date-may",
+					"pattern": "^(?:on )?May (\\d{1,2})$"
+				},
+				{
+					"id": "profile/short-date-jun",
+					"pattern": "^(?:on )?Jun (\\d{1,2})$"
+				},
+				{
+					"id": "profile/short-date-jul",
+					"pattern": "^(?:on )?Jul (\\d{1,2})$"
+				},
+				{
+					"id": "profile/short-date-aug",
+					"pattern": "^(?:on )?Aug (\\d{1,2})$"
+				},
+				{
+					"id": "profile/short-date-sep",
+					"pattern": "^(?:on )?Sep (\\d{1,2})$"
+				},
+				{
+					"id": "profile/short-date-oct",
+					"pattern": "^(?:on )?Oct (\\d{1,2})$"
+				},
+				{
+					"id": "profile/short-date-nov",
+					"pattern": "^(?:on )?Nov (\\d{1,2})$"
+				},
+				{
+					"id": "profile/short-date-dec",
+					"pattern": "^(?:on )?Dec (\\d{1,2})$"
 				}
 			]
 		},

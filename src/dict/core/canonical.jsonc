@@ -1298,6 +1298,31 @@
 				"Top languages",
 				"Highlights",
 				"following",
+				// —— 个人主页：关注者与动态概览 ——
+				"followers",
+				"Activity overview",
+				"Contributed to",
+				"Learn how we count contributions",
+				// —— 贡献动态时间线：仓库 / 组织名是链接，锚点把整句拆成前后两段，
+				// 两段各自成词条（拆节点不能靠整句译文复用，见开发指南）——
+				"Created a pull request in",
+				"Created an issue in",
+				"Joined the",
+				"organization",
+				// —— 贡献动态月份标题：月份与年份是两个节点（年份是纯数字、不译），
+				// 故月份名各自成词条，「September」+「2026」渲染为「9 月 2026」——
+				"January",
+				"February",
+				"March",
+				"April",
+				"May",
+				"June",
+				"July",
+				"August",
+				"September",
+				"October",
+				"November",
+				"December",
 				// —— 仓库列表筛选（Type / Language / Order 下拉）——
 				"Find a repository…",
 				"Sources",

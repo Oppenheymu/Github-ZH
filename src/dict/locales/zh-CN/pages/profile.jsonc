@@ -26,6 +26,30 @@
 		"Top languages": "主要语言",
 		"Highlights": "亮点",
 		"following": "正在关注",
+		// —— 关注者与动态概览（计数在独立节点里，故这里只译名词）——
+		"followers": "位关注者",
+		"Activity overview": "活动概览",
+		// 亮点区：「Contributed to <仓库链接>…」的前半句
+		"Contributed to": "贡献于",
+		"Learn how we count contributions": "了解我们如何统计贡献",
+		// —— 贡献动态时间线：整句被仓库 / 组织链接拆开，链接前后各自成词条 ——
+		"Created a pull request in": "创建了拉取请求：",
+		"Created an issue in": "创建了议题：",
+		"Joined the": "加入了",
+		"organization": "组织",
+		// —— 贡献动态月份标题（月份与年份是两个节点，年份保持数字不译）——
+		"January": "1 月",
+		"February": "2 月",
+		"March": "3 月",
+		"April": "4 月",
+		"May": "5 月",
+		"June": "6 月",
+		"July": "7 月",
+		"August": "8 月",
+		"September": "9 月",
+		"October": "10 月",
+		"November": "11 月",
+		"December": "12 月",
 		// —— 仓库列表筛选（Type / Language / Order 下拉）——
 		"Find a repository…": "查找仓库…",
 		"Sources": "来源",
