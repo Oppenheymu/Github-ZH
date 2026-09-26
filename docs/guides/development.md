@@ -245,8 +245,10 @@ popup 底部的「开发者模式」开关**默认关闭**，用于系统性发�
 
 ```bash
 bun run build
-bun run verify -- --pages .zcode/pages-smoke.txt --out .zcode/misses.json
-bun run verify -- --locale ja --pages .zcode/pages-smoke.txt --out .zcode/misses-ja.json
+# 缺省页面清单是 DEFAULT_PAGES（各词典模块的代表页，9 条，整轮约 2 分钟）
+bun run verify --out .zcode/misses.json
+# 想只跑几页：清单文件每行一个 URL（# 为注释），路径随意、不必进仓
+bun run verify -- --pages my-pages.txt --locale ja --out .zcode/misses-ja.json
 ```
 
 - `--locale <id>`：写进 storage（content script 据它选词典），同时决定**翻译探针的锚点与字系统计数**——判据不得硬编码某种语言的译文（旧版把「注册 / 登录」和 CJK 计数写死，换成任何别的语言都会误判为「翻译未生效」）；
