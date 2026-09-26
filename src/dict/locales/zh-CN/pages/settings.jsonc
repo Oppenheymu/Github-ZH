@@ -415,7 +415,9 @@
 		"Products selector navigation": "产品选择器导航",
 		"Open repository usage options": "打开仓库用量选项",
 		"User navigation": "用户导航",
-		"Total gross spend on Copilot for the selected timeframe including licenses and AI Credits.": "所选时间段内 Copilot 的总毛支出，含许可证与 AI 点数。",
+		// 「毛」在中文里单用不成词（「总毛支出」很别扭），故不逐字对译 gross，改用
+		// 「总支出」+ 括号说明包含项；两者语义相同且不丢信息
+		"Total gross spend on Copilot for the selected timeframe including licenses and AI Credits.": "所选时间段内 Copilot 的总支出（含许可证与 AI 点数）。",
 		"Gross metered usage for September 1 - September 30, 2026.": "2026 年 9 月 1 日 – 9 月 30 日的毛按量计费用量。",
 		"Included usage discounts for September 1 - September 30, 2026.": "2026 年 9 月 1 日 – 9 月 30 日的所含用量折扣。",
 		"Gross metered usage for September 1 - September 29, 2026.": "2026 年 9 月 1 日 – 9 月 29 日的毛按量计费用量。",
