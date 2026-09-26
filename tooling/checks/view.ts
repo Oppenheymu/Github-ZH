@@ -52,14 +52,19 @@ export const PROBE_PATHS: readonly string[] = [
 	"/settings/accessibility",
 	"/settings/notifications",
 	"/settings/billing",
-	// AI 用量页与账单总览同属 ^/settings/billing，但它是**另一页**（模型用量表 +
+	// 个人账单已于 2026-09 迁到 /account/billing/**（/settings/billing 实测 404，仅
+	// /settings/billing/licensing 尚存），两条路由按「新路径为主、旧路径兼容」写在一起。
+	// 下面四条探针走新路径，紧邻的 /settings/billing 这条是**旧路径兼容锚点**：它对不上
+	// 任何现存页面，但必须是同一条骨架——哪次改动把路由里的 /settings 分支删了，这里立刻报警
+	"/account/billing",
+	// AI 用量页与账单总览同属 ^/(?:settings|account)/billing，但它是**另一页**（模型用量表 +
 	// 账期选择器 + AI 点数单价脚注），自带一组只在该页出现的规则（settings/month-year-*），
 	// 故单独列一条探针——否则「规则加了却没生效」在这条路径上完全不可见
-	"/settings/billing/ai_usage",
+	"/account/billing/ai_usage",
 	// 预算与提醒页同理：同模块的第三个页面，自带 settings/budget-* 规则
-	"/settings/billing/budgets",
+	"/account/billing/budgets",
 	// 许可页：同模块的第四个页面，自带 settings/licensing-* 四条配额规则
-	"/settings/billing/licensing",
+	"/account/billing/licensing",
 	"/microsoft/vscode/actions",
 	"/microsoft/vscode/agents",
 	"/microsoft/vscode/commits",

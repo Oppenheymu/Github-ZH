@@ -86,7 +86,7 @@
 		{
 			"name": "pages/settings-billing",
 			"rules": [
-				// 账单页（/settings/billing）的用量表格：说明句与时间范围常被拆成两个节点
+				// 账单页（/account/billing）的用量表格：说明句与时间范围常被拆成两个节点
 				// （"Gross metered usage for " + 区间），区间本身又是动态的，故按月全展开：
 				// 12 条同月 + 132 条跨月，与 insights/range-long-* 同一形态。之所以逐组合
 				// 写死月份，是因为替换模板不支持函数映射——把英文月名捕获进模板，中文里
@@ -749,7 +749,7 @@
 					"id": "settings/discount-exact",
 					"pattern": "^\\$(?<amount>[\\d.,]+) off\\*?$"
 				},
-				// —— 用量页（/settings/billing/usage）的图表卡片副标题 ——
+				// —— 用量页（/account/billing/usage）的图表卡片副标题 ——
 				// 用量页把账期写成**短月份**形态（截图实证：「Sep 1 - Sep 30, 2026」），
 				// 与账单总览的长月份形态是两套写法，故必须另收一组 pattern；同月只写一次月份。
 				// 跨月形态（如「Sep 1 - Oct 1, 2026」）暂无实证，未收：global 的 short-date-*
@@ -894,10 +894,10 @@
 					"id": "settings/timeframe-last-12-months",
 					"pattern": "^Timeframe: Last 12 months$"
 				},
-				// —— AI 用量页（/settings/billing/ai_usage）的账期选择器 ——
+				// —— AI 用量页（/account/billing/ai_usage）的账期选择器 ——
 				// 未展开时是「月份 年份」（截图实证：「Sep 2026」），year 随所选月份变化。
 				// 与 insights/month-year-* 是同一形态，但那是 insights 模块的规则（路由
-				// ^/[^/]+/[^/]+/(pulse|graphs|…)），在 /settings/billing/ai_usage 下不生效，
+				// ^/[^/]+/[^/]+/(pulse|graphs|…)），在 /account/billing/ai_usage 下不生效，
 				// 故本模块必须自带一组；月份写死进 pattern 与模板是替换模板不支持
 				// 「捕获组 → 中文月份」映射的老问题（见上面的账期区间说明）。
 				// 与上面的账期规则不冲突：那些短语都以「日」或「-」分隔，这里的形态是月份缩写 + 空格 + 年份
@@ -960,7 +960,7 @@
 					"id": "settings/ai-credit-cost",
 					"pattern": "^Each GitHub AI credit costs (?<amount>[$][\\d.,]+)\\.$"
 				},
-				// —— 预算与提醒页（/settings/billing/budgets）——
+				// —— 预算与提醒页（/account/billing/budgets）——
 				// 标题行「5 Account budgets」：数字随预算条数变化
 				{
 					"id": "settings/budget-count",
@@ -976,7 +976,7 @@
 					"id": "settings/budget-amount-limit",
 					"pattern": "^(?<amount>[$][\\d.,]+) budget$"
 				},
-				// —— 许可页（/settings/billing/licensing）的「包含 / 不包含」清单 ——
+				// —— 许可页（/account/billing/licensing）的「包含 / 不包含」清单 ——
 				// 含数量的四条按形态各锚一条（数量随方案变化）：数值与单位原样保留，
 				// 只把英文结构换成中文语序
 				{

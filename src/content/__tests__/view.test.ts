@@ -67,9 +67,28 @@ describe("matchModules", () => {
 			"pages/settings",
 			"global",
 		]);
+		// 个人账单 2026-09 迁到 /account/billing/**：设置侧栏照旧渲染，故两个模块都要命中，
+		// 否则侧栏（词条在 pages/settings）与正文（词条在 pages/settings-billing）整体保留英文
+		expect(routes("/account/billing")).toEqual([
+			"pages/settings",
+			"pages/settings-billing",
+			"global",
+		]);
+		// 用户实际踩到的路径：同一路由下的子页，命中序列必须与总览页一致
+		expect(routes("/account/billing/history")).toEqual([
+			"pages/settings",
+			"pages/settings-billing",
+			"global",
+		]);
+		// 旧路径兼容分支（/settings/billing/licensing 实机尚存）
 		expect(routes("/settings/billing")).toEqual([
 			"pages/settings",
 			"pages/settings-billing",
+			"global",
+		]);
+		// 未迁移的 /account/* 不注入设置词条：实测 /account/appearance 是 404，
+		// 路由只精确覆盖 /account/billing，放宽会让不存在的页面吃到整包设置词条
+		expect(routes("/account/appearance")).toEqual([
 			"global",
 		]);
 		expect(routes("/search")).toEqual([

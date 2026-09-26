@@ -1,11 +1,17 @@
-// 账单页模块：/settings/billing 的账单总览、「所含用量与点数」面板与用量页（/settings/billing/usage）
+// 账单页模块：/account/billing 的账单总览、「所含用量与点数」面板与用量页（/account/billing/usage）
+//
+// 路径迁移（2026-09 实测）：这一支原在 /settings/billing/**，GitHub 已把个人账单整支迁到
+// /account/billing/**（/settings/billing 及其子页实测 404，仅 /settings/billing/licensing 尚存）。
+// 迁移只换路径、不换文案，故键与规则原样沿用；core/modules.jsonc 里本模块路由
+// ^/(?:settings|account)/billing 与 pages/settings 的 ^/(?:settings|account/billing) 一起覆盖
+// 新老路径（旧路径保留兼容，因为 /settings/billing/licensing 仍在线）。
 //
 // 为什么单开一个子模块而不是塞进 pages/settings：本页的动态规则数量很大
 // （日期区间按月全展开：12 条同月 + 132 条跨月，另有用量页的短月份区间与两个下拉），
 // 若挂在 pages/settings 下，每个设置页的探针都会背上一百多条本页永不使用的规则 id
 // （视图骨架快照随之膨胀）。
-// 路由 ^/settings/billing 比 ^/settings 更具体，按 core/modules.jsonc 的顺序排在
-// pages/settings 之后，因而**继承**它提供的设置页外壳词条（用量页的图表图例「Usage」
+// 本模块按 core/modules.jsonc 的顺序排在 pages/settings 之后（后者同样覆盖
+// /account/billing），因而**继承**它提供的设置页外壳词条（用量页的图表图例「Usage」
 // 就来自 pages/settings），只叠加账单专属内容。
 // 简体中文 · 模块 pages/settings-billing（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
@@ -89,8 +95,8 @@
 		"** GitHub Packages usage is free for public packages. For details on free Actions usage, see": "** 公共软件包的 GitHub Packages 用量免费。免费 Actions 用量的详情见",
 		"Free use of GitHub Actions": "免费使用 GitHub Actions",
 		"* Included usage is an approximate amount based on current pricing.": "* 所含用量是按当前价格估算的近似金额。",
-		// —— 用量页（/settings/billing/usage）——
-		// 路由 ^/settings/billing 同时命中用量页，故词条归本模块；键来自 2026-09 的实机
+		// —— 用量页（/account/billing/usage）——
+		// 路由 ^/(?:settings|account)/billing 同时命中用量页，故词条归本模块；键来自 2026-09 的实机
 		// 截图逐行誊录（页面需登录，未进开发者模式导出），节点边界见
 		// src/content/__tests__/settings-billing.test.ts 的 USAGE_NODES。
 		//
@@ -117,7 +123,7 @@
 		"Report format": "报告格式",
 		"Generate report": "生成报告",
 		"The start date must be before the end date.": "开始日期必须早于结束日期。",
-		// —— AI 用量页（/settings/billing/ai_usage）——
+		// —— AI 用量页（/account/billing/ai_usage）——
 		// 键来自 2026-09 的实机截图逐行誊录（页面需登录，未进开发者模式导出），
 		// 节点边界见 src/content/__tests__/settings-billing.test.ts 的 AI_USAGE_NODES。
 		// 页面标题「AI usage」沿用 pages/settings 的「AI 用量」（模块更靠前，先到先得），
@@ -137,7 +143,7 @@
 		"Additional credits": "额外点数",
 		// 表脚注的静态形态（金额变化时由 core/rules.jsonc 的 settings/ai-credit-cost 覆盖）
 		"Each GitHub AI credit costs $0.01.": "每个 GitHub AI 点数费用为 $0.01。",
-		// —— 预算与提醒页（/settings/billing/budgets）——
+		// —— 预算与提醒页（/account/billing/budgets）——
 		// 键来自 2026-09 的实机截图逐行誊录（页面需登录，未进开发者模式导出），
 		// 节点边界见 src/content/__tests__/settings-billing.test.ts 的 BUDGETS_NODES。
 		// 页面标题「Budgets and alerts」沿用 pages/settings 的「预算与提醒」（模块更靠前）；
@@ -154,7 +160,7 @@
 		"budget": "预算",
 		// 行尾溢出菜单按钮的无障碍名
 		"Budget options": "预算选项",
-		// —— 许可页（/settings/billing/licensing）——
+		// —— 许可页（/account/billing/licensing）——
 		// 键来自 2026-09 的实机截图逐行誊录（页面需登录，未进开发者模式导出），
 		// 节点边界见 src/content/__tests__/settings-billing.test.ts 的 LICENSING_NODES。
 		// 页面标题「Licensing」沿用 pages/settings 的「许可」；「GitHub Copilot」「GitHub Free」
@@ -199,7 +205,7 @@
 		"Multiple reviewers in pull requests": "拉取请求中的多名审查者",
 		// 清单底部的对比入口
 		"See all features and compare plans": "查看所有功能并对比各方案",
-		// —— 付款信息页（/settings/billing/payment_information）——
+		// —— 付款信息页（/account/billing/payment_information）——
 		// 键来自 2026-09 的实机 HTML（用户提供 label 片段）与截图，节点边界见
 		// src/content/__tests__/settings-billing.test.ts 的 PAYMENT_NODES。
 		// 三条实机边界必须记住：

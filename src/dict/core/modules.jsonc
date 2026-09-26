@@ -16,13 +16,24 @@
 			"name": "pages/pulls",
 			"route": "^/[^/]+/[^/]+/pull"
 		},
+		// 账号设置路由有**两支**（实测 2026-09，未登录即可复现状态码）：
+		//   /settings/**        其余设置（/settings/profile 302 存活；/account/appearance 404，未迁）
+		//   /account/billing/**  个人账单整支（/account/billing 302 存活；/settings/billing 404，
+		//                        仅 /settings/billing/licensing 尚存，故旧路由仍需兼容）
+		// 账单页沿用**同一套设置侧栏**，而侧栏词条（Public profile / Emails / Sessions /
+		// Payment history…）全在 pages/settings 与 pages/settings-billing 里，因此两条路由
+		// 都必须覆盖 /account/billing，否则在新账单路径上侧栏与正文整体保留英文——
+		// 只剩 global 里零星几条命中，表现为「一半中文一半英文」的中英混杂。
+		// 这里只精确覆盖 /account/billing 而不是整个 /account：未迁移的设置路径实测是 404，
+		// 放宽会为不存在的页面注入整包设置词条。GitHub 后续若继续迁移，改这里并同步
+		// tooling/checks/view.ts 的 PROBE_PATHS 与 tooling/fixtures 快照。
 		{
 			"name": "pages/settings",
-			"route": "^/settings"
+			"route": "^/(?:settings|account/billing)"
 		},
 		{
 			"name": "pages/settings-billing",
-			"route": "^/settings/billing"
+			"route": "^/(?:settings|account)/billing"
 		},
 		{
 			"name": "pages/repo-settings",

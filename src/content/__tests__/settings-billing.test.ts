@@ -1,4 +1,10 @@
-// 账单页（/settings/billing）与用量页（/settings/billing/usage）实机文本节点回归。
+// 账单页（/account/billing）与用量页（/account/billing/usage）实机文本节点回归。
+//
+// 路径迁移（2026-09 实测）：这几个页面原本都在 /settings/billing/**，GitHub 已把**个人账单整支**
+// 迁到 /account/billing/**（/settings/billing 及其子页实测 404，仅 /settings/billing/licensing 尚存）。
+// 迁移只换路径、不换节点原文，故下面誊录的清单原样沿用，只把构建视图的 pathname 换成新路径。
+// 两条路由由 core/modules.jsonc 同时覆盖新老路径：pages/settings → ^/(?:settings|account/billing)、
+// pages/settings-billing → ^/(?:settings|account)/billing，因此这里锁的行为在新路径上必须成立。
 //
 // 为什么单独锁这两页：
 //   1. 键整批来自开发者模式导出的漏翻 JSON（2026-09 该页会话），导出记录的是
@@ -13,12 +19,12 @@
 //      GitHub Models / Packages / Git LFS，以及 per / month / items / usage 这类泛化短词。
 //      门禁要求译文含中文字系，这类词条的正确做法就是不收录（未命中即保留英文），
 //      这里反向断言，防止后人「补」成死键或造出翻译循环；
-//   4. 用量页（/settings/billing/usage）是**同一路由下的另一页**，实机截图逐行誊录的
+//   4. 用量页（/account/billing/usage）是**同一路由下的另一页**，实机截图逐行誊录的
 //      节点清单在下面的 USAGE_NODES：除了静态词条，它还要两个下拉（Group by / Timeframe）
 //      与**短月份**账期（「Sep 1 - Sep 30, 2026」，与账单总览的长月份是两套写法）。
 //
-// 实机节点清单来源：账单总览是 popup 开发者模式导出的 github-zh-misses/1 JSON（path 全为
-// /settings/billing）；用量页需登录、未进导出，按 2026-09 的实机截图誊录。
+// 实机节点清单来源：账单总览是 popup 开发者模式导出的 github-zh-misses/1 JSON（导出时该页
+// 路径还是 /settings/billing，迁移发生在采集之后）；用量页需登录、未进导出，按 2026-09 的实机截图誊录。
 import { describe, expect, it } from "bun:test";
 import {
 	dictCore,
@@ -27,9 +33,9 @@ import {
 import { buildView } from "../view.ts";
 import { translateText } from "../walker.ts";
 
-/** /settings/billing 命中的模块视图（pages/settings + pages/repo + global） */
+/** /account/billing 命中的模块视图（pages/settings + pages/settings-billing + global） */
 const view = buildView(
-	"/settings/billing",
+	"/account/billing",
 	dictForLocale("zh-CN"),
 	new Map(Object.entries(dictCore.aliases)),
 );
@@ -428,7 +434,7 @@ describe("「More details」弹窗的实机节点边界", () => {
 });
 
 /**
- * 用量页（/settings/billing/usage）的实机文本节点。
+ * 用量页（/account/billing/usage）的实机文本节点。
  *
  * 这份清单的边界强度分两档：
  *   - **已实测**：说明句「Usage for Sep 1 - Sep 30, 2026. 」（span.UsageTable-module__hintText__）
@@ -467,7 +473,7 @@ const USAGE_NODES: readonly string[] = [
 
 /** 用量页命中的模块视图（pages/settings + pages/settings-billing + pages/repo + global） */
 const usageView = buildView(
-	"/settings/billing/usage",
+	"/account/billing/usage",
 	dictForLocale("zh-CN"),
 	new Map(Object.entries(dictCore.aliases)),
 );
@@ -591,9 +597,9 @@ describe("用量页的实机节点边界", () => {
 });
 
 /**
- * AI 用量页（/settings/billing/ai_usage）的实机文本节点。
+ * AI 用量页（/account/billing/ai_usage）的实机文本节点。
  *
- * 边界强度与上面的 USAGE_NODES 同档：该路由同样只命中 ^/settings/billing，页面需登录、
+ * 边界强度与上面的 USAGE_NODES 同档：该页同样由 ^/(?:settings|account)/billing 覆盖，页面需登录、
  * **未进开发者模式导出**，节点原文按 2026-09 的实机截图逐行誊录，每行假定为一个独立文本节点
  * （表格两行表头的「英文列名 / 另一种写法」在截图里各自成列，故按两个节点收录）。
  * 若实机出现漏翻，第一步是把该页的漏翻 JSON（popup 开发者模式）或 Console 取的节点原文
@@ -623,7 +629,7 @@ const AI_USAGE_NODES: readonly string[] = [
 
 /** AI 用量页命中的模块视图（与用量页同一组模块：settings + settings-billing + repo + global） */
 const aiUsageView = buildView(
-	"/settings/billing/ai_usage",
+	"/account/billing/ai_usage",
 	dictForLocale("zh-CN"),
 	new Map(Object.entries(dictCore.aliases)),
 );
@@ -706,9 +712,9 @@ describe("AI 用量页的实机节点边界", () => {
 });
 
 /**
- * 预算与提醒页（/settings/billing/budgets）的实机文本节点。
+ * 预算与提醒页（/account/billing/budgets）的实机文本节点。
  *
- * 边界强度与 AI 用量页同档：路由同样只命中 ^/settings/billing，页面需登录、
+ * 边界强度与 AI 用量页同档：路由同上（^/(?:settings|account)/billing），页面需登录、
  * **未进开发者模式导出**，节点原文按 2026-09 的实机截图逐行誊录。截图里
  * 「账户」「代码空间」「软件包」「Actions 工作流」「预算与提醒（标题）」已经由既有词条译出，
  * 故这里只收当时仍是英文的那些节点。
@@ -738,7 +744,7 @@ const BUDGETS_NODES: readonly string[] = [
 
 /** 预算页命中的模块视图（与账单页同一组模块） */
 const budgetsView = buildView(
-	"/settings/billing/budgets",
+	"/account/billing/budgets",
 	dictForLocale("zh-CN"),
 	new Map(Object.entries(dictCore.aliases)),
 );
@@ -819,9 +825,9 @@ describe("预算与提醒页的实机节点边界", () => {
 });
 
 /**
- * 许可页（/settings/billing/licensing）的实机文本节点。
+ * 许可页（/account/billing/licensing）的实机文本节点。
  *
- * 边界强度与其它账单子页同档：路由只命中 ^/settings/billing，页面需登录、
+ * 边界强度与其它账单子页同档：路由同上（^/(?:settings|account)/billing），页面需登录、
  * **未进开发者模式导出**，节点原文按 2026-09 的实机截图逐行誊录。
  * 截图里「许可（标题）」「GitHub Copilot」「Community support」「Web-based support」
  * 「Code owners」「Required reviewers」「Multiple reviewers in pull requests」
@@ -860,7 +866,7 @@ const LICENSING_NODES: readonly string[] = [
 
 /** 许可页命中的模块视图（与其它账单子页同一组模块） */
 const licensingView = buildView(
-	"/settings/billing/licensing",
+	"/account/billing/licensing",
 	dictForLocale("zh-CN"),
 	new Map(Object.entries(dictCore.aliases)),
 );
@@ -969,13 +975,13 @@ describe("许可页的实机节点边界", () => {
 });
 
 /**
- * 付款信息页（/settings/billing/payment_information）的实机文本节点。
+ * 付款信息页（/account/billing/payment_information）的实机文本节点。
  *
  * 节点边界分两档：
  *   - **实机 HTML 实证**（用户提供）：地址 / 地址第二行 / 邮编三个标签被 `.text-normal`
  *     拆成「主标签 + 括号说明」两个节点，故此处按拆分形态列，不列整行键；
  *   - 其余行按 2026-09 的实机截图誊录。
- * 该路由同样只命中 ^/settings/billing，故词条归 pages/settings-billing 模块；
+ * 该页同样由 ^/(?:settings|account)/billing 覆盖，故词条归 pages/settings-billing 模块；
  * 页面标题「Payment information」由 pages/settings 提供（模块更靠前），不在此重复登记。
  *
  * 刻意不收录的内容：
@@ -1014,7 +1020,7 @@ const PAYMENT_NODES: readonly string[] = [
 
 /** 付款信息页命中的模块视图（与其它账单子页同一组模块） */
 const paymentView = buildView(
-	"/settings/billing/payment_information",
+	"/account/billing/payment_information",
 	dictForLocale("zh-CN"),
 	new Map(Object.entries(dictCore.aliases)),
 );

@@ -160,7 +160,8 @@ content script 以 `run_at: document_start` 注入：
 - 快照按语言逐份：同键异译是分语言的事实（某语言少译了被压过的那个键，跨模块同键就不成立）；
 - 失败时只报首处差异 + 差异条数（一条路径的规则序列可达上百项，整表打印会淹掉真正的信息）；
 - 改动确实有意时用 `bun run check:view --update` 重生成快照，并在提交信息里说明原因；
-- 探针清单（`PROBE_PATHS`）是快照的坐标：**同一模块下的另一页也要单独列一条**（如 `/settings/billing` 与 `/settings/billing/ai_usage`），否则只在该页生效的规则进了 core 也没人发现；
+- 探针清单（`PROBE_PATHS`）是快照的坐标：**同一模块下的另一页也要单独列一条**（如 `/account/billing` 与 `/account/billing/ai_usage`），否则只在该页生效的规则进了 core 也没人发现；
+- **上游改路径时「新路径为主 + 旧路径兼容」，并为兼容分支留一条锚点探针**：个人账单 2026-09 从 `/settings/billing/**` 迁到 `/account/billing/**`（旧路径实测 404，仅 `/settings/billing/licensing` 尚存），两个模块的路由因此写成 `^/(?:settings|account)/billing`（`pages/settings-billing`）与 `^/(?:settings|account/billing)`（`pages/settings`，账单页沿用同一套设置侧栏，侧栏词条在它里面）。`PROBE_PATHS` 里除新路径的四条页面探针外，还留一条旧路径探针 `/settings/billing`：它对不上任何现存页面，作用是锁住兼容分支**没被谁顺手删掉**；
 - **`--update` 写出的文件必须同时满足 `biome check`**：`serializeSkeleton` 按 Biome 的规则自己排版（tab 缩进、超过 `lineWidth` 就竖排、内联对象带空格、tab 按 `indentWidth` 折算列数）。历史上它用 `JSON.stringify(…, null, 2)`，产物必然被 `biome check` 报格式错误，于是「重生成快照」这条流程只能靠手工补一次 `biome format --write`；改这里的排版逻辑时，验收标准是 `bun run check:view --update` 之后 `biome check tooling/fixtures/` 零改动；
 - 与词典门禁一样走 `registry.ts` + `load.ts` 的严格路径，**不 import 软失败的 `src/dict/index.ts`**。
 
@@ -258,7 +259,7 @@ for (const p of probes) {
 | `settings-appearance.test.ts` | `/settings/appearance` | 外观设置页（下拉 / 分段控件的当前值本身是节点） |
 | `settings-accessibility.test.ts` | `/settings/accessibility` | 辅助功能设置页（按键名 + `kbd` + `sr-only` 拼接） |
 | `settings-notifications.test.ts` | `/settings/notifications` | 通知设置页（四处拼接必须成立） |
-| `settings-billing.test.ts` | `/settings/billing`、`/settings/billing/usage` | 账单 / 用量页（含日期区间规则的顺序语义） |
+| `settings-billing.test.ts` | `/account/billing`、`/account/billing/usage` | 账单 / 用量页（含日期区间规则的顺序语义） |
 | `repo.test.ts` | `/owner/repo` 及子页 | 仓库页（导航、文件列表、README 与 README.md 的区分） |
 | `issues.test.ts` | `/owner/repo/issues` | 议题列表页 |
 | `pulls.test.ts` | `/owner/repo/pulls` | 拉取请求列表页 |
@@ -314,7 +315,7 @@ for (const p of probes) {
 
 ### 日期区间为什么逐组合展开（以账单页为例）
 
-`/settings/billing`（账单总览）与 `/settings/billing/usage`（用量页）把同一个账期写成**两套**英文形态：
+`/account/billing`（账单总览）与 `/account/billing/usage`（用量页）把同一个账期写成**两套**英文形态：
 账单总览是长月份（`September 1 - September 30, 2026`），用量页是短月份（`Sep 1 - Sep 30, 2026`）。
 两者都只能靠 `settings/usage-range-*` 规则覆盖，且**必须逐组合展开**（2026-09 实测：长月份
 `settings/usage-range-*` 共 144 条 = 同月 12 + 跨月 132；短月份 `settings/usage-range-short-same-month-*`
@@ -323,8 +324,8 @@ for (const p of probes) {
 - 引擎的替换模板不支持「捕获组 → 中文月份」的映射，模板里引用捕获组会渲染出英文 `September`，
   所以月份必须写死在 pattern 与模板里；
 - **全展开的代价如实记在此处**：这 144 条长月份规则挂在 `pages/settings-billing` 模块下，而该模块的
-  路由是 `^/settings/billing`——当前命中 **4 条探针**（`/settings/billing`、`/settings/billing/ai_usage`、
-  `/settings/billing/budgets`、`/settings/billing/licensing`），所以视图骨架快照会在这 4 处各膨胀一百多个
+  路由是 `^/(?:settings|account)/billing`——当前命中 **5 条探针**（`/account/billing`、`/account/billing/ai_usage`、
+  `/account/billing/budgets`、`/account/billing/licensing`，以及旧路径兼容锚点 `/settings/billing`），所以视图骨架快照会在这 5 处各膨胀一百多个
   永不使用的规则 id；把它们上提到 `pages/settings` 更糟：每条 `/settings*` 探针都会背上这一百多条；
 - 跨月短月份（如 `Sep 1 - Oct 1, 2026`）**暂无实证**，故目前只收同月 11 条：未命中只是保留英文，
   不会产出中英残句（`global/short-date-*` 两端都以 `^…$` 锚定，不做部分替换）。短月份里 5 月的全称与缩写
