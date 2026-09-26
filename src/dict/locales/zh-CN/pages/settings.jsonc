@@ -46,6 +46,7 @@
 		"You can @mention your company’s GitHub organization to link it.": "你可以 @提及公司的 GitHub 组织来链接它。",
 		"your company’s GitHub organization to link it.": "的 GitHub 组织，以便链接它。",
 		"other your company’s GitHub organization to link it.": "其他公司的 GitHub 组织来链接它。",
+		"your your company’s GitHub organization to link it.": "你公司的 GitHub 组织来链接它。",
 		"Location": "位置",
 		"Display current local time": "显示当前本地时间",
 		"Other users will see the time difference from their local time.": "其他用户将看到与其本地时间的时差。",

@@ -214,6 +214,7 @@
 				// 两种片段边界各收一条，兼容源码换行缩进落在哪一侧
 				"your company’s GitHub organization to link it.",
 				"other your company’s GitHub organization to link it.",
+				"your your company’s GitHub organization to link it.",
 				"Location",
 				"Display current local time",
 				"Other users will see the time difference from their local time.",
