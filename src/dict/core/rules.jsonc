@@ -893,6 +893,72 @@
 				{
 					"id": "settings/timeframe-last-12-months",
 					"pattern": "^Timeframe: Last 12 months$"
+				},
+				// —— AI 用量页（/settings/billing/ai_usage）的账期选择器 ——
+				// 未展开时是「月份 年份」（截图实证：「Sep 2026」），year 随所选月份变化。
+				// 与 insights/month-year-* 是同一形态，但那是 insights 模块的规则（路由
+				// ^/[^/]+/[^/]+/(pulse|graphs|…)），在 /settings/billing/ai_usage 下不生效，
+				// 故本模块必须自带一组；月份写死进 pattern 与模板是替换模板不支持
+				// 「捕获组 → 中文月份」映射的老问题（见上面的账期区间说明）。
+				// 与上面的账期规则不冲突：那些短语都以「日」或「-」分隔，这里的形态是月份缩写 + 空格 + 年份
+				{
+					"id": "settings/month-year-jan",
+					"pattern": "^Jan (\\d{4})$"
+				},
+				{
+					"id": "settings/month-year-feb",
+					"pattern": "^Feb (\\d{4})$"
+				},
+				{
+					"id": "settings/month-year-mar",
+					"pattern": "^Mar (\\d{4})$"
+				},
+				{
+					"id": "settings/month-year-apr",
+					"pattern": "^Apr (\\d{4})$"
+				},
+				{
+					"id": "settings/month-year-may",
+					"pattern": "^May (\\d{4})$"
+				},
+				{
+					"id": "settings/month-year-jun",
+					"pattern": "^Jun (\\d{4})$"
+				},
+				{
+					"id": "settings/month-year-jul",
+					"pattern": "^Jul (\\d{4})$"
+				},
+				{
+					"id": "settings/month-year-aug",
+					"pattern": "^Aug (\\d{4})$"
+				},
+				{
+					"id": "settings/month-year-sep",
+					"pattern": "^Sep (\\d{4})$"
+				},
+				{
+					"id": "settings/month-year-oct",
+					"pattern": "^Oct (\\d{4})$"
+				},
+				{
+					"id": "settings/month-year-nov",
+					"pattern": "^Nov (\\d{4})$"
+				},
+				{
+					"id": "settings/month-year-dec",
+					"pattern": "^Dec (\\d{4})$"
+				},
+				// AI 点数单价脚注（金额随定价变化，故不宜写成静态词条）。
+				// 金额连同美元符号一起捕获，美元符号写成字符类「[$]」：模板里**不能**出现
+				// 紧跟组引用的字面 $——那种写法必须写成「$$<amount>」，而引擎会把 $$ 折成
+				// 一个 $ 并让组引用原样输出（实测，见 locales/zh-CN/rules.jsonc 折扣列的同类
+				// 说明），所以美元符号只能来自捕获组本身。字符类同时也绕开了 JSONC 转义：
+				// 「\\$」交给正则是「字面反斜杠 + 串尾」（永不命中），「\$」则会被 Bun 的
+				// JSONC 解析器当成非法转义直接报 Syntax Error
+				{
+					"id": "settings/ai-credit-cost",
+					"pattern": "^Each GitHub AI credit costs (?<amount>[$][\\d.,]+)\\.$"
 				}
 			]
 		},

@@ -585,3 +585,118 @@ describe("用量页的实机节点边界", () => {
 		expect(translateText("Cancel", usageView)).toBe("取消");
 	});
 });
+
+/**
+ * AI 用量页（/settings/billing/ai_usage）的实机文本节点。
+ *
+ * 边界强度与上面的 USAGE_NODES 同档：该路由同样只命中 ^/settings/billing，页面需登录、
+ * **未进开发者模式导出**，节点原文按 2026-09 的实机截图逐行誊录，每行假定为一个独立文本节点
+ * （表格两行表头的「英文列名 / 另一种写法」在截图里各自成列，故按两个节点收录）。
+ * 若实机出现漏翻，第一步是把该页的漏翻 JSON（popup 开发者模式）或 Console 取的节点原文
+ * 贴回来，按此处格式替换。
+ */
+const AI_USAGE_NODES: readonly string[] = [
+	// 页面标题来自 pages/settings 的同一键（模块更靠前），本模块不重复登记
+	"AI usage",
+	// 图表分组切换器（截图里 Days 为选中态；Models 沿用本模块既有的「模型」词条）
+	"Models",
+	"Days",
+	// 账期选择器（未展开时「月份 年份」，由 settings/month-year-* 规则覆盖）
+	"Sep 2026",
+	// 额外用量限额卡片
+	"Extra usage",
+	"Not enabled",
+	"If enabled, your enterprise will be billed for additional AI credits usage after your included credits have been exhausted.",
+	// 图表空状态
+	"No usage",
+	// 模型用量表的英文列名（第二行的「所含用量」「额外用量」由既有词条译出）
+	"Model",
+	"Included credits",
+	"Additional credits",
+	// 表脚注
+	"Each GitHub AI credit costs $0.01.",
+];
+
+/** AI 用量页命中的模块视图（与用量页同一组模块：settings + settings-billing + repo + global） */
+const aiUsageView = buildView(
+	"/settings/billing/ai_usage",
+	dictForLocale("zh-CN"),
+	new Map(Object.entries(dictCore.aliases)),
+);
+
+describe("AI 用量页的实机节点边界", () => {
+	it("translates every text node GitHub actually renders", () => {
+		for (const node of AI_USAGE_NODES) {
+			for (const variant of withWhitespace(node)) {
+				const translated = translateText(
+					variant,
+					aiUsageView,
+				);
+				expect(
+					translated,
+					`未命中：${JSON.stringify(variant)}`,
+				).not.toBeNull();
+				expect(translated ?? "").toMatch(/[\u4e00-\u9fff]/);
+			}
+		}
+	});
+
+	it("translates the account-period selector for every month", () => {
+		// 账期选择器未展开时是「月份缩写 年份」，逐月由 settings/month-year-* 覆盖
+		// （模板写死中文月份，理由同上面的账期区间：模板不支持捕获组 → 中文的映射）
+		for (const [raw, expected] of [
+			["Jan 2026", "2026 年 1 月"],
+			["May 2026", "2026 年 5 月"],
+			["Sep 2026", "2026 年 9 月"],
+			["Dec 2026", "2026 年 12 月"],
+			// 跨年同样只换年份
+			["Sep 2025", "2025 年 9 月"],
+		] as const) {
+			expect(
+				translateText(raw, aiUsageView),
+				`账期未覆盖：${JSON.stringify(raw)}`,
+			).toBe(expected);
+		}
+		// 未收的形态必须**原样保留**，不得被规则截成半句中文：
+		// 长月份（"September 2026"）与非法月份（"Foo 2026"）都不在规则里
+		for (const raw of ["September 2026", "Foo 2026"]) {
+			expect(
+				translateText(raw, aiUsageView),
+				`不应被翻译：${JSON.stringify(raw)}`,
+			).toBeNull();
+		}
+	});
+
+	it("keeps the AI credit price in the footnote dynamic", () => {
+		// 单价随定价变化：静态词条只覆盖截图里的 $0.01，其余金额靠规则补上
+		expect(
+			translateText(
+				"Each GitHub AI credit costs $0.02.",
+				aiUsageView,
+			),
+		).toBe("每个 GitHub AI 点数费用为 $0.02。");
+		// 规则以英文锚定，替换产物（已含中文）不会再命中任何规则
+		expect(
+			translateText(
+				"每个 GitHub AI 点数费用为 $0.02。",
+				aiUsageView,
+			),
+		).toBeNull();
+	});
+
+	it("keeps the table headers bilingual row as separate nodes", () => {
+		// 截图边界：英文列名与第二行写法分属两列（各自成节点），
+		// 故「Included credits」这类单节点键必须在词典里；
+		// 若实机把两者渲染进**同一个**文本节点（"Included credits 所含用量"），
+		// 该节点含非拉丁字母，引擎按设计整节点跳过——这是节点边界问题，不是缺词条
+		expect(translateText("Model", aiUsageView)).toBe(
+			"模型",
+		);
+		expect(
+			translateText("Included credits", aiUsageView),
+		).toBe("所含点数");
+		expect(
+			translateText("Additional credits", aiUsageView),
+		).toBe("额外点数");
+	});
+});

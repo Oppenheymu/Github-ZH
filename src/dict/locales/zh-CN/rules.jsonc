@@ -448,6 +448,21 @@
 		"settings/timeframe-last-month": "时间范围：上个月",
 		"settings/timeframe-last-3-months": "时间范围：近 3 个月",
 		"settings/timeframe-last-6-months": "时间范围：近 6 个月",
-		"settings/timeframe-last-12-months": "时间范围：近 12 个月"
+		"settings/timeframe-last-12-months": "时间范围：近 12 个月",
+		// AI 用量页的账期选择器「月份 年份」；单组保持 $1，不命名
+		"settings/month-year-jan": "$1 年 1 月",
+		"settings/month-year-feb": "$1 年 2 月",
+		"settings/month-year-mar": "$1 年 3 月",
+		"settings/month-year-apr": "$1 年 4 月",
+		"settings/month-year-may": "$1 年 5 月",
+		"settings/month-year-jun": "$1 年 6 月",
+		"settings/month-year-jul": "$1 年 7 月",
+		"settings/month-year-aug": "$1 年 8 月",
+		"settings/month-year-sep": "$1 年 9 月",
+		"settings/month-year-oct": "$1 年 10 月",
+		"settings/month-year-nov": "$1 年 11 月",
+		"settings/month-year-dec": "$1 年 12 月",
+		// AI 用量页的 AI 点数单价脚注：金额（含美元符号）由捕获组带出，模板里不再另写 $
+		"settings/ai-credit-cost": "每个 GitHub AI 点数费用为 $<amount>。"
 	}
 }

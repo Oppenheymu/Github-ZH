@@ -51,6 +51,10 @@ export const PROBE_PATHS: readonly string[] = [
 	"/settings/accessibility",
 	"/settings/notifications",
 	"/settings/billing",
+	// AI 用量页与账单总览同属 ^/settings/billing，但它是**另一页**（模型用量表 +
+	// 账期选择器 + AI 点数单价脚注），自带一组只在该页出现的规则（settings/month-year-*），
+	// 故单独列一条探针——否则「规则加了却没生效」在这条路径上完全不可见
+	"/settings/billing/ai_usage",
 	"/microsoft/vscode/actions",
 	"/microsoft/vscode/agents",
 	"/microsoft/vscode/commits",
@@ -232,9 +236,196 @@ function compareText(left: string, right: string): number {
 }
 
 /**
- * 稳定序列化：字段顺序固定、2 空格缩进（与仓库其它 JSON 一致）、末尾换行。
- * --update 写出的文件必须逐字节可复现，否则快照会因字段顺序抖动。
+ * 稳定序列化：字段顺序固定、tab 缩进、数组/对象超过行宽就竖排（每个元素一行）、末尾换行。
+ * --update 写出的文件必须逐字节可复现，否则快照会因字段顺序或空白抖动。
+ *
+ * 为什么手写而不是 JSON.stringify(…, null, "\t")：本仓的格式权威是 Biome，而 Biome 会把
+ * 超过 lineWidth(60) 的数组**竖排**（每项一行），JSON.stringify 只会整条写在一行。
+ * 两者产物不一致时，`--update` 生成的文件会被随后的 `biome check .` 报格式错误——
+ * 于是「用 --update 重生成快照」这条流程本身是坏的（历史快照是生成后手工跑过 biome format 的）。
+ * 这里按 Biome 的规则自己排版：探测容器内联与竖排两种形态，内联产物的最长行不超过行宽就用内联，
+ * 对象键值对同理。行宽与缩进改动必须同步 biome.json。
  */
+const SNAPSHOT_INDENT = "\t";
+const SNAPSHOT_LINE_WIDTH = 60;
+
+/** 容器的排版结果：head 为空串表示这不是容器（调用方按标量处理） */
+interface ContainerLayout {
+	/** 首行：内联容器就是整行，竖排容器就是开括号 */
+	readonly head: string;
+	/** 竖排时的每个元素（已带缩进） */
+	readonly body: readonly string[];
+	/** 闭括号：`]` 或 `}`；内联容器用不到 */
+	readonly close: string;
+	/** 这个值是否为容器（数组 / 对象） */
+	readonly isContainer: boolean;
+}
+
+/**
+ * 一个值的「内联写法」：容器用 Biome 的空格风格（`{ "k": v }`），标量用 JSON.stringify。
+ * 行宽探测必须按这个形态量，否则会把「按字符串长度算放得下、按空格风格算放不下」的
+ * 容器误判成内联（实测：matched 数组差的就是对象花括号里的两个空格）。
+ */
+function inlineText(value: unknown): string {
+	if (Array.isArray(value)) {
+		return `[${value.map((item) => inlineText(item)).join(", ")}]`;
+	}
+	if (value !== null && typeof value === "object") {
+		return `{ ${Object.entries(value)
+			.map(
+				([key, item]) =>
+					`${JSON.stringify(key)}: ${inlineText(item)}`,
+			)
+			.join(", ")} }`;
+	}
+	return JSON.stringify(value);
+}
+
+/**
+ * 容器（数组 / 对象）**竖排**排版：开括号作为首行单独返回，让调用方决定是否把它接到
+ * 上一行末尾（Biome 写作 `"rules": [` + 元素同行）。
+ * 是否内联由调用方判断（它才知道这一行前面还有多长的键名前缀，见 fitsInline）。
+ */
+function formatContainer(
+	value: unknown,
+	indent: string,
+): ContainerLayout {
+	if (Array.isArray(value)) {
+		if (value.length === 0) {
+			return {
+				head: "[]",
+				body: [],
+				close: "]",
+				isContainer: true,
+			};
+		}
+		const inner = `${indent}${SNAPSHOT_INDENT}`;
+		return {
+			head: "[",
+			// 逗号由容器加在**每个元素的最后一行**末尾（元素本身可能是多行）
+			body: value.map(
+				(item, index) =>
+					`${inner}${formatValue(item, inner)}${index < value.length - 1 ? "," : ""}`,
+			),
+			close: "]",
+			isContainer: true,
+		};
+	}
+	if (value !== null && typeof value === "object") {
+		const entries = Object.entries(value);
+		if (entries.length === 0) {
+			return {
+				head: "{}",
+				body: [],
+				close: "}",
+				isContainer: true,
+			};
+		}
+		const inner = `${indent}${SNAPSHOT_INDENT}`;
+		return {
+			head: "{",
+			body: entries.map(([key, item], index) =>
+				formatMember(
+					key,
+					item,
+					inner,
+					index < entries.length - 1,
+				),
+			),
+			close: "}",
+			isContainer: true,
+		};
+	}
+	return {
+		head: "",
+		body: [],
+		close: "",
+		isContainer: false,
+	};
+}
+
+/**
+ * 缩进占的**列数**：Biome 量行宽时按 indentWidth 折算（tab 算 2 列，见 biome.json 的
+ * 默认 indentWidth = 2），不是按字符数算 1。实测依据：`"matched": [...],` 那一行
+ * 字符数 58（3 个 tab 按 1 算是 3 列）本该内联，Biome 却断开；按 tab = 2 列算就是 61 列，
+ * 超过 lineWidth 60，断开才自洽。
+ */
+const INDENT_COLUMNS = 2;
+
+/** 这一行（缩进 + 前缀 + 内联值 + 可能的逗号）放得下吗 */
+function fitsInline(
+	indent: string,
+	prefix: string,
+	inline: string,
+	comma: string,
+): boolean {
+	const columns = indent.length * INDENT_COLUMNS;
+	return (
+		columns +
+			prefix.length +
+			inline.length +
+			comma.length <=
+		SNAPSHOT_LINE_WIDTH
+	);
+}
+
+/**
+ * 一个键值对成员的排版。
+ * 值的竖排容器把首行接在键后（`"rules": [` + 元素同行），其余行原样跟在后面——
+ * 这正是 Biome 的排版，也是与 JSON.stringify 的差别所在。
+ * 逗号由容器决定（见 trailing），因为它该加在这个成员**最后一行**的末尾。
+ */
+function formatMember(
+	key: string,
+	value: unknown,
+	indent: string,
+	trailing: boolean,
+): string {
+	const comma = trailing ? "," : "";
+	const label = `${JSON.stringify(key)}: `;
+	const inline = inlineText(value);
+	if (
+		!isContainer(value) ||
+		fitsInline(indent, label, inline, comma)
+	) {
+		// 标量，或放得下的内联容器：整行输出
+		return `${indent}${label}${inline}${comma}`;
+	}
+	// 竖排容器：开括号接在键后，元素与闭括号跟在后面
+	const container = formatContainer(value, indent);
+	const lines = [`${indent}${label}${container.head}`];
+	for (const line of container.body) lines.push(line);
+	lines.push(`${indent}${container.close}${comma}`);
+	return lines.join("\n");
+}
+
+/** 一个值的 JSON 文本：标量 / 短容器内联，长容器竖排 */
+function formatValue(
+	value: unknown,
+	indent: string,
+): string {
+	const inline = inlineText(value);
+	if (
+		!isContainer(value) ||
+		fitsInline(indent, "", inline, "")
+	) {
+		return inline;
+	}
+	const container = formatContainer(value, indent);
+	const lines = [container.head];
+	for (const line of container.body) lines.push(line);
+	lines.push(`${indent}${container.close}`);
+	return lines.join("\n");
+}
+
+/** 值是否为 JSON 容器（数组 / 对象） */
+function isContainer(value: unknown): boolean {
+	return (
+		Array.isArray(value) ||
+		(value !== null && typeof value === "object")
+	);
+}
+
 export function serializeSkeleton(
 	skeleton: ViewSkeleton,
 ): string {
@@ -252,7 +443,7 @@ export function serializeSkeleton(
 			notTranslated: [...probe.notTranslated],
 		})),
 	};
-	return `${JSON.stringify(normalized, null, 2)}\n`;
+	return `${formatValue(normalized, "")}\n`;
 }
 
 /** 数组逐位比较，返回第一条差异的可读说明；完全相同返回 null */

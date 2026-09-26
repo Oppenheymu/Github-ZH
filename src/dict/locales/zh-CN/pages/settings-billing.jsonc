@@ -116,6 +116,26 @@
 		// 「Cancel」不在本模块收录：global 词条已提供「取消」，重复登记只会制造同键异译
 		"Report format": "报告格式",
 		"Generate report": "生成报告",
-		"The start date must be before the end date.": "开始日期必须早于结束日期。"
+		"The start date must be before the end date.": "开始日期必须早于结束日期。",
+		// —— AI 用量页（/settings/billing/ai_usage）——
+		// 键来自 2026-09 的实机截图逐行誊录（页面需登录，未进开发者模式导出），
+		// 节点边界见 src/content/__tests__/settings-billing.test.ts 的 AI_USAGE_NODES。
+		// 页面标题「AI usage」沿用 pages/settings 的「AI 用量」（模块更靠前，先到先得），
+		// 不在此重复登记，避免同键异译。
+		// 图表分组切换器（截图里 Days 为选中态；Models 沿用本模块既有的「模型」词条）
+		"Days": "天",
+		// 额外用量限额卡片
+		"Extra usage": "额外用量",
+		"Not enabled": "未启用",
+		"If enabled, your enterprise will be billed for additional AI credits usage after your included credits have been exhausted.": "启用后，当所含点数用尽时，你的企业将为额外的 AI 点数用量付费。",
+		// 图表空状态
+		"No usage": "暂无用量",
+		// 模型用量表两行表头里的英文列名（第二行的「所含用量」「额外用量」已由
+		// Included usage / Additional usage 两条既有词条译出）
+		"Model": "模型",
+		"Included credits": "所含点数",
+		"Additional credits": "额外点数",
+		// 表脚注的静态形态（金额变化时由 core/rules.jsonc 的 settings/ai-credit-cost 覆盖）
+		"Each GitHub AI credit costs $0.01.": "每个 GitHub AI 点数费用为 $0.01。"
 	}
 }

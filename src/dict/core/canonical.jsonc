@@ -655,7 +655,30 @@
 				"Report format",
 				"Generate report",
 				// 报告弹窗里的日期区间校验提示（起止顺序颠倒时出现）
-				"The start date must be before the end date."
+				"The start date must be before the end date.",
+				// —— AI 用量页（/settings/billing/ai_usage，账单侧栏「AI usage」进入）——
+				// 该路由同样只命中 ^/settings/billing，故键归本模块。键逐字抄自 2026-09 的
+				// 实机截图（页面需登录，未进开发者模式导出），节点边界见
+				// src/content/__tests__/settings-billing.test.ts 的 AI_USAGE_NODES。
+				// 页面标题「AI usage」与分组切换器的「Models」都不在此登记：
+				// pages/settings 与本就排在本模块词条里的同键译文可复用（先到先得）
+				"Days",
+				// 额外用量限额卡片
+				"Extra usage",
+				"Not enabled",
+				"If enabled, your enterprise will be billed for additional AI credits usage after your included credits have been exhausted.",
+				// 图表空状态
+				"No usage",
+				// —— 模型用量表的两行表头 ——
+				// 第一行是英文列名，第二行是同一列的另一种写法；实机截图里
+				// 「所含用量」「额外用量」已经由既有词条（Included usage / Additional usage）
+				// 译出，而它们的同列英文「Model」「Included credits」「Additional credits」没有
+				// ——故这里补的是那三个英文列名。
+				"Model",
+				"Included credits",
+				"Additional credits",
+				// 表脚注（AI 点数单价说明，金额随定价变化，故走规则）
+				"Each GitHub AI credit costs $0.01."
 			]
 		},
 		{

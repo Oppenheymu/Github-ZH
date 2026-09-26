@@ -94,8 +94,8 @@ content script 以 `run_at: document_start` 注入：
 覆盖率由 `bun run check:dict` 报告（分母是 `core/canonical.jsonc`）：
 
 ```
-词典门禁通过：16 模块 / 1618 规范键 / 207 条共享规则 / 1668 条译文
-覆盖率：zh-CN 1618/1618（100.0%，全部已译） | ja 50/1618（3.1%，15 个模块待译）
+词典门禁通过：17 模块 / 2034 规范键 / 440 条共享规则 / 2084 条译文
+覆盖率：zh-CN 2034/2034（100.0%，全部已译） | ja 50/2034（2.5%，16 个模块待译）
 ```
 
 ### 规则为什么按 id 拆
@@ -150,6 +150,8 @@ content script 以 `run_at: document_start` 注入：
 - 快照按语言逐份：同键异译是分语言的事实（某语言少译了被压过的那个键，跨模块同键就不成立）；
 - 失败时只报首处差异 + 差异条数（一条路径的规则序列可达上百项，整表打印会淹掉真正的信息）；
 - 改动确实有意时用 `bun run check:view --update` 重生成快照，并在提交信息里说明原因；
+- 探针清单（`PROBE_PATHS`）是快照的坐标：**同一模块下的另一页也要单独列一条**（如 `/settings/billing` 与 `/settings/billing/ai_usage`），否则只在该页生效的规则进了 core 也没人发现；
+- **`--update` 写出的文件必须同时满足 `biome check`**：`serializeSkeleton` 按 Biome 的规则自己排版（tab 缩进、超过 `lineWidth` 就竖排、内联对象带空格、tab 按 `indentWidth` 折算列数）。历史上它用 `JSON.stringify(…, null, 2)`，产物必然被 `biome check` 报格式错误，于是「重生成快照」这条流程只能靠手工补一次 `biome format --write`；改这里的排版逻辑时，验收标准是 `bun run check:view --update` 之后 `biome check tooling/fixtures/` 零改动；
 - 与词典门禁一样走 `registry.ts` + `load.ts` 的严格路径，**不 import 软失败的 `src/dict/index.ts`**。
 
 ## 词典维护指南
