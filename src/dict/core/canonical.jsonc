@@ -421,7 +421,10 @@
 				// 故只登记实机真正出现的碎片；各碎片的键串见 pages/settings 词条旁的边界注释。
 				"Enable",
 				"GitHub shortcuts",
-				"that don't use modifier keys in their activation. For example, the and",
+				"that don't use modifier keys in their activation. For example, the",
+				// "and" 是 <kbd>g</kbd><kbd>n</kbd> 之间的独立节点；与 pages/repo-settings 同键，
+				// 本模块在前，只在 /settings 子树压过仓库设置页的「与」（该路径不命中本模块）
+				"and",
 				"shortcut to navigate notifications, or",
 				"to view context relevant shortcuts.",
 				"Motion",

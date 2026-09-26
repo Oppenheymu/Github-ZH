@@ -80,9 +80,10 @@ const ACCESSIBILITY_NODES: readonly string[] = [
 const CHARACTER_KEYS_NODES: readonly string[] = [
 	"\n      Enable ",
 	"GitHub shortcuts",
-	" that don't use modifier keys in their activation. For example, the and ",
+	" that don't use modifier keys in their activation. For example, the ",
 	"g",
 	"n",
+	" and ",
 	" shortcut to navigate notifications, or ",
 	"question mark",
 	"?",
@@ -151,8 +152,9 @@ describe("辅助功能设置页的实机节点边界", () => {
 		// 实机里整句被拆成 9 个节点（链接 + <kbd>g</kbd><kbd>n</kbd> + sr-only + <kbd>?</kbd>），
 		// 拼接后必须是通顺中文，且 g / n / ? 原样保留
 		const rendered = renderNodes(CHARACTER_KEYS_NODES);
+		// 逐字锁住拼接结果（含节点自带空白造成的一处双空格：<kbd> 之间是 " and " 节点）
 		expect(rendered).toContain(
-			"启用 GitHub 快捷键 这些快捷键在激活时不使用修饰键。例如用  gn 快捷键跳转到通知，或 question mark? 查看与当前上下文相关的快捷键。",
+			"启用 GitHub 快捷键 这些快捷键在激活时不使用修饰键。例如  gn 用  快捷键跳转到通知，或 question mark? 查看与当前上下文相关的快捷键。",
 		);
 		for (const raw of ["g", "n", "?", "GitHub"]) {
 			expect(rendered).toContain(raw);

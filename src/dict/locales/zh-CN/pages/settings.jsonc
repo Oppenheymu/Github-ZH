@@ -235,15 +235,18 @@
 		"Keyboard shortcuts": "键盘快捷键",
 		"Character keys": "字符快捷键",
 		// 实机边界（整句永不出现）：Enable + <a>GitHub shortcuts</a> + that don't use … the
-		//   + <kbd>g</kbd> + <kbd>n</kbd> + shortcut to navigate notifications, or
+		//   + <kbd>g</kbd> + <kbd>n</kbd> + and + shortcut to navigate notifications, or
 		//   + <span class="sr-only">question mark</span> + <kbd aria-hidden="true">?</kbd> + to view …
 		// 只按碎片收录：整句键在实机里永不出现，留着反而会与碎片键互相顶替（同一节点命中错的那条）。
-		// `<kbd>` 之间的 "and" 并进相邻片段，不单独收 "and"：pages/repo-settings 已收 "and"（「与」），
-		// 同键会互相顶替（本模块在前，会压过仓库设置页的「与」）。译文以「用 」收尾，
-		// 让 <kbd>g</kbd><kbd>n</kbd> 与前一句「例如」隔开。
 		"Enable": "启用",
 		"GitHub shortcuts": "GitHub 快捷键",
-		"that don't use modifier keys in their activation. For example, the and": "这些快捷键在激活时不使用修饰键。例如用 ",
+		// 片段译文以「例如 」收尾（带一个尾随空格），让 <kbd>g</kbd><kbd>n</kbd> 与前句隔开
+		"that don't use modifier keys in their activation. For example, the": "这些快捷键在激活时不使用修饰键。例如 ",
+		// "and" 在实机里是独立节点（<kbd>g</kbd><kbd>n</kbd> 之间的 and）。它与 pages/repo-settings
+		// 的 "and"（「与」，用于 MCP 那句 "…the repository's and environment."）同键：本模块在前，
+		// 只在 /settings 子树压过它，repo 设置页不受影响（该路径不命中本模块）。
+		// 译文不带尾随空格：相邻节点的源码空白会原样保留（拼成「例如 用  g n  快捷键…」）。
+		"and": "用",
 		"shortcut to navigate notifications, or": "快捷键跳转到通知，或",
 		"to view context relevant shortcuts.": "查看与当前上下文相关的快捷键。",
 		"Motion": "动态效果",
