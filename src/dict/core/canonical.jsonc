@@ -305,16 +305,20 @@
 				"email settings",
 				"to learn more about how we use this information.",
 				// —— 账号管理（/settings/admin）——
-				// 实机节点边界：`<p><a>Change</a> your username can have <a>unintended side effects</a>.</p>`
-				// → 整句只在「恰好拼成一个节点」时命中，真实渲染是三个节点，这里逐段收录
+				// 实机节点边界（两种渲染都见过，故都收）：
+				// a) `Changing your username can have` 一整个文本节点 + <a>unintended side effects</a> + `.`
+				//    —— 链接锚在「unintended side effects」上，Change 不是链接（/settings/admin 现状）
+				// b) `<a>Change</a> your username can have <a>unintended side effects</a>.`
 				"Change username",
+				"Changing your username can have",
 				"Change",
 				"your username can have",
 				"unintended side effects",
 				"Changing your username can have unintended side effects.",
-				// 句中的「密码与身份验证」是链接 → 整句被拆开，链接后片段单独收录
+				// 句中的「密码与身份验证」是链接 → 整句被拆开，链接前 / 链接后各一条
 				// （链接文本 "Password and authentication" 已在上面的设置导航里收录）
 				"Looking to manage account security settings? You can find them in the",
+				"page.",
 				// 「Patreon」是链接 → 说明句被拆开，链接前 / 链接后各成一条
 				"Link Patreon account",
 				"Connect a Patreon account for",

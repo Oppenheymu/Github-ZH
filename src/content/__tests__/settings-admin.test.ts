@@ -22,10 +22,12 @@ const view = buildView(
 
 /** 实机文本节点：值逐字抄自 DOM dump，不做 trim（引擎自己会归一空白） */
 const ACCOUNT_ADMIN_NODES: readonly string[] = [
-	// 「更改用户名」：<a>Change</a> your username can have <a>unintended side effects</a>.
-	"\n            Change\n          ",
-	" your username can have ",
+	// 「更改用户名」：实机是 `Changing your username can have` 一整个文本节点 +
+	// <a>unintended side effects</a> + `.`（Change 不是链接，没有独立节点）
+	"\n          Changing your username can have\n          ",
 	"\n            unintended side effects",
+	// 「密码与身份验证」链接之后的尾片段
+	"page.",
 	// 导出：句号属于用户名链接节点，故可用天数那句以 ". " 开头
 	"Export all repositories and profile metadata for",
 	".\n      Exports will be available for 7 days.\n    ",

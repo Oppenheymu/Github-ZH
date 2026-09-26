@@ -140,14 +140,17 @@
 		"email settings": "电子邮件设置",
 		"to learn more about how we use this information.": "以进一步了解我们如何使用这些信息。",
 		// —— 账号管理（/settings/admin）——
-		// 实机节点边界：`<p><a>Change</a> your username can have <a>unintended side effects</a>.</p>`
-		// 逐段对齐：译文末尾**不要**带空格（walker 会保留原节点的首尾空白）
+		// 实机节点边界 a：整句前半段是一个完整文本节点（Change 不是链接）——
+		// 这是 /settings/admin 的现状，只收下面的碎片键会漏掉它
 		"Change username": "更改用户名",
+		"Changing your username can have": "你的用户名可能会有",
+		// 实机节点边界 b：Change 为独立链接时的碎片（兼容另一种渲染）
 		"Change": "更改",
 		"your username can have": "你的用户名可能会有",
 		"unintended side effects": "意想不到的副作用",
 		"Changing your username can have unintended side effects.": "更改用户名可能会带来意想不到的副作用。",
 		"Looking to manage account security settings? You can find them in the": "想管理账号安全设置？你可以在",
+		"page.": "页面。",
 		"Link Patreon account": "关联 Patreon 账户",
 		"Connect a Patreon account for": "为",
 		"to sponsor maintainers with. Get recognition on GitHub for sponsorships made on Patreon when the sponsored person has linked Patreon and GitHub, too, and has a public GitHub Sponsors profile.": "连接一个 Patreon 账户，用来赞助维护者。当被赞助者也关联了 Patreon 与 GitHub，并且有公开的 GitHub Sponsors 个人资料时，你可以在 GitHub 上获得通过 Patreon 提供的赞助的认可。",
