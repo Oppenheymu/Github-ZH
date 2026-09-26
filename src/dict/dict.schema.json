@@ -1,12 +1,12 @@
 {
 	"$schema": "https://json-schema.org/draft/2020-12/schema",
 	"title": "GitHub 汉化词典模块",
-	"description": "编辑器侧校验：在 VS Code 里对 src/dict/data/**.jsonc 提供补全与红线。权威门禁是 bun run check:dict——本文件只做人打开文件时的即时提示，CI 不读它。分工：重复键由 Biome 的 noDuplicateObjectKeys 负责；正则能否编译、跨模块重复键由 check:dict 负责；CJK 精确判定（\\p{Script=Han}）由 check:dict 的 hasCJK 负责，此处只能用码点区间近似。",
+	"description": "编辑器侧校验：在 VS Code 里对 src/dict/data/**.jsonc 提供补全与红线。权威门禁是 bun run check:dict——本文件只做人打开文件时的即时提示，CI 不读它。分工：重复键由 Biome 的 noDuplicateObjectKeys 负责；正则能否编译、跨模块重复键、译文是否含目标语言文字系统、译文是否等于某个键，均由 check:dict 按 src/dict/locales.ts 的语言声明负责，此处只能用码点区间近似。",
 	"$defs": {
 		"cjk": {
 			"type": "string",
-			"pattern": "[\\u3400-\\u4dbf\\u4e00-\\u9fff\\uf900-\\ufaff]",
-			"description": "含 CJK（近似：扩展 A + 基本区 + 兼容区）"
+			"pattern": "[\\u3040-\\u30ff\\u3400-\\u4dbf\\u4e00-\\u9fff\\uf900-\\ufaff]",
+			"description": "含目标语言文字系统的近似判定（近似：扩展 A + 基本区 + 兼容区 + 假名；精确判定见 check:dict 与 src/dict/locales.ts）"
 		},
 		"entries": {
 			"type": "object",
@@ -23,14 +23,14 @@
 					},
 					{
 						"not": { "$ref": "#/$defs/cjk" },
-						"description": "键必须保持英文原文，不得含 CJK"
+						"description": "键必须保持英文原文，不得含目标语言的文字系统"
 					}
 				]
 			},
 			"additionalProperties": {
 				"type": "string",
 				"allOf": [{ "$ref": "#/$defs/cjk" }],
-				"description": "值必须含 CJK（防 MutationObserver 翻译循环）"
+				"description": "值必须含目标语言的文字系统（防 MutationObserver 翻译循环；语言声明见 src/dict/locales.ts）"
 			}
 		},
 		"rules": {
@@ -45,13 +45,13 @@
 						"type": "string",
 						"minLength": 1,
 						"not": { "$ref": "#/$defs/cjk" },
-						"description": "对整段已 trim 的文本 test。输入恒为英文原文，故不得含 CJK。反斜杠需双写：正则 \\d 在 JSONC 里写作 \"\\\\d\"（写漏一层 Bun 会直接报 Syntax Error，不会静默变成别的正则）"
+						"description": "对整段已 trim 的文本 test。输入恒为英文原文，故不得含目标语言的文字系统。反斜杠需双写：正则 \\d 在 JSONC 里写作 \"\\\\d\"（写漏一层 Bun 会直接报 Syntax Error，不会静默变成别的正则）"
 					},
 					"replacement": {
 						"type": "string",
 						"minLength": 1,
 						"allOf": [{ "$ref": "#/$defs/cjk" }],
-						"description": "替换模板，可用 $1 引用捕获组；必须含 CJK"
+						"description": "替换模板，可用 $1 引用捕获组；必须含目标语言的文字系统"
 					}
 				}
 			}

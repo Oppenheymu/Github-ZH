@@ -4,7 +4,7 @@
 export interface Rule {
 	/** 匹配模式（禁用 g / y 标志——lastIndex 状态会跨节点累积，见 tooling/checks/dict.ts） */
 	readonly pattern: RegExp;
-	/** 替换模板（必须含 CJK，防 MutationObserver 翻译循环） */
+	/** 替换模板（必须含目标语言的文字系统，防 MutationObserver 翻译循环） */
 	readonly replacement: string;
 }
 

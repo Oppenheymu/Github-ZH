@@ -29,9 +29,23 @@ export const EXCLUDE_SELECTOR = [
 	".markdown-body",
 ].join(",");
 
-/** 是否含 CJK（汉字）；已翻译文本与替换值校验都靠它收敛 */
-export function hasCJK(text: string): boolean {
-	return /\p{Script=Han}/u.test(text);
+/**
+ * 是否含**非拉丁字母**（语言无关的「已翻译 / 非英文」判定）。
+ *
+ * 刻意用 Unicode 脚本属性而不是硬编码汉字区间：日语译文可能全是假名
+ * （「もっと見る」）、韩语用谚文、还有西里尔 / 希腊 / 阿拉伯等，汉字判定对它们
+ * 全部失效，会让译文被当成英文原文再翻一遍。这里只要求「存在一个不属于拉丁
+ * 字系的字母」——标点、数字、符号（`©`、`…`、`——`）不算字母，带变音符的拉丁
+ * 字母（`café`）仍属拉丁字系，故英文 UI 文本不会被误判为已翻译。
+ *
+ * 拉丁语系目标语言无法靠本判定区分（与源语言同字系），其防循环依赖
+ * 「译文不得等于任何键」的结构门禁，见 tooling/checks/dict.ts。
+ */
+const NON_LATIN_LETTER =
+	/(?:(?!\p{Script=Latin})\p{Letter})/u;
+
+export function hasNonLatinLetter(text: string): boolean {
+	return NON_LATIN_LETTER.test(text);
 }
 
 /** 单段文本长度上限：超过视为代码或用户内容，直接放弃 */
@@ -39,13 +53,14 @@ const MAX_TEXT_LENGTH = 500;
 
 /**
  * 文本节点 / 属性值翻译前的可翻译判定：
- * 空白、已含 CJK、超长、无拉丁字母（纯数字或符号）一律跳过。
+ * 空白、超长、无拉丁字母（纯数字或符号）、已含非拉丁字母（已是译文或非英文
+ * 用户内容）一律跳过。先测最便宜的「含拉丁字母」再测字系，热路径上更省。
  */
 export function isTranslatableText(text: string): boolean {
 	const trimmed = text.trim();
 	if (trimmed.length === 0) return false;
 	if (trimmed.length > MAX_TEXT_LENGTH) return false;
-	if (hasCJK(trimmed)) return false;
 	if (!/[a-z]/i.test(trimmed)) return false;
+	if (hasNonLatinLetter(trimmed)) return false;
 	return true;
 }

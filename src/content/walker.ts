@@ -55,7 +55,7 @@ function applyTextNode(
 	const translated = translateText(value, view);
 	if (translated === null) {
 		// 未命中词典与规则：开发者模式下记录 trimmed 原文
-		// （可翻译判定已滤掉空白 / CJK / 超长，排除容器由调用方整树跳过）
+		// （可翻译判定已滤掉空白 / 非拉丁字母 / 超长，排除容器由调用方整树跳过）
 		if (isTranslatableText(value)) recordText(value);
 		return false;
 	}
