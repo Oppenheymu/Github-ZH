@@ -189,6 +189,8 @@
 				"Your name may appear around GitHub where you contribute or are mentioned. You can remove it at any time.",
 				"Public email",
 				"You can manage verified email addresses in your email settings",
+				// 「email settings」是链接 → 整句被拆开时只剩链接前片段，单独收录
+				"You can manage verified email addresses in your",
 				"Bio",
 				"Pronouns",
 				"Don't specify",
@@ -202,13 +204,20 @@
 				"You can @mention other users and organizations to link to them.",
 				"Company",
 				"You can @mention your company’s GitHub organization to link it.",
+				// 「组织名」若渲染成链接，整句按链接前 / 链接后两段各收一条
+				"You can @mention your company’s GitHub organization",
+				"to link it.",
 				"Location",
 				"Display current local time",
 				"Other users will see the time difference from their local time.",
 				"Time zone",
 				"ORCID iD",
 				"ORCID provides a persistent identifier - an ORCID iD - that distinguishes you from other researchers. Learn more at ORCID.org.",
+				// 说明句里的链接会让 GitHub 把整句拆成多个文本节点，链接前的片段单独收录
+				"ORCID provides a persistent identifier - an ORCID iD - that distinguishes you from other researchers. Learn more at",
 				"All of the fields on this page are optional and can be deleted at any time, and by filling them out, you're giving us consent to share this data wherever your user profile appears. Please see our privacy statement to learn more about how we use this information.",
+				"All of the fields on this page are optional and can be deleted at any time, and by filling them out, you're giving us consent to share this data wherever your user profile appears. Please see our",
+				"privacy statement",
 				// —— 头像与「贡献与动态」——
 				"Profile picture",
 				"Contributions & activity",
@@ -216,6 +225,9 @@
 				"Enabling this will hide your contributions and activity from your GitHub profile and from social features like followers, stars, feeds, leaderboards and releases.",
 				"Include private contributions on my profile",
 				"Your contribution graph, achievements, and activity overview will show your private contributions without revealing any repository or organization information. Read more.",
+				// 「Read more」若渲染成链接，整句同样按链接前的片段收录
+				"Your contribution graph, achievements, and activity overview will show your private contributions without revealing any repository or organization information.",
+				"Read more.",
 				// —— 资料设置（成就展示）——
 				"Profile settings",
 				"Show Achievements on my profile",
