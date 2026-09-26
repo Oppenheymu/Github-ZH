@@ -256,7 +256,44 @@
 				"Chinese",
 				"We'll use this language preference to filter the trending repository lists on",
 				"our Trending Repositories page",
-				"Save Trending settings"
+				"Save Trending settings",
+				// —— 本页右侧导航与账户区块（键同时存在于 pages/repo-settings，
+				// 但那边路由只命中 /<owner>/<repo>/settings，本页永远不会生效，故此处各来一份）——
+				"Your personal account",
+				"Billing and licensing",
+				"Payment information",
+				"Payment history",
+				"Budgets and alerts",
+				"Additional billing details",
+				"Sponsorship log",
+				"Scheduled reminders",
+				"Education benefits",
+				"Blocked users",
+				"Security log",
+				"Applications",
+				"Integrations",
+				"Code, planning, and automation",
+				"Interaction limits",
+				"Code review limits",
+				// —— 页面级属性与菜单 ——
+				"Settings menu",
+				"Select settings context",
+				// —— 头像上传与图片校验（文案与 pages/repo-settings 保持一致）——
+				"Remove photo",
+				"Please upload a picture smaller than 1 MB.",
+				"We only support PNG, GIF, or JPG pictures.",
+				"File contents don’t match the file extension.",
+				"Please upload a picture smaller than 10,000x10,000.",
+				"Something went really wrong and we can’t process that picture.",
+				"This file is empty.",
+				// —— 公开资料表单补充 ——
+				"Select a verified email to display",
+				"No Preference",
+				"Connect your ORCID iD",
+				"Trending Repositories",
+				// —— 说明句被链接拆开后单独成节点的片段（摘录自实机文本节点清单）——
+				"email settings",
+				"to learn more about how we use this information."
 			]
 		},
 		{

@@ -93,6 +93,42 @@
 		// 说明句被「Trending Repositories」链接拆开：链接前以 on 结尾，链接文本单独成条
 		"We'll use this language preference to filter the trending repository lists on": "我们将使用此语言偏好来筛选趋势仓库列表，见",
 		"our Trending Repositories page": "我们的「趋势仓库」页面",
-		"Save Trending settings": "保存趋势设置"
+		"Save Trending settings": "保存趋势设置",
+		// —— 本页右侧导航与账户区块（与 pages/repo-settings 的用词保持一致）——
+		"Your personal account": "你的个人账户",
+		"Billing and licensing": "账单与许可",
+		"Payment information": "付款信息",
+		"Payment history": "付款历史",
+		"Budgets and alerts": "预算与提醒",
+		"Additional billing details": "其他账单详情",
+		"Sponsorship log": "赞助记录",
+		"Scheduled reminders": "定时提醒",
+		"Education benefits": "教育权益",
+		"Blocked users": "已屏蔽用户",
+		"Security log": "安全日志",
+		"Applications": "应用",
+		"Integrations": "集成",
+		"Code, planning, and automation": "代码、规划与自动化",
+		"Interaction limits": "互动限制",
+		"Code review limits": "代码审查限制",
+		// —— 页面级属性与菜单 ——
+		"Settings menu": "设置菜单",
+		"Select settings context": "选择设置范围",
+		// —— 头像上传与图片校验 ——
+		"Remove photo": "移除头像",
+		"Please upload a picture smaller than 1 MB.": "请上传小于 1 MB 的图片。",
+		"We only support PNG, GIF, or JPG pictures.": "仅支持 PNG、GIF 或 JPG 图片。",
+		"File contents don’t match the file extension.": "文件内容与扩展名不符。",
+		"Please upload a picture smaller than 10,000x10,000.": "请上传小于 10,000×10,000 的图片。",
+		"Something went really wrong and we can’t process that picture.": "出了点严重的问题，无法处理这张图片。",
+		"This file is empty.": "文件为空。",
+		// —— 公开资料表单补充 ——
+		"Select a verified email to display": "选择要公开展示的已验证邮箱",
+		"No Preference": "无偏好",
+		"Connect your ORCID iD": "连接你的 ORCID iD",
+		"Trending Repositories": "趋势仓库",
+		// —— 说明句被链接拆开后单独成节点的片段 ——
+		"email settings": "电子邮件设置",
+		"to learn more about how we use this information.": "以进一步了解我们如何使用这些信息。"
 	}
 }
