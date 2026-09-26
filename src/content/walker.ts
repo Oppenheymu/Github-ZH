@@ -79,7 +79,13 @@ function applyTextNode(
 		value.length - value.trimStart().length,
 	);
 	const trail = value.slice(value.trimEnd().length);
-	node.nodeValue = `${lead}${translated}${trail}`;
+	const next = `${lead}${translated}${trail}`;
+	// 写回同一个字符串也必须跳过：DOM 规范规定即使赋相同的值也会产生
+	// characterData 变更记录，观察器会把它再入队，于是「命中 → 写入 →
+	// 再命中 → 再写入」在微任务队列里无限自转，页面不报错但会卡死。
+	// 这条守卫让「译文与原文同形」在引擎侧不可能自触发。
+	if (next === value) return false;
+	node.nodeValue = next;
 	return true;
 }
 

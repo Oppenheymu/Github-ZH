@@ -310,40 +310,22 @@ describe("anti-loop gates", () => {
 			{ Markdown: "Markdown" },
 			"测试",
 			new Set(["Markdown", "Star"]),
-			"zh-CN",
 		);
 		expect(errors).toHaveLength(1);
 		expect(errors[0]).toContain("等于某个键");
 	});
 
-	it("allows the whitelisted proper noun as is", () => {
-		const keys = new Set(["ORCID iD", "Markdown"]);
-		expect(
-			validateNoIdentity(
-				{ "ORCID iD": "ORCID iD" },
-				"测试",
-				keys,
-				"zh-CN",
-			),
-		).toEqual([]);
-		// 白名单同时豁免文字系统检查（同一个事实：按约定原样保留）
-		expect(
-			validateEntries(
-				{ "ORCID iD": "ORCID iD" },
-				"测试",
-				ZH,
-				keys,
-			),
-		).toEqual([]);
-		// 但别的英文原文照旧报错，白名单不能当通用后门
-		expect(
-			validateNoIdentity(
-				{ Markdown: "Markdown" },
-				"测试",
-				keys,
-				"zh-CN",
-			),
-		).toHaveLength(1);
+	it("has no whitelist: identity translations always fail", () => {
+		// 事故回归（2026-09）：曾把 "ORCID iD": "ORCID iD" 放进白名单，
+		// 引擎因此每轮命中并对同值重复写 nodeValue，/settings/profile 卡死。
+		// 想保留英文原文的唯一正确做法是不收录该词条。
+		const errors = validateNoIdentity(
+			{ "ORCID iD": "ORCID iD" },
+			"测试",
+			new Set(["ORCID iD"]),
+		);
+		expect(errors).toHaveLength(1);
+		expect(errors[0]).toContain("自我触发");
 	});
 
 	it("flags a template that another rule would translate again", () => {

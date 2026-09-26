@@ -57,7 +57,8 @@ bun run pack                    # dist/ 打 zip（Chrome Web Store / Edge Add-on
 - **Bun.build 没有 `outfile`**：产物命名靠 `naming` 模板，content 与 popup 按入口分别构建；iife 是硬约束（见硬性约束 5）。
 - **图标是静态资产，没有生成脚本**：`public/icons/` 下的 `logo-16.jpg` / `logo-32.jpg` / `logo-48.jpg` / `logo-128.jpg` 直接提交在仓库里，改图标就替换这四个文件（四个尺寸都要换）；**改文件名必须同步 `public/manifest.json` 的 `icons` 与 `public/popup.html` 的 `<img src>`**（`check:manifest` 校验引用存在性，漏改即红灯）；`assets/icon.svg` 与 `tooling/gen-icons.ts` 已删除，`bun run icons` 不再存在（历史：曾用无头浏览器 CDP 栅格化 SVG，新版无头浏览器的 `--screenshot` 不支持透明背景，故当时必须走 CDP）。
 - **GitHub 正在渐进迁移 React 重写页面**：类名 / 结构变动导致漏翻或排除失灵属常态，修词条前先修对应排除选择器。
-- **防翻译循环现在是两件事**：脚本守卫（文本含非拉丁字母即视为已译文，语言无关，见 `src/content/filters.ts`）负责收敛，结构门禁（译文不得等于任何键、替换产物不得再命中规则）负责让循环的第二条件不可能成立。**拉丁语系目标语言只能靠后者**——它与源语言同字系，脚本守卫结构上失效。
+- **防翻译循环现在是三件事**：脚本守卫（文本含非拉丁字母即视为已译文，语言无关，见 `src/content/filters.ts`）负责收敛，结构门禁（译文不得等于任何键、替换产物不得再命中规则）负责让循环的第二条件不可能成立，**引擎侧「同值不写入」守卫**（`src/content/walker.ts`：`next === value` 时直接返回）负责让自我触发在物理上不可能。**拉丁语系目标语言只能靠后两者**——它与源语言同字系，脚本守卫结构上失效。
+- **译文绝不能与键同形（`"X": "X"`），且白名单不是出路**：DOM 规范规定 `node.nodeValue = 同值` 也会产生 characterData 变更记录，观察器会把它再入队，于是「命中 → 写入 → 再命中」在微任务队列无限自转，页面**不报错但卡死**（2026-09 真实事故：`"ORCID iD": "ORCID iD"` 让 `/settings/profile` 卡死，只有含该标签的页面命中）。想保留英文原文的正确做法是**不收录该词条**——未命中即保留英文。门禁 `tooling/checks/dict.ts` 无白名单，`validateNoIdentity` 会直接报错。
 - **`core/canonical.jsonc` 不进 content 包**：它只被 `tooling/checks/dict.ts` import；一旦 `src/**` 也 import 它，1618 个键就会进包（约 20 KB）。
 - **规则模板按 id 对齐 pattern**：`core/rules.jsonc` 里改 pattern 是 O(1) 的（各语言模板不用动），但**改 id 必须同步所有语言的 `rules.jsonc`**；模板引用的 `$1` / `$<name>` 由门禁对着 pattern 校验。
 - **`<relative-time>` 等自定义元素会自行重渲染英文**：靠观察器再翻一遍收敛，勿试图一次性翻译。

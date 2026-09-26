@@ -37,7 +37,10 @@
 		"Display current local time": "显示当前本地时间",
 		"Other users will see the time difference from their local time.": "其他用户将看到与其本地时间的时差。",
 		"Time zone": "时区",
-		"ORCID iD": "ORCID iD",
+		// ORCID 官方把该标识符叫 ORCID iD（大小写固定），中文文献惯用「ORCID 标识符」。
+		// **绝不能填成与键同形的 "ORCID iD"**：引擎会每轮命中并对同一个值重复写入
+		// nodeValue，观察器自我触发成死循环（门禁也会直接报错，见 tooling/checks/dict.ts）
+		"ORCID iD": "ORCID 标识符",
 		"ORCID provides a persistent identifier - an ORCID iD - that distinguishes you from other researchers. Learn more at ORCID.org.": "ORCID 提供一个持久标识符（ORCID iD），用于把你与其他研究者区分开。在 ORCID.org 了解更多。",
 		"All of the fields on this page are optional and can be deleted at any time, and by filling them out, you're giving us consent to share this data wherever your user profile appears. Please see our privacy statement to learn more about how we use this information.": "本页所有字段均为可选，且随时可以删除；填写这些字段即表示你同意我们在你的用户个人资料出现的任何位置分享这些数据。请查看我们的隐私声明，进一步了解我们如何使用这些信息。",
 		// —— 头像与「贡献与动态」——

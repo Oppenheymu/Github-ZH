@@ -42,30 +42,7 @@ import type {
 	RuleDef,
 } from "../../src/shared/types.ts";
 
-/**
- * 译文与键完全相同时的显式例外（键 = 英文原文）。
- * 将来某语言需要原样保留英文术语（日语保留 Markdown / GitHub Actions 等）
- * 时按「语言 id → 允许的文本」加在这里，**不要**因此放弃这条检查。
- *
- * 进了这里也就一并豁免「值必须含目标语言文字系统」：两者是同一个事实
- * ——该文本按约定原样保留。**只收官方专名**（当前只有 ORCID 的标识符名
- * ORCID iD，大小写固定、中英日同形）。绝不用它绕过防翻译循环检查。
- */
-const IDENTICAL_ALLOWLIST: Readonly<
-	Record<string, readonly string[]>
-> = {
-	"zh-CN": ["ORCID iD"],
-};
-
-/** 该语言是否显式允许把这段文本原样保留（两条形态检查共用同一份清单） */
-function isIdenticalAllowed(
-	localeId: string,
-	text: string,
-): boolean {
-	return (IDENTICAL_ALLOWLIST[localeId] ?? []).includes(
-		text.trim(),
-	);
-}
+// —— core/canonical.jsonc ——
 
 /** 一个字系一个正则；门禁调用量小，无需缓存池 */
 function scriptPattern(script: Script): RegExp {
@@ -224,8 +201,7 @@ export function validateEntries(
 		}
 		if (
 			locale.scripts.length > 0 &&
-			!hasAnyScript(value, locale.scripts) &&
-			!isIdenticalAllowed(locale.id, value)
+			!hasAnyScript(value, locale.scripts)
 		) {
 			errors.push(
 				`${label}：值必须含 ${locale.name} 的文字系统（${locale.scripts.join(" / ")}）`,
@@ -333,6 +309,13 @@ export function validateRuleDef(
 /**
  * 防翻译循环的结构门禁（形状与语言无关的一半）：译文不得等于任何键。
  *
+ * **这条检查没有白名单，也不该有。** 译文与键同形时，引擎会在每一轮都「命中」，
+ * 并对同一个值反复执行 `node.nodeValue = 同值`：DOM 规范规定赋相同字符串也会产生
+ * characterData 变更记录，观察器于是把它再入队——微任务队列无限自转，页面不报错
+ * 但主线程被榨干（2026-09 真实事故：`"ORCID iD": "ORCID iD"` 让 /settings/profile 卡死）。
+ * 想保留英文原文的专名，正确做法是**不收录该词条**（未命中即保留英文），而不是让
+ * 译文等于键。
+ *
  * 翻译循环的真实条件是两条同时成立：(a) 脚本守卫没拦住译文，(b) 译文本身又是
  * 一个键、或能命中某条规则。这里从结构上让 (b) 不可能发生，于是各语言拿到同一
  * 套保证——包括拉丁语系目标（脚本守卫对它们结构上失效）。
@@ -342,15 +325,13 @@ export function validateNoIdentity(
 	entries: Readonly<Record<string, string>>,
 	where: string,
 	keys: ReadonlySet<string>,
-	localeId: string,
 ): string[] {
 	const errors: string[] = [];
 	for (const [key, value] of Object.entries(entries)) {
 		const trimmed = value.trim();
 		if (!keys.has(trimmed)) continue;
-		if (isIdenticalAllowed(localeId, trimmed)) continue;
 		errors.push(
-			`${where} 词条 ${JSON.stringify(key)}：译文 ${JSON.stringify(trimmed)} 等于某个键（或别名源文本），会在下一轮被再翻一次（防循环）`,
+			`${where} 词条 ${JSON.stringify(key)}：译文 ${JSON.stringify(trimmed)} 等于某个键（或别名源文本），会在每一轮被再翻一次并自我触发观察器（防循环）。保留英文原文的正确做法是不收录该词条`,
 		);
 	}
 	return errors;
@@ -560,7 +541,6 @@ export function buildLocaleData(input: {
 					entries,
 					`${where}/${moduleName}`,
 					allKeys,
-					localeId,
 				),
 			);
 		} catch (error) {
@@ -609,7 +589,6 @@ export function buildLocaleData(input: {
 				{ [id]: template },
 				`${where}/rules`,
 				allKeys,
-				localeId,
 			),
 		);
 	}
