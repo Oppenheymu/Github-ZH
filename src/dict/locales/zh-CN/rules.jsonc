@@ -3,7 +3,7 @@
 // $1 / $<name> 引用的是对应 pattern 的捕获组，改模板前先看那边的 pattern。
 // 值必须含简体中文的文字系统（门禁强制，防替换循环）。
 {
-	"$schema": "../../dict.schema.json",
+	"$schema": "../../types/dict.schema.json",
 	"replacements": {
 		"issues/in-repo": "位于 $1；",
 		"issues/page-title": "议题 · $1 · GitHub",

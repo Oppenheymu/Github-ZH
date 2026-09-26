@@ -3,7 +3,7 @@
 // 运行时长与运行计数是动态文本，用规则覆盖；属性（title/aria）不应用规则
 // 简体中文 · 模块 pages/actions（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
-	"$schema": "../../../dict.schema.json",
+	"$schema": "../../../types/dict.schema.json",
 	"entries": {
 		// —— 侧栏 ——
 		"Actions Workflows": "Actions 工作流",

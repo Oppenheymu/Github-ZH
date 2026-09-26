@@ -5,7 +5,7 @@
 // 中的用户名 / 页面名 / 仓库名靠规则捕获原样保留
 // 简体中文 · 模块 pages/wiki（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
-	"$schema": "../../../dict.schema.json",
+	"$schema": "../../../types/dict.schema.json",
 	"entries": {
 		// —— 侧栏 ——
 		"Wiki pages": "维基页面",

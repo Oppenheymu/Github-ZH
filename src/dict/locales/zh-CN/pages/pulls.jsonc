@@ -2,7 +2,7 @@
 // 路由同时覆盖详情页（/pull/<编号>）与列表页（/pulls）
 // 简体中文 · 模块 pages/pulls（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
-	"$schema": "../../../dict.schema.json",
+	"$schema": "../../../types/dict.schema.json",
 	"entries": {
 		"Conversation": "对话",
 		"Checks": "检查",

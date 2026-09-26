@@ -6,7 +6,7 @@
 // 页标题中的仓库名与读屏属性里的用户名同样原样保留
 // 简体中文 · 模块 pages/insights（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
-	"$schema": "../../../dict.schema.json",
+	"$schema": "../../../types/dict.schema.json",
 	"entries": {
 		// —— Pulse 动态页 ——
 		"merged": "已合并",

@@ -4,7 +4,7 @@
 // （见 content/walker.ts），含动态部分的属性值不设词条
 // 简体中文 · 模块 pages/commits（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
-	"$schema": "../../../dict.schema.json",
+	"$schema": "../../../types/dict.schema.json",
 	"entries": {
 		// —— 分支页：表格列头与行内操作 ——
 		"Ahead": "领先",

@@ -2,7 +2,7 @@
 // 現時点ではサンプル語彙のみで、網羅的な翻訳は目標ではない（カバレッジは門禁が報告する）。
 // 鍵は core/canonical.jsonc にある英語原文の完全一致であること（綴り違いは門禁が弾く）。
 {
-	"$schema": "../../dict.schema.json",
+	"$schema": "../../types/dict.schema.json",
 	"entries": {
 		"Skip to content": "コンテンツへスキップ",
 		"Homepage": "ホームページ",

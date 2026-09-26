@@ -1,7 +1,7 @@
 // 仪表板模块：根路径（登录后首页）
 // 简体中文 · 模块 pages/dashboard（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
-	"$schema": "../../../dict.schema.json",
+	"$schema": "../../../types/dict.schema.json",
 	"entries": {
 		"Home": "主页",
 		"For you": "为你推荐",

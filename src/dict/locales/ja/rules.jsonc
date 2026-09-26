@@ -1,7 +1,7 @@
 // 日本語の置換テンプレート（サンプル）：鍵は core/rules.jsonc のルール id。
 // 未訳の id は書かなくてよい（その規則はその言語では適用されない）。
 {
-	"$schema": "../../dict.schema.json",
+	"$schema": "../../types/dict.schema.json",
 	"replacements": {
 		"global/now": "たった今",
 		"global/yesterday": "昨日",

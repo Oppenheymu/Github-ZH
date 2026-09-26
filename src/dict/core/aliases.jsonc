@@ -8,6 +8,6 @@
 // 风险：别名是维护者手写的「这是同一个概念」断言。若上游是语义变更（Watch → Subscribe），
 // 错误加别名会静默沿用旧译文，评审时请重点看这几十行。
 {
-	"$schema": "../dict.schema.json",
+	"$schema": "../types/dict.schema.json",
 	"aliases": {}
 }

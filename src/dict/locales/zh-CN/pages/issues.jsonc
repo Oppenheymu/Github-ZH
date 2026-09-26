@@ -5,7 +5,7 @@
 // （属性值只查静态词条、不应用正则规则，见 src/content/walker.ts）
 // 简体中文 · 模块 pages/issues（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
-	"$schema": "../../../dict.schema.json",
+	"$schema": "../../../types/dict.schema.json",
 	"entries": {
 		// —— 列表行元信息（状态徽标与打开时间）——
 		"opened": "打开",

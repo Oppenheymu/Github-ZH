@@ -2,7 +2,7 @@
 // 覆盖 /search 与 /topics 两类顶级路径
 // 简体中文 · 模块 pages/search（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
-	"$schema": "../../../dict.schema.json",
+	"$schema": "../../../types/dict.schema.json",
 	"entries": {
 		// —— 结果排序（「X最多 / X最少」与 issues.jsonc 排序菜单同款）——
 		"Best match": "最佳匹配",

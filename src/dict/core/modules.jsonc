@@ -6,7 +6,7 @@
 //
 // 词条键的权威清单在 core/canonical.jsonc（覆盖率分母 + 拼错即报）；本文件只管路由。
 {
-	"$schema": "../dict.schema.json",
+	"$schema": "../types/dict.schema.json",
 	"modules": [
 		{
 			"name": "pages/issues",

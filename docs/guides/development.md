@@ -34,8 +34,9 @@ Github-i18n/
 │   │   ├── registry.ts      # 数据注册表：core + 各语言 → JSONC 原始数据
 │   │   ├── load.ts          # JSONC → 词典类型（严格编译 + 字段白名单 + 交叉引用）
 │   │   ├── index.ts         # 运行时汇总：按语言构建词典，单模块失败只跳过 + 打日志
-│   │   ├── dict.schema.json # 编辑器侧 JSON Schema（oneOf 覆盖六种数据形状）
-│   │   └── jsonc.d.ts       # `.jsonc` ambient 声明（tsc 不认该扩展名）
+│   │   └── types/           # 类型 / schema 资产（不含运行时代码）
+│   │       ├── dict.schema.json # 编辑器侧 JSON Schema（oneOf 覆盖六种数据形状）
+│   │       └── jsonc.d.ts       # `.jsonc` ambient 声明（tsc 不认该扩展名）
 │   ├── popup/popup.ts       # popup：UI 文案回填 + 开关 / 语言读写 + 漏翻面板
 │   └── shared/              # types.ts（词典类型）、storage.ts（开关与语言存取）、identity.ts
 ├── tooling/
@@ -67,7 +68,7 @@ content script 以 `run_at: document_start` 注入：
 - **IIFE 经典脚本**：MV3 的 content_scripts 不支持 module，`tooling/pipeline/build.ts` 用 Bun.build `format: "iife"` 产出；Bun.build 没有 outfile，产物名靠 naming 模板输出后重命名成 manifest 引用的 `content.js` / `popup.js`；
 - **排除清单优先**：`src/content/filters.ts` 的 `EXCLUDE_SELECTOR` 命中元素自身或祖先即整树跳过（`code` / `pre` / `textarea` / `.markdown-body` / 代码高亮与 diff 容器等）。误伤修复永远先加排除选择器，**不得为覆盖 UI 词条而放宽排除**；
 - **词条合并「先到先得」**：`core/modules.jsonc` 的顺序是优先级，`buildView` 先放具体页词条、后放 global 兜底，因此议题页词条能压过仓库泛化词条、页面词条能压过全站词条。已知有意的跨模块同键异译（如 `Actions` 在仓库页是「操作」、在设置页是「Actions 工作流」；`Pages` 在设置页是「页面」、在 global 是「页码」）正是靠这个顺序生效，**勿当重复键清理**；
-- **词典是 JSONC 数据，不是 TS 模块**：编辑器按 `dict.schema.json` 直接给红线与补全；脚本 / AI 能安全批量追加词条，不必重写 TS 对象字面量；重复键由 Biome 的 `noDuplicateObjectKeys` 原生覆盖。代价：正则从字面量降级成字符串，反斜杠必须双写，正则语法检查从编译期挪到门禁；
+- **词典是 JSONC 数据，不是 TS 模块**：编辑器按 `types/dict.schema.json` 直接给红线与补全；脚本 / AI 能安全批量追加词条，不必重写 TS 对象字面量；重复键由 Biome 的 `noDuplicateObjectKeys` 原生覆盖。代价：正则从字面量降级成字符串，反斜杠必须双写，正则语法检查从编译期挪到门禁；
 - **词典数据两条消费路径**：`index.ts`（运行时）与 `tooling/checks/dict.ts`（门禁）都从 `registry.ts` 取原始数据、都走 `load.ts` 编译，只有失败策略不同——运行时单模块失败只跳过 + `console.error`，避免整站翻译失效；门禁严格报错并一次列全。**门禁不得 import `index.ts`**，否则坏数据被静默跳过后门禁反而变绿；
 - **图标**：`public/icons/` 下的 16/32/48/128 PNG 是**直接提交在仓库里的静态资产**，改图标就替换这四个文件（四个尺寸都要换），没有生成脚本、也没有 `bun run icons`。历史原因：图标曾由 `assets/icon.svg` 经 `tooling/gen-icons.ts` 用系统浏览器无头 CDP 栅格化，新版无头浏览器的 `--screenshot` 不支持透明背景、必须走 `Emulation.setDefaultBackgroundColorOverride`；后来这条链路整体删除，SVG 源文件也不在仓库里了。
 
@@ -160,7 +161,7 @@ content script 以 `run_at: document_start` 注入：
 - **键**必须是 GitHub 实际渲染的英文原文精确串（整节点精确匹配语义），大小写一致、不含目标语言文字系统。一律加双引号——裸键虽然 JSONC 合法，但统一加引号便于 Biome 查重与脚本改写；
 - **值**必须含目标语言的文字系统（如简体中文的汉字、日语的汉字 / 平假名 / 片假名），门禁按 `src/dict/locales.ts` 的声明校验；
 - `route` 与 `pattern` 都是**字符串形态的正则源**，因此 `/` 无需转义：`"route": "^/owner/repo/issues"`。`route` 必须以 `^/` 锚定 pathname；
-- 顶层字段是白名单：`modules` / `rules` / `aliases` / `entries` / `replacements`（哪个文件用哪个见 `dict.schema.json`）。多写一个字段（例如把 `entries` 拼成 `entires`）会被 `load.ts` 拒绝——否则整块词典会静默变成空对象；
+- 顶层字段是白名单：`modules` / `rules` / `aliases` / `entries` / `replacements`（哪个文件用哪个见 `types/dict.schema.json`）。多写一个字段（例如把 `entries` 拼成 `entires`）会被 `load.ts` 拒绝——否则整块词典会静默变成空对象；
 - **JSONC 里正则的反斜杠必须双写**：TS 字面量 `/^(\d+) minutes? ago$/` 在 JSONC 里写作 `"^(\\d+) minutes? ago$"`。写漏一层 Bun 会直接报 `Syntax Error`（响亮失败，不会静默变成别的正则）。
 
 ### 加一条静态词条

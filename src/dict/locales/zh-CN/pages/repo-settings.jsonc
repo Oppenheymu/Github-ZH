@@ -5,7 +5,7 @@
 // 纯产品名（Copilot、Dependabot、OIDC 等）与用户名、邮箱占位符不收录
 // 简体中文 · 模块 pages/repo-settings（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
-	"$schema": "../../../dict.schema.json",
+	"$schema": "../../../types/dict.schema.json",
 	"entries": {
 		// —— 设置侧边栏 ——
 		"General": "常规",

@@ -52,7 +52,7 @@ import zhWikiRaw from "./locales/zh-CN/pages/wiki.jsonc";
 import zhRulesRaw from "./locales/zh-CN/rules.jsonc";
 import type { LocaleId } from "./locales.ts";
 
-/** 语言无关的核心原始数据（编辑器侧形状校验见 dict.schema.json） */
+/** 语言无关的核心原始数据（编辑器侧形状校验见 types/dict.schema.json） */
 export const coreRawDict: {
 	readonly modules: unknown;
 	readonly rules: unknown;

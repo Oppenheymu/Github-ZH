@@ -6,7 +6,7 @@
 // 收静态词条仅解当前值（同 actions.jsonc 先例）
 // 简体中文 · 模块 pages/profile（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
-	"$schema": "../../../dict.schema.json",
+	"$schema": "../../../types/dict.schema.json",
 	"entries": {
 		"Popular repositories": "热门仓库",
 		"Customize your pins": "自定义置顶项",

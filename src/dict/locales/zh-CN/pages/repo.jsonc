@@ -3,7 +3,7 @@
 // 注意：本模块是最泛化的路由，其余模块词条都会压过它（先到先得合并）
 // 简体中文 · 模块 pages/repo（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
-	"$schema": "../../../dict.schema.json",
+	"$schema": "../../../types/dict.schema.json",
 	"entries": {
 		"Code": "代码",
 		"Clone": "克隆",

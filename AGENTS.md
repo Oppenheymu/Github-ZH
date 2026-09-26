@@ -63,9 +63,9 @@ bun run pack                    # dist/ 打 zip（Chrome Web Store / Edge Add-on
 - **`<relative-time>` 等自定义元素会自行重渲染英文**：靠观察器再翻一遍收敛，勿试图一次性翻译。
 - **词典误伤权衡**：静态词典按「整节点精确匹配」工作，任何词条都可能命中同名的用户内容（仓库名 / 文件名），高风险短词靠不收录来回避（见硬性约束 3）。
 - **JSONC 正则的反斜杠必须双写**：`\d` 在 `.jsonc` 里要写 `\\d`；写漏一层 Bun 直接报 `Syntax Error`（响亮失败，不会静默变成别的正则）。另注意 `RegExp#source` 会把 `/` 转义回 `\/`，断言路由 / 规则请断言行为，别断言 `source`。
-- **tsc 不认 `.jsonc`**：开了 `resolveJsonModule` 也报 TS2307，靠 `src/dict/jsonc.d.ts` 的 ambient 声明；`tooling/tsconfig.json` 的 include 必须含 `../src/**/*.d.ts`，否则脚本侧工程拿不到该声明。
+- **tsc 不认 `.jsonc`**：开了 `resolveJsonModule` 也报 TS2307，靠 `src/dict/types/jsonc.d.ts` 的 ambient 声明；`tooling/tsconfig.json` 的 include 必须含 `../src/**/*.d.ts`，否则脚本侧工程拿不到该声明。
 - **词典数据由两条路消费同一个注册表**：`src/dict/index.ts` 单模块编译失败只跳过 + 打日志（保整站翻译），`tooling/checks/dict.ts` 走同一套 `load.ts` 但严格报错。**禁止让门禁 import `index.ts`**——那样坏数据被静默跳过后门禁反而变绿。
-- **`.jsonc` 的重复键归 Biome 管**：`biome check .` 会扫 `.jsonc`，`noDuplicateObjectKeys` 对加引号 / 裸键两种写法都报，故 `check:dict` 不再扫源码。编辑器侧另有 `src/dict/dict.schema.json`（`$schema` 只对编辑器生效，CI 不读它；它用 `oneOf` 覆盖六种数据形状）。
+- **`.jsonc` 的重复键归 Biome 管**：`biome check .` 会扫 `.jsonc`，`noDuplicateObjectKeys` 对加引号 / 裸键两种写法都报，故 `check:dict` 不再扫源码。编辑器侧另有 `src/dict/types/dict.schema.json`（`$schema` 只对编辑器生效，CI 不读它；它用 `oneOf` 覆盖六种数据形状）。
 - **扩展自身 UI 文案走 `public/_locales/`**：manifest 的 `name` / `description` / `action.default_title` 用 `__MSG_*__`，popup 文案用 `data-i18n` + `chrome.i18n.getMessage`；门禁强制「各语言消息键集合一致」与「引用的键都存在」。**探针不能用 `manifest.name` 认扩展**（它随浏览器语言变化），改用 content script 写下的身份标记（`src/shared/identity.ts`）。
 - **`bun run verify --locale <id>`**：探针既写 storage 也决定锚点与字系统计数，判据不得再硬编码某种语言的译文。
 
