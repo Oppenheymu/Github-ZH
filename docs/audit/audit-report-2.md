@@ -60,6 +60,7 @@
 | E-1 | 中 | **自审**：保留名单漏 7 条真实路径（`/copilot`、`/import`、`/projects`、`/packages`、`/advisories`、`/security-advisories`、`/gist`） | `core/modules.jsonc` |
 | E-2 | 中 | **自审**：键形态门禁漏「长度上限」条件（663 字符键能过门禁但引擎永不查表） | `tooling/checks/dict.ts` |
 | E-3 | 低 | **自审**：产物集合断言无法发现同名入口互相覆盖 | `tooling/pipeline/build.ts` |
+| E-7 | 低 | **自审**：`popup.html` 版本号门禁的正则会被单引号/无引号写法绕过，且会误命中注释里的假元素 | `tooling/checks/manifest.ts:73` |
 | E-4 | 低 | 时间线失实：文档把 `verify` 脚本的删除归因到 `48bf519`，实为 `8001d9f` | `AGENTS.md:73`、`development.md:377` |
 | E-5 | 低 | 同键异译举例过期（漏 `pages/settings`、`pages/wiki`） | `development.md:70` |
 | E-6 | 低 | 目录树不完整（测试文件位置错、缺 `src/shared/text.ts`、`ja/pages/issues.jsonc`） | `development.md:9-50` |
@@ -246,9 +247,26 @@ pinned  published  remaining  results  selection  settings  updated
 
 **建议**：在 `validateCanonicalKeys` 里直接断言 `isTranslatableText(key)`（而不只检查长度）——这样将来 `isTranslatableText` 新增任何条件都会自动被门禁继承。
 
+### E-7 版本号门禁的正则缺口（自审，低）
+
+`manifest.ts:73` 用正则 `class="[^"]*\bversion\b[^"]*"` 提取 popup.html 里的版本号元素。实测各种写法：
+
+| popup.html 写法 | 门禁行为 |
+| --- | --- |
+| `<span class="version">0.2.0</span>` | ✓ 正常识别 |
+| `<span class="badge version">9.9.9</span>` | ✓ 正常识别 |
+| `<span class='version'>9.9.9</span>`（单引号） | ✗ **未识别 → 校验被跳过** |
+| `<span class=version>9.9.9</span>`（无引号） | ✗ **未识别 → 校验被跳过** |
+| `<!-- <span class="version">9.9.9</span> -->`（注释里） | ⚠ **被当成真元素 → 误报** |
+| CSS 里的 `.version { … }` | ✓ 不误命中 |
+
+**影响**：该门禁是防御性的（理论上防「改了 package.json 忘了改 popup.html」），当前 popup.html 用的是双引号标准写法，所以**没有现网影响**；但绕过形态存在，且注释会误报。**建议**：直接断言 popup.html 里存在 `class="version">${packageVersion}<` 这个精确串（或同时兼容两种引号），比正则更严格也更简单。
+
+
+
 ### E-4 时间线失实（低但明确）
 
-`AGENTS.md:73` 与 `docs/guides/development.md:377` 说「`tooling/verify-live.ts` 与 `package.json` 的 `verify` 脚本都已在 `48bf519` 删除」。实测 `git show 48bf519:package.json` 里**仍有** `"verify": "bun tooling/verify-live.ts"`；该脚本是 **`8001d9f`**（本轮修复）才删的（`git log -S'"verify"' -- package.json` 证实）。事实状态（现在都不存在）是对的，只是归因错了一个提交。
+`AGENTS.md:73` 与 `docs/guides/development.md:377` 说「`tooling/verify-live.ts` 与 `package.json` 的 `verify` 脚本都已在 `48bf519` 删除」。实测 `git show 48bf519:package.json` 里**仍有** `"verify": "bun tooling/verify-live.ts"`；该脚本是 **`8001d9f`**（本轮修复）才删的（`git log -S'"verify"' -- package.json` 证实）。事实状态（现在都不存在）只是归因错了一个提交。
 
 ### F-1 zip 不可复现（低，实测）
 
@@ -294,6 +312,11 @@ zip 条目时间戳取的是当前时刻（`ZipFile` 读出 09/27/2026 00:19:02�
 | zip 结构损坏 | **否**：11 条目，中央目录自洽，**11/11 CRC 用我独立实现的 CRC32 复算一致**，条目字节与 `dist/` 完全一致，`manifest.json` 在根目录，无重复条目 |
 | 上一轮新增的门禁是「摆设」 | **否，端到端反证通过**：把换行键塞回 canonical → `check:dict` 立刻报「键必须是引擎归一化后的形态」；删掉 `_locales/zh_CN` 的 `$COUNT$` → `check:manifest` 立刻报「缺少占位符」 |
 | 真机误伤（用户内容被翻） | **19 页扫描零命中**（详见 D-6） |
+| 两份保留名单是否一致（只改一处会留单侧越界） | **一致**：`pages/profile` 与 `pages/repo` 的负向前瞻逐字符相同（各 37 条） |
+| 保留名单是否误伤真实账号 | **否**：`torvalds`/`microsoft`/`google`/`git-lfs`/`nodejs`/`rust-lang`/`octocat`/`vuejs`/`vercel`/`github` 十个真实账号无一被排除 |
+| 「缺键语言跳过占位符比较」是否留漏洞 | **否**：`validateLocales` 先断言各语言消息键集合完全相等（缺键即报错），占位符比较只在键齐全的语言间进行 |
+| `msg()` 降级返回消息键是否会被持久化或参与比较 | **否**：9 处调用全部流向 `textContent` 与 `document.title`，只在显示层（最坏是显示一个未本地化的键名） |
+| 页面测试用软失败加载器（`src/dict/index.ts`）是否会让测试空转 | **部分**：词典模块编译失败时反向断言（`expect(null)`）仍会通过，但**同一文件的正向断言会先失败**，整体仍能拦住；若后人删掉正向断言，测试会退化成空转 |
 
 ---
 
