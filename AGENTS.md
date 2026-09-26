@@ -68,7 +68,8 @@ bun run pack                    # dist/ 打 zip（Chrome Web Store / Edge Add-on
 - **词典数据由两条路消费同一个注册表**：`src/dict/index.ts` 单模块编译失败只跳过 + 打日志（保整站翻译），`tooling/checks/dict.ts` 走同一套 `load.ts` 但严格报错。**禁止让门禁 import `index.ts`**——那样坏数据被静默跳过后门禁反而变绿。
 - **`.jsonc` 的重复键归 Biome 管**：`biome check .` 会扫 `.jsonc`，`noDuplicateObjectKeys` 对加引号 / 裸键两种写法都报，故 `check:dict` 不再扫源码。编辑器侧另有 `src/dict/types/dict.schema.json`（`$schema` 只对编辑器生效，CI 不读它；它用 `oneOf` 覆盖六种数据形状）。
 - **扩展自身 UI 文案走 `public/_locales/`**：manifest 的 `name` / `description` / `action.default_title` 用 `__MSG_*__`，popup 文案用 `data-i18n` + `chrome.i18n.getMessage`；门禁强制「各语言消息键集合一致」与「引用的键都存在」。**探针不能用 `manifest.name` 认扩展**（它随浏览器语言变化），改用 content script 写下的身份标记（`src/shared/identity.ts`）。
-- **`bun run verify --locale <id>`**：探针既写 storage 也决定锚点与字系统计数，判据不得再硬编码某种语言的译文。
+- **逐页开工的固定起手式：先抓实机渲染文本，再登记键**。GitHub 的长说明句普遍被拆成多个文本节点（链接、`<kbd>`、`sr-only` 各自成节点），整句键在实机上永不命中；抓取方式与四类边界事实（`kbd` 内文本被排除、`sr-only` 照常翻译、纯符号节点翻不了、`\u00a0` 会被 trim）见 `docs/guides/development.md` 的「采集实机渲染文本」。**节点边界必须同时写进 `src/content/__tests__/<页名>.test.ts`**，否则下次改版无人知道它断了。
+- **自动化实机探针（`bun run verify` / `tooling/verify-live.ts`）已于 `48bf519` 删除**：现在只有 popup 的开发者模式 + 手工浏览这条采集路径；`package.json` 里的 `verify` 脚本会在该工具重建前报错（文档与脚本不得再引用它）。
 
 ## git 提交流程
 

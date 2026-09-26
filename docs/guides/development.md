@@ -44,7 +44,7 @@ Github-i18n/
 │   ├── pipeline/pack.ts     # dist/ 压 zip（零依赖 store 模式）
 │   ├── checks/dict.ts       # 词典门禁（严格编译 + 交叉引用 + 覆盖率）
 │   ├── checks/manifest.ts   # manifest 门禁（MV3 字段 / _locales 一致性 / 资产与产物）
-│   └── verify-live.ts       # 实机验证：无头浏览器加载 dist/ 逐页收集漏翻 → JSON（bun run verify）
+│   └── checks/view.ts       # 视图骨架门禁（模块顺序 / 命中序列 / 同键异译赢家 / 规则 id）
 ├── *.test.ts                # 与源码同目录，bun:test
 └── .github/workflows/ci.yml # bun install → bun run check
 ```
@@ -53,7 +53,7 @@ Github-i18n/
 
 content script 以 `run_at: document_start` 注入：
 
-1. **入口**（`src/content/index.ts`）：先在 isolated world 的全局写一个身份标记（供实机探针认扩展，见「实机探针」），再读 `chrome.storage.local`（`enabled` / `devMode` / `locale`）；开启时把 `MutationObserver` 挂到 `document.documentElement`（childList + subtree + characterData），天然覆盖 GitHub 的 Turbo SPA 导航，无需单独路由钩子；
+1. **入口**（`src/content/index.ts`）：先在 isolated world 的全局写一个身份标记（`src/shared/identity.ts`），再读 `chrome.storage.local`（`enabled` / `devMode` / `locale`）；开启时把 `MutationObserver` 挂到 `document.documentElement`（childList + subtree + characterData），天然覆盖 GitHub 的 Turbo SPA 导航，无需单独路由钩子；
 2. **目标语言**：`locale` 有值即用它；没设过则取 `chrome.i18n.getUILanguage()` 并按 `src/dict/locales.ts` 的声明解析（`ja-JP` → ja、`zh-Hans-CN` → zh-CN、未支持即回退 zh-CN）。popup 改语言会触发整页刷新重建视图；
 3. **调度**（`engine.ts`）：mutation 只收集 `record.target` 入队，微任务合并后统一 flush，避免高频抖动；flush 时跳过已脱离文档的节点；
 4. **路由与视图**（`pages.ts`）：flush 前按 `location.pathname` + 目标语言取词典视图（单槽缓存，二者任一变化才重建）。视图 = `core/modules.jsonc` 顺序下所有命中路由的模块合并结果：词条「先到先得」（具体页压过泛化页、页面压过 global 兜底），规则「首条命中生效」；
@@ -166,11 +166,36 @@ content script 以 `run_at: document_start` 注入：
 
 ### 加一条静态词条
 
-1. 在 GitHub 实机用 DevTools 确认渲染的精确原文（看文本节点，而不是 DOM 里的源码）；
+1. 在 GitHub 实机用 DevTools 确认渲染的精确原文（看文本节点，而不是 DOM 里的源码——见下方「采集实机渲染文本」）；
 2. 决定归属模块：全站通用进 `global`，仅特定页面出现的进对应 `pages/<页名>`（模块路由见 `core/modules.jsonc`）；需要新模块时同时改 `core/modules.jsonc` 与 `core/canonical.jsonc`（同名同序，门禁强制）；
 3. 在 `core/canonical.jsonc` 对应模块的 `keys` 里登记该键；
 4. 在**每种已支持语言**的 `locales/<语言>/<模块>.jsonc` 里加键值对（没翻译的语言可以先不加，覆盖率会显示缺口）；
-5. `bun run check:dict` → `bun run build` → 浏览器重载扩展验证。
+5. 若该页已有 `src/content/__tests__/<页名>.test.ts` 的实机节点回归，把新节点（以及拼接结果）补进去——没有就在同一 PR 里建一份：**页面上的节点边界只有测试能长期锁住**；
+6. `bun run check` → `bun run build` → 浏览器重载扩展验证。
+
+### 采集实机渲染文本（每个页面会话的固定起手式）
+
+引擎按**单个文本节点**精确匹配，而 GitHub 的长说明句普遍被拆成多个节点（链接拆开、`<kbd>` 夹在中间、无障碍文本放进 `<span class="sr-only">`），因此「整句键」在实机上永远不会命中——**任何页面开工前都应先把真实节点文本抓下来**，不要照着视觉上看到的一整句登记键。做法（在目标页面打开 DevTools → Console）：
+
+```js
+// 按关键字找出承载它的文本节点，逐条打印「节点原文 + 父元素」
+const probes = ["modifier keys", "formatted on paste"];
+for (const p of probes) {
+  const it = document.evaluate(`//text()[contains(., "${p}")]`, document, null,
+    XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+  for (let i = 0; i < it.snapshotLength; i++) {
+    const n = it.snapshotItem(i);
+    console.log(JSON.stringify(n.nodeValue), "|", n.parentElement?.tagName, n.parentElement?.className);
+  }
+}
+```
+
+再配合 Elements 面板右键节点 → Copy → Copy outerHTML，就能看到完整的拆分明细。四类必须记住的边界事实：
+
+1. **`<kbd>` / `<code>` / `<pre>` / `<textarea>` / `.markdown-body` 等容器被整棵排除**（`src/content/filters.ts`），其中的文本节点绝不翻译；`kbd` 之间的连词（如 `and`）若单独成节点，**不要收录**——它与别的模块同键时会互相顶替（本模块在前会压过对方），正确做法是把连词并进相邻片段；
+2. **`sr-only` 文本照常翻译**（它不在排除清单里），所以像 `alt upAlt↑` 这种「无障碍文本 + `<kbd>` 序列」在实机里是三段以上，键要按段收；翻译时按视觉意图处理即可（例如 `按 Alt ↑`）；
+3. **纯符号 / 纯数字节点翻不了**：可翻译判定要求「含至少一个拉丁字母」（`isTranslatableText`），所以单独的 `.`、`↑`、`1.2` 永远保持原样——**不要为它们收词条**（收了也不会生效，只会变成 canonical 里的死键）；
+4. **查询键会 trim + 折叠空白**（`walker.ts` 的 `normalizeKey`），故键里不要写源码缩进；但**不换行空格 `\u00a0` 会被 trim 掉**，按实际文本收键时按「无前导空格」的形态写（本次实测：`"\u00a0to paste a link…"` 收不中，`"to paste a link…"` 才中）。
 
 ### 加一条动态规则
 
@@ -214,7 +239,7 @@ content script 以 `run_at: document_start` 注入：
 | 语义真的变了 | `Watch` → `Subscribe` | **不要加别名**：改 canonical 的安全做法是新增键、删旧键，然后各语言重译 |
 | 页面结构变了导致漏翻 / 误伤 | React 重写 | 先修 `src/content/filters.ts` 的排除选择器，再考虑词条 |
 
-「旧键不再渲染」不会报错（引擎只是再也命中不到它），所以定期用 `bun run verify` 采集漏翻、并清理 canonical 里的死键是维护常态。
+「旧键不再渲染」不会报错（引擎只是再也命中不到它），所以定期用 popup 的开发者模式采集漏翻、并清理 canonical 里的死键是维护常态。**上游把整句拆成多节点时，整句键会静默失效**（节点拼接前的文本永远不出现）：这时要按实机节点逐片收录碎片键，并把旧整句键从 canonical 删掉——留着不会报错，但会和碎片键互相顶替（同一节点命中错的那条）。
 
 ### 新增一种语言
 
@@ -247,7 +272,7 @@ popup 底部的「开发者模式」开关**默认关闭**，用于系统性发�
 2. 正常浏览仓库 / 议题 / PR 等页面，引擎每 5 秒（以及页面隐藏 / 卸载时）把缓冲合并写入本机 `chrome.storage.local`；
 3. 回到 popup 查看「已收集 N 条」，点「复制」得到 JSON，粘贴给 AI 会话或按下方归档规则手工补词条；
 4. 点「清空」重新攒一批；
-5. 自动化路径：`bun run verify` 跳过手工浏览（见下）。
+5. 需要覆盖更多页面时，重复上面 1–4 步（`bun run verify` 的自动化探针已在 `48bf519` 删除，尚未重建）。
 
 ### 收集范围与导出格式
 
@@ -271,26 +296,9 @@ popup 底部的「开发者模式」开关**默认关闭**，用于系统性发�
 }
 ```
 
-## 实机探针（`bun run verify`）
+## 隐私
 
-用无头浏览器加载 `dist/` 扩展，开启开发者模式后逐页访问 GitHub，读取漏翻日志并汇总输出与「复制」完全同构的 JSON。
-
-```bash
-bun run build
-# 缺省页面清单是 DEFAULT_PAGES（各词典模块的代表页，9 条，整轮约 2 分钟）
-bun run verify --out .zcode/misses.json
-# 想只跑几页：清单文件每行一个 URL（# 为注释），路径随意、不必进仓
-bun run verify -- --pages my-pages.txt --locale ja --out .zcode/misses-ja.json
-```
-
-- `--locale <id>`：写进 storage（content script 据它选词典），同时决定**翻译探针的锚点与字系统计数**——判据不得硬编码某种语言的译文（旧版把「注册 / 登录」和 CJK 计数写死，换成任何别的语言都会误判为「翻译未生效」）；
-- `--pages` 每行一个 URL（`#` 为注释）；`--dwell` 调单页停留毫秒；`--headed` 便于旁观；`--browser` / `GITHUB_I18N_BROWSER_PATH` 指定浏览器（改名前的旧名 `GITHUB_ZH_BROWSER_PATH` 仍然兼容，两者同时设置时新名优先）；
-- 探针识别扩展上下文靠 content script 写下的**身份标记**（`src/shared/identity.ts`），不能用 `manifest.name`——品牌走 `__MSG_*__` 后它随浏览器界面语言变化；
-- 退出码：扩展未加载 / 翻译未生效 / 全部页面探针失败都会以非零码退出。
-
-### 隐私
-
-- 默认关闭，开启前零收集；全程无任何网络请求；
+- 漏翻收集**默认关闭**，开启前零收集；全程无任何网络请求；
 - 收集内容仅存本机 `chrome.storage.local`，不自动上传、不同步、不导出下载；
 - 导出内容可能含页面文本（文件名、仓库名等），复制后请自查再粘贴。
 
@@ -307,4 +315,4 @@ bun run verify -- --pages my-pages.txt --locale ja --out .zcode/misses-ja.json
 - **复数的语法分歧**（俄语 3 种、阿拉伯语 6 种）无法表达：一个 `pattern` 只能配一个模板，没有复数类别；
 - GitHub 正渐进迁移 React 重写页面，类名 / 结构变动导致的漏翻 / 误伤属常态：先修排除选择器，再修词条；
 - `<relative-time>` 等自定义元素会自行重渲染英文，观察器会再翻一遍收敛，勿追求一次性翻译；
-- 上游删除的文案会在 `core/canonical.jsonc` 里留下死键（不报错），需要靠实机探针定期清理。
+- 上游删除的文案会在 `core/canonical.jsonc` 里留下死键（不报错）：靠 popup 的开发者模式定期采集漏翻、或按页面逐个核对时顺手清理。
