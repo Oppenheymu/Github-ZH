@@ -321,6 +321,8 @@ export const repoSettingsDict: PageDict = {
 		"Organization access": "组织访问",
 		"Manage.": "管理。",
 		Manage: "管理",
+		// 数字链接把句子切开后的中段节点「…users and…」
+		"users and": "个用户和",
 		"Create team": "创建团队",
 		"Add teams": "添加团队",
 		Role: "角色",
@@ -335,6 +337,8 @@ export const repoSettingsDict: PageDict = {
 		Admin: "管理员",
 		"Create custom roles with GitHub Enterprise":
 			"使用 GitHub Enterprise 创建自定义角色",
+		// 「GitHub Enterprise」带样式独立成节点时，前段单独成句，后段仍是产品名
+		"Create custom roles with": "创建自定义角色，需使用",
 		"Enterprise accounts offer organizations more granular control over permissions by allowing you to configure up to 20 custom repository roles. This enables greater control over who and how your users access code and data in your organization.":
 			"企业账户为组织提供更细粒度的权限控制，支持配置最多 20 个自定义仓库角色，从而更精细地控制组织中的哪些用户可以访问代码和数据，以及以何种方式访问。",
 		"Try GitHub Enterprise": "试用 GitHub Enterprise",
@@ -344,6 +348,7 @@ export const repoSettingsDict: PageDict = {
 			"可读取、克隆并推送此仓库。还可管理议题、拉取请求和仓库设置，包括添加协作者。",
 		"Add custom roles with GitHub Enterprise":
 			"使用 GitHub Enterprise 添加自定义角色",
+		"Add custom roles with": "添加自定义角色，需使用",
 		"Enterprise accounts offer organizations granular control over permissions, and up to three custom repository roles.":
 			"企业账户为组织提供细粒度的权限控制，最多可配置三个自定义仓库角色。",
 		// —— sudo 身份确认（Access 子页弹层）——
@@ -517,17 +522,33 @@ export const repoSettingsDict: PageDict = {
 			replacement:
 				"验证码已发送至 $1，如果几分钟内仍未收到，请检查垃圾邮件文件夹。",
 		},
-		// 直接访问 / 组织访问卡片：动态计数句（数量与单复数随数据变化）
+		// 直接访问 / 组织访问卡片：动态计数句（数量与单复数随数据变化）。
+		// 数字在页面上是独立链接节点，句子会被切成「数字 + 尾段」，整句与尾段都收
 		{
 			pattern:
-				/^([\d,]+) entit(y|ies) (?:has|have) access to this repository\.$/,
+				/^([\d,]+) entit(y|ies) (?:has|have) access to this repository\.?$/,
 			replacement: "$1 个实体可访问此仓库。",
 		},
 		{
 			pattern:
-				/^([\d,]+) users? and ([\d,]+) teams? can access this repository through the organization\.$/,
+				/^entit(y|ies) (?:has|have) access to this repository\.?$/,
+			replacement: "个实体可访问此仓库。",
+		},
+		{
+			pattern:
+				/^([\d,]+) users? and ([\d,]+) teams? can access this repository through the organization\.?$/,
 			replacement:
 				"$1 个用户和 $2 个团队可通过该组织访问此仓库。",
+		},
+		{
+			pattern:
+				/^teams? can access this repository through the organization\.?$/,
+			replacement: "个团队可通过该组织访问此仓库。",
+		},
+		{
+			pattern:
+				/^can access this repository through the organization\.?$/,
+			replacement: "可通过该组织访问此仓库。",
 		},
 		// 角色下拉按钮「Role: write」等，角色值小写、随当前权限变化
 		{
