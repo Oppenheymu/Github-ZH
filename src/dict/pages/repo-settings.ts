@@ -338,6 +338,14 @@ export const repoSettingsDict: PageDict = {
 		"Enterprise accounts offer organizations more granular control over permissions by allowing you to configure up to 20 custom repository roles. This enables greater control over who and how your users access code and data in your organization.":
 			"企业账户为组织提供更细粒度的权限控制，支持配置最多 20 个自定义仓库角色，从而更精细地控制组织中的哪些用户可以访问代码和数据，以及以何种方式访问。",
 		"Try GitHub Enterprise": "试用 GitHub Enterprise",
+		// —— 协作者：Choose role 角色选择弹层 ——
+		"Choose role": "选择角色",
+		"Can read, clone, and push to this repository. Can also manage issues, pull requests, and repository settings, including adding collaborators.":
+			"可读取、克隆并推送此仓库。还可管理议题、拉取请求和仓库设置，包括添加协作者。",
+		"Add custom roles with GitHub Enterprise":
+			"使用 GitHub Enterprise 添加自定义角色",
+		"Enterprise accounts offer organizations granular control over permissions, and up to three custom repository roles.":
+			"企业账户为组织提供细粒度的权限控制，最多可配置三个自定义仓库角色。",
 		// —— sudo 身份确认（Access 子页弹层）——
 		"Confirm access": "确认访问",
 		Verify: "验证",
@@ -541,6 +549,16 @@ export const repoSettingsDict: PageDict = {
 		{
 			pattern: /^Role: admin$/,
 			replacement: "角色：管理员",
+		},
+		// 混合角色提示：经由组织所有权授予的 admin（组织名随页面变化）
+		{
+			pattern:
+				/^Admin as owner of the (.+) organization\.?$/,
+			replacement: "作为 $1 组织的所有者，拥有管理员权限。",
+		},
+		{
+			pattern: /^as owner of the (.+) organization\.?$/,
+			replacement: "，作为 $1 组织的所有者",
 		},
 	],
 };
