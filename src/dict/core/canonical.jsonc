@@ -1329,6 +1329,33 @@
 				"October",
 				"November",
 				"December",
+				// 贡献日历的可见标签用月份缩写（May 与全称同形），星期只标 Mon / Wed / Fri
+				"Jan",
+				"Feb",
+				"Mar",
+				"Apr",
+				"Jun",
+				"Jul",
+				"Aug",
+				"Sep",
+				"Oct",
+				"Nov",
+				"Dec",
+				"Mon",
+				"Wed",
+				"Fri",
+				// —— 贡献日历的图例与设置面板 ——
+				"Less",
+				"Contribution settings",
+				"Private contributions",
+				"Turning off private contributions will show only public activity on your profile.",
+				"Turning off the activity overview will hide the section on your profile.",
+				// —— 置顶项编辑器对话框 ——
+				"Edit pinned items",
+				"Select up to six public repositories or gists you'd like to show to anyone.",
+				"Filter repositories",
+				// 剩余可置顶数量：整句成节点时走规则，数字独立成节点时只剩这个词
+				"remaining",
 				// —— 仓库列表筛选（Type / Language / Order 下拉）——
 				"Find a repository…",
 				"Sources",

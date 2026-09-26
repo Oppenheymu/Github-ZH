@@ -55,6 +55,33 @@
 		"October": "10 月",
 		"November": "11 月",
 		"December": "12 月",
+		// 贡献日历的可见标签（月份缩写；May 与全称同形，用上面的词条）
+		"Jan": "1 月",
+		"Feb": "2 月",
+		"Mar": "3 月",
+		"Apr": "4 月",
+		"Jun": "6 月",
+		"Jul": "7 月",
+		"Aug": "8 月",
+		"Sep": "9 月",
+		"Oct": "10 月",
+		"Nov": "11 月",
+		"Dec": "12 月",
+		"Mon": "周一",
+		"Wed": "周三",
+		"Fri": "周五",
+		// —— 贡献日历图例与「贡献设置」面板 ——
+		"Less": "较少",
+		"Contribution settings": "贡献设置",
+		"Private contributions": "私有贡献",
+		"Turning off private contributions will show only public activity on your profile.": "关闭私有贡献后，你的个人主页将只显示公开动态。",
+		"Turning off the activity overview will hide the section on your profile.": "关闭活动概览后，个人主页将隐藏该区块。",
+		// —— 置顶项编辑器对话框 ——
+		"Edit pinned items": "编辑置顶项",
+		"Select up to six public repositories or gists you'd like to show to anyone.": "最多可选择六个公开仓库或 Gist 展示给任何人。",
+		"Filter repositories": "筛选仓库",
+		// 数字独立成节点时只剩这个词（整句形态由 profile/pins-remaining 规则接手）
+		"remaining": "个可选",
 		// —— 仓库列表筛选（Type / Language / Order 下拉）——
 		"Find a repository…": "查找仓库…",
 		"Sources": "来源",

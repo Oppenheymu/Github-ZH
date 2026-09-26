@@ -627,6 +627,21 @@
 					"id": "profile/showing-of-repos",
 					"pattern": "^Showing (?<count>\\d+) of (?<total>[\\d,]+) repositor(?:y|ies)$"
 				},
+				// 贡献日历标题：计数与年份在同一节点（「2,546 contributions in 2026」）
+				{
+					"id": "profile/contributions-in-year",
+					"pattern": "^(?<count>[\\d,]+) contributions? in (?<year>\\d{4})$"
+				},
+				// 计数若在独立节点里（加粗数字），剩下的半句只带年份
+				{
+					"id": "profile/contributions-of-year",
+					"pattern": "^contributions in (\\d{4})$"
+				},
+				// 置顶项编辑器的剩余可选数量（整句成节点时命中；数字独立成节点则走静态词条）
+				{
+					"id": "profile/pins-remaining",
+					"pattern": "^(\\d+) remaining$"
+				},
 				// 贡献动态时间线的分类折叠汇总：计数与仓库数都动态、单复数折叠。
 				// 节点内换行缩进在匹配前已折叠为单空格（见 content/walker.ts 的 normalizeKey），
 				// 故 pattern 按单空格书写。
