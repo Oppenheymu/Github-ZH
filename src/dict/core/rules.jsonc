@@ -748,6 +748,97 @@
 				{
 					"id": "settings/discount-exact",
 					"pattern": "^\\$(?<amount>[\\d.,]+) off\\*?$"
+				},
+				// —— 用量页（/settings/billing/usage）的图表卡片副标题 ——
+				// 用量页把账期写成**短月份**形态（截图实证：「Sep 1 - Sep 30, 2026」），
+				// 与账单总览的长月份形态是两套写法，故必须另收一组 pattern；同月只写一次月份。
+				// 跨月形态（如「Sep 1 - Oct 1, 2026」）暂无实证，未收：global 的 short-date-*
+				// 两端都以 ^…$ 锚定，不做部分替换，故未命中只是保留英文，不会产出中英残句。
+				{
+					"id": "settings/usage-range-short-same-month-jan",
+					"pattern": "^Jan (?<startDay>\\d{1,2}) - Jan (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-short-same-month-feb",
+					"pattern": "^Feb (?<startDay>\\d{1,2}) - Feb (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-short-same-month-mar",
+					"pattern": "^Mar (?<startDay>\\d{1,2}) - Mar (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-short-same-month-apr",
+					"pattern": "^Apr (?<startDay>\\d{1,2}) - Apr (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-short-same-month-may",
+					"pattern": "^May (?<startDay>\\d{1,2}) - May (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-short-same-month-jun",
+					"pattern": "^Jun (?<startDay>\\d{1,2}) - Jun (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-short-same-month-jul",
+					"pattern": "^Jul (?<startDay>\\d{1,2}) - Jul (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-short-same-month-aug",
+					"pattern": "^Aug (?<startDay>\\d{1,2}) - Aug (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-short-same-month-sep",
+					"pattern": "^Sep (?<startDay>\\d{1,2}) - Sep (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-short-same-month-oct",
+					"pattern": "^Oct (?<startDay>\\d{1,2}) - Oct (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-short-same-month-nov",
+					"pattern": "^Nov (?<startDay>\\d{1,2}) - Nov (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				{
+					"id": "settings/usage-range-short-same-month-dec",
+					"pattern": "^Dec (?<startDay>\\d{1,2}) - Dec (?<endDay>\\d{1,2}), (?<year>\\d{4})(?:\\.)?$"
+				},
+				// —— 用量页的两个下拉 ——
+				// 未展开时是「标签: 当前值」，值的候选固定（分组：None / Repository / Product；
+				// 时间范围：本月 / 上个月 / 近 3 个月 / 近 6 个月 / 近 12 个月），逐值展开，
+				// 与 usage-range-* 同一形态：模板引用捕获组会渲染出英文值，故写死进模板。
+				// 顺序：先分组、后时间范围，与页面上的先后一致
+				// （"Timeframe: …" 在任何 group-by 规则里都不可能命中，两组之间不存在顶替）
+				{
+					"id": "settings/group-by-none",
+					"pattern": "^Group by: None$"
+				},
+				{
+					"id": "settings/group-by-repository",
+					"pattern": "^Group by: Repository$"
+				},
+				{
+					"id": "settings/group-by-product",
+					"pattern": "^Group by: Product$"
+				},
+				{
+					"id": "settings/timeframe-current-month",
+					"pattern": "^Timeframe: Current month$"
+				},
+				{
+					"id": "settings/timeframe-last-month",
+					"pattern": "^Timeframe: Last month$"
+				},
+				{
+					"id": "settings/timeframe-last-3-months",
+					"pattern": "^Timeframe: Last 3 months$"
+				},
+				{
+					"id": "settings/timeframe-last-6-months",
+					"pattern": "^Timeframe: Last 6 months$"
+				},
+				{
+					"id": "settings/timeframe-last-12-months",
+					"pattern": "^Timeframe: Last 12 months$"
 				}
 			]
 		},

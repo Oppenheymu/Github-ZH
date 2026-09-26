@@ -230,6 +230,22 @@ for (const p of probes) {
 6. **只改 pattern 不必动任何语言的模板**（O(1)）；反过来说，**改 id 必须同步所有语言的 `rules.jsonc`**。
    另外：视图骨架门禁记的是规则 **id**、不记 pattern 源串，所以给已有规则加命名组不会动快照。
 
+### 日期区间为什么逐组合展开（以账单页为例）
+
+`/settings/billing`（账单总览）与 `/settings/billing/usage`（用量页）把同一个账期写成**两套**英文形态：
+账单总览是长月份（`September 1 - September 30, 2026`），用量页是短月份（`Sep 1 - Sep 30, 2026`）。
+两者都只能靠 `settings/usage-range-*` 规则覆盖，且**必须逐组合展开**（同月 12 条 + 跨月 132 条，每种语言各写一份模板）：
+
+- 引擎的替换模板不支持「捕获组 → 中文月份」的映射，模板里引用捕获组会渲染出英文 `September`，
+  所以月份必须写死在 pattern 与模板里；
+- **全展开的代价如实记在此处**：这 144 条规则挂在 `pages/settings-billing` 模块下，而该模块的
+  路由是 `^/settings/billing`（只有这一个探针），所以视图骨架快照只膨胀这一处；若挂到 `pages/settings`
+  下，每条 `/settings` 探针都会背上这一百多条永不使用的 id；
+- 跨月短月份（如 `Sep 1 - Oct 1, 2026`）**暂无实证**，故目前只收同月 12 条：未命中只是保留英文，
+  不会产出中英残句（`global/short-date-*` 两端都以 `^…$` 锚定，不做部分替换）；
+- 用量页的实机译文对照图（按区域重建的无头浏览器渲染，非真实页面截图）：
+  `docs/guides/assets/settings-billing-usage.zh-CN.png`。
+
 ### 上游改版时怎么办
 
 | 情形 | 例子 | 做法 |

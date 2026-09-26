@@ -550,9 +550,10 @@
 		{
 			"name": "pages/settings-billing",
 			"keys": [
-				// —— 账单页（/settings/billing）——
-				// 键逐字抄自开发者模式导出的实机文本节点（2026-09 该页会话）与「More details」
-				// 弹窗截图；节点边界见 src/content/__tests__/settings-billing.test.ts。
+				// —— 账单页（/settings/billing）与用量页（/settings/billing/usage）——
+				// 键逐字抄自开发者模式导出的实机文本节点（2026-09 该页会话）、「More details」
+				// 弹窗截图与用量页实机截图；节点边界见
+				// src/content/__tests__/settings-billing.test.ts。
 				// 纯专名（Copilot / Spark / GitHub / GitHub Models / Packages / Git LFS）、
 				// 纯泛化短词（per / month / items / usage）与用户内容（仓库名、@用户名、
 				// 头像 alt）**一律不收录**：前者的译文必然与键同形（自触发循环，门禁直接拒），
@@ -624,7 +625,33 @@
 				// 也是独立键：文本节点精确匹配，标记必须一起收
 				"** GitHub Packages usage is free for public packages. For details on free Actions usage, see",
 				"* Included usage is an approximate amount based on current pricing.",
-				"Free use of GitHub Actions"
+				"Free use of GitHub Actions",
+				// —— 用量页（/settings/billing/usage，从账单总览的「Metered usage」卡片进入）——
+				// 该路由命中本模块，故这些键也归这里。键来自 2026-09 的实机截图逐行誊录
+				// （页面在登录态下，未进开发者模式导出；节点边界见 settings-billing.test.ts
+				// 的 USAGE_NODES）；Group by / Timeframe 随选择变化，靠 core/rules.jsonc
+				// 的 settings/group-by-* 与 settings/timeframe-* 覆盖，不在静态词条里。
+				"Get usage report",
+				"Search or filter usage",
+				// 下拉未展开时的固定标签；展开后的候选值（None / Repository / Product /
+				// Current month / Last month / …）由规则覆盖
+				"Group by: None",
+				"Timeframe: Current month",
+				"Usage breakdown",
+				"For license-based products, the price/unit is a prorated portion of the monthly price.",
+				"Date",
+				"Billed amount",
+				// 「Generate usage report」弹窗（点按钮后渲染；from / to 是原生日期输入控件，
+				// 其年月文本由浏览器按界面语言渲染，不走 DOM 文本，故只收静态文案与按钮）
+				"Generate usage report",
+				"Download a CSV or JSON report of your usage for the selected timeframe.",
+				"Select the date range for your report.",
+				// 弹窗的「Cancel」不在此登记：键已在 core/canonical.jsonc 的 global 模块里，
+				// 全局词条对 /settings/billing/usage 同样生效
+				"Report format",
+				"Generate report",
+				// 报告弹窗里的日期区间校验提示（起止顺序颠倒时出现）
+				"The start date must be before the end date."
 			]
 		},
 		{

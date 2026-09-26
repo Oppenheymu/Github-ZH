@@ -411,6 +411,30 @@
 		// 模板刻意写成「约 $<amount> 抵扣」而不是「约抵扣 $<amount>」——后者需要字面量 $
 		// 紧跟捕获组（`$$<amount>`），而 `$$` 会被引擎折叠、导致组引用原样输出（实测）
 		"settings/discount-approx": "约 $<amount> 抵扣",
-		"settings/discount-exact": "$<amount> 抵扣"
+		"settings/discount-exact": "$<amount> 抵扣",
+		// —— 用量页（模块 pages/settings-billing）——
+		// 图表卡片副标题的短月份账期：「Sep 1 - Sep 30, 2026」→「2026 年 9 月 1 日 – 30 日」。
+		// 同月只写一次月份（与长月份那组的写法一致）；跨月形态暂未收（见 core/rules.jsonc 的说明）
+		"settings/usage-range-short-same-month-jan": "$<year> 年 1 月 $<startDay> 日 – $<endDay> 日",
+		"settings/usage-range-short-same-month-feb": "$<year> 年 2 月 $<startDay> 日 – $<endDay> 日",
+		"settings/usage-range-short-same-month-mar": "$<year> 年 3 月 $<startDay> 日 – $<endDay> 日",
+		"settings/usage-range-short-same-month-apr": "$<year> 年 4 月 $<startDay> 日 – $<endDay> 日",
+		"settings/usage-range-short-same-month-may": "$<year> 年 5 月 $<startDay> 日 – $<endDay> 日",
+		"settings/usage-range-short-same-month-jun": "$<year> 年 6 月 $<startDay> 日 – $<endDay> 日",
+		"settings/usage-range-short-same-month-jul": "$<year> 年 7 月 $<startDay> 日 – $<endDay> 日",
+		"settings/usage-range-short-same-month-aug": "$<year> 年 8 月 $<startDay> 日 – $<endDay> 日",
+		"settings/usage-range-short-same-month-sep": "$<year> 年 9 月 $<startDay> 日 – $<endDay> 日",
+		"settings/usage-range-short-same-month-oct": "$<year> 年 10 月 $<startDay> 日 – $<endDay> 日",
+		"settings/usage-range-short-same-month-nov": "$<year> 年 11 月 $<startDay> 日 – $<endDay> 日",
+		"settings/usage-range-short-same-month-dec": "$<year> 年 12 月 $<startDay> 日 – $<endDay> 日",
+		// 用量页的两个下拉（值固定，逐值展开，模板写死中文）
+		"settings/group-by-none": "分组方式：无",
+		"settings/group-by-repository": "分组方式：仓库",
+		"settings/group-by-product": "分组方式：产品",
+		"settings/timeframe-current-month": "时间范围：本月",
+		"settings/timeframe-last-month": "时间范围：上个月",
+		"settings/timeframe-last-3-months": "时间范围：近 3 个月",
+		"settings/timeframe-last-6-months": "时间范围：近 6 个月",
+		"settings/timeframe-last-12-months": "时间范围：近 12 个月"
 	}
 }

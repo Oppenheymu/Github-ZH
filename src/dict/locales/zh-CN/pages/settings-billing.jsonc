@@ -1,10 +1,12 @@
-// 账单页模块：/settings/billing 的账单总览与「所含用量与点数」面板
+// 账单页模块：/settings/billing 的账单总览、「所含用量与点数」面板与用量页（/settings/billing/usage）
 //
 // 为什么单开一个子模块而不是塞进 pages/settings：本页的动态规则数量很大
-// （日期区间按月全展开：12 条同月 + 132 条跨月），若挂在 pages/settings 下，
-// 每个设置页的探针都会背上一百多条本页永不使用的规则 id（视图骨架快照随之膨胀）。
+// （日期区间按月全展开：12 条同月 + 132 条跨月，另有用量页的短月份区间与两个下拉），
+// 若挂在 pages/settings 下，每个设置页的探针都会背上一百多条本页永不使用的规则 id
+// （视图骨架快照随之膨胀）。
 // 路由 ^/settings/billing 比 ^/settings 更具体，按 core/modules.jsonc 的顺序排在
-// pages/settings 之后，因而**继承**它提供的设置页外壳词条，只叠加账单专属内容。
+// pages/settings 之后，因而**继承**它提供的设置页外壳词条（用量页的图表图例「Usage」
+// 就来自 pages/settings），只叠加账单专属内容。
 // 简体中文 · 模块 pages/settings-billing（路由见 core/modules.jsonc，键的分组注释见 core/canonical.jsonc）
 {
 	"$schema": "../../../types/dict.schema.json",
@@ -86,6 +88,30 @@
 		// 单独收键——不带标记的那条留给标记独立成节点的渲染
 		"** GitHub Packages usage is free for public packages. For details on free Actions usage, see": "** 公共软件包的 GitHub Packages 用量免费。免费 Actions 用量的详情见",
 		"Free use of GitHub Actions": "免费使用 GitHub Actions",
-		"* Included usage is an approximate amount based on current pricing.": "* 所含用量是按当前价格估算的近似金额。"
+		"* Included usage is an approximate amount based on current pricing.": "* 所含用量是按当前价格估算的近似金额。",
+		// —— 用量页（/settings/billing/usage）——
+		// 路由 ^/settings/billing 同时命中用量页，故词条归本模块；键来自 2026-09 的实机
+		// 截图逐行誊录（页面需登录，未进开发者模式导出），节点边界见
+		// src/content/__tests__/settings-billing.test.ts 的 USAGE_NODES。
+		//
+		// 「Date」只有独立成节点（= 表头）时才需要翻，故收键是安全的
+		"Get usage report": "获取用量报告",
+		"Search or filter usage": "搜索或筛选用量",
+		// 下拉未展开时的标签；展开后的候选值由 core/rules.jsonc 的规则覆盖
+		"Group by: None": "分组方式：无",
+		"Timeframe: Current month": "时间范围：本月",
+		"Usage breakdown": "用量明细",
+		"For license-based products, the price/unit is a prorated portion of the monthly price.": "对于基于许可证的产品，单价是按月价格折算后的部分金额。",
+		"Date": "日期",
+		// 「Billed amount」与上面的「Gross amount」是同一张表的相邻两列，术语保持一致
+		"Billed amount": "计费金额",
+		// —— 「获取用量报告」弹窗（键来自产品文案，尚未实机核对，若实机形态不同按此处替换）——
+		"Generate usage report": "生成用量报告",
+		"Download a CSV or JSON report of your usage for the selected timeframe.": "下载所选时间范围内用量的 CSV 或 JSON 报告。",
+		"Select the date range for your report.": "选择报告覆盖的日期范围。",
+		// 「Cancel」不在本模块收录：global 词条已提供「取消」，重复登记只会制造同键异译
+		"Report format": "报告格式",
+		"Generate report": "生成报告",
+		"The start date must be before the end date.": "开始日期必须早于结束日期。"
 	}
 }

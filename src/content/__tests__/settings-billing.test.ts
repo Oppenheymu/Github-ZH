@@ -1,6 +1,6 @@
-// 账单页（/settings/billing）实机文本节点回归。
+// 账单页（/settings/billing）与用量页（/settings/billing/usage）实机文本节点回归。
 //
-// 为什么单独锁这一页：
+// 为什么单独锁这两页：
 //   1. 键整批来自开发者模式导出的漏翻 JSON（2026-09 该页会话），导出记录的是
 //      **逐个文本节点的 trimmed 原文**——账单总览被拆成一堆卡片、下拉与说明句碎片，
 //      这是「不凭视觉整句登记键」的唯一依据，故把这份清单原样锁在这里；
@@ -12,10 +12,13 @@
 //   3. 用户内容与纯专名**必须不被翻译**：仓库名、@用户名、头像 alt、Copilot / Spark /
 //      GitHub Models / Packages / Git LFS，以及 per / month / items / usage 这类泛化短词。
 //      门禁要求译文含中文字系，这类词条的正确做法就是不收录（未命中即保留英文），
-//      这里反向断言，防止后人「补」成死键或造出翻译循环。
+//      这里反向断言，防止后人「补」成死键或造出翻译循环；
+//   4. 用量页（/settings/billing/usage）是**同一路由下的另一页**，实机截图逐行誊录的
+//      节点清单在下面的 USAGE_NODES：除了静态词条，它还要两个下拉（Group by / Timeframe）
+//      与**短月份**账期（「Sep 1 - Sep 30, 2026」，与账单总览的长月份是两套写法）。
 //
-// 实机节点清单来源：popup 开发者模式导出的 github-zh-misses/1 JSON，path 全为
-// /settings/billing。
+// 实机节点清单来源：账单总览是 popup 开发者模式导出的 github-zh-misses/1 JSON（path 全为
+// /settings/billing）；用量页需登录、未进导出，按 2026-09 的实机截图誊录。
 import { describe, expect, it } from "bun:test";
 import {
 	dictCore,
@@ -417,5 +420,121 @@ describe("「More details」弹窗的实机节点边界", () => {
 				`不应被翻译：${JSON.stringify(raw)}`,
 			).toBeNull();
 		}
+	});
+});
+
+/**
+ * 用量页（/settings/billing/usage）的实机文本节点。
+ *
+ * 这份清单比账单总览弱一档：用量页需要登录，**没进开发者模式导出**，节点原文按 2026-09
+ * 的实机截图逐行誊录（每行 = 一个文本节点：标题、按钮、搜索框 placeholder 与两个下拉各
+ * 自独立）。因此这里只断言「确实收录且译成中文」，不断言节点在实机上的确切边界；若实机
+ * 出现漏翻，第一步是把用量页的漏翻 JSON 导出下来，按此处格式替换。
+ */
+const USAGE_NODES: readonly string[] = [
+	// —— 页头与工具条 ——
+	"Get usage report",
+	"Search or filter usage",
+	"Group by: None",
+	"Timeframe: Current month",
+	// —— 图表卡片（标题「按量计费用量」与副标题「Sep 1 - Sep 30, 2026」分别由
+	//    静态词条「Metered usage」与 usage-range-same-month-* 规则覆盖，此处不重复列）——
+	"Usage",
+	// —— 用量明细区块 ——
+	"Usage breakdown",
+	"For license-based products, the price/unit is a prorated portion of the monthly price.",
+	"Date",
+	"Gross amount",
+	"Billed amount",
+	// —— 「获取用量报告」弹窗（点按钮才渲染，键来自产品文案，尚未实机核对）——
+	"Generate usage report",
+	"Download a CSV or JSON report of your usage for the selected timeframe.",
+	"Select the date range for your report.",
+	"Report format",
+	"Generate report",
+	"The start date must be before the end date.",
+];
+
+/** 用量页命中的模块视图（pages/settings + pages/settings-billing + pages/repo + global） */
+const usageView = buildView(
+	"/settings/billing/usage",
+	dictForLocale("zh-CN"),
+	new Map(Object.entries(dictCore.aliases)),
+);
+
+describe("用量页的实机节点边界", () => {
+	it("translates every text node GitHub actually renders", () => {
+		for (const node of USAGE_NODES) {
+			for (const variant of withWhitespace(node)) {
+				const translated = translateText(
+					variant,
+					usageView,
+				);
+				expect(
+					translated,
+					`未命中：${JSON.stringify(variant)}`,
+				).not.toBeNull();
+				expect(translated ?? "").toMatch(/[\u4e00-\u9fff]/);
+			}
+		}
+	});
+
+	it("translates both dropdowns for every option they offer", () => {
+		// 下拉「标签: 当前值」的候选值逐条由 core/rules.jsonc 覆盖（模板写死中文，
+		// 因为引擎的替换模板不支持「捕获组 → 中文」的映射）
+		for (const [raw, expected] of [
+			["Group by: None", "分组方式：无"],
+			["Group by: Repository", "分组方式：仓库"],
+			["Group by: Product", "分组方式：产品"],
+			["Timeframe: Current month", "时间范围：本月"],
+			["Timeframe: Last month", "时间范围：上个月"],
+			["Timeframe: Last 3 months", "时间范围：近 3 个月"],
+			["Timeframe: Last 6 months", "时间范围：近 6 个月"],
+			["Timeframe: Last 12 months", "时间范围：近 12 个月"],
+		] as const) {
+			expect(
+				translateText(raw, usageView),
+				`下拉值未覆盖：${JSON.stringify(raw)}`,
+			).toBe(expected);
+		}
+		// 未列出的值（上游新增候选）原样保留，不得被规则截断成半句中文
+		expect(
+			translateText("Timeframe: Last 24 months", usageView),
+		).toBeNull();
+	});
+
+	it("translates the usage breakdown table and its dates", () => {
+		expect(
+			translateText("Usage breakdown", usageView),
+		).toBe("用量明细");
+		expect(translateText("Billed amount", usageView)).toBe(
+			"计费金额",
+		);
+		// 明细行的日期由 global 的短日期规则覆盖（Sep 1, 2026 → 2026 年 9 月 1 日）
+		expect(translateText("Sep 1, 2026", usageView)).toBe(
+			"2026 年 9 月 1 日",
+		);
+		// 图表卡片的副标题：短月份账期，由本模块的 usage-range-short-same-month-* 覆盖
+		// （同月只写一次月份，与长月份那组同一形态）
+		expect(
+			translateText("Sep 1 - Sep 30, 2026", usageView),
+		).toBe("2026 年 9 月 1 日 – 30 日");
+		// 跨月的短月份区间暂无实证、未收规则：必须**原样保留**（不得被 global 的短日期
+		// 规则做部分替换而产出「2026 年 9 月 1 日 - Oct 1, 2026」这类残句）
+		expect(
+			translateText("Sep 1 - Oct 1, 2026", usageView),
+		).toBeNull();
+		// 表格里的金额节点（纯符号 + 数字）保持原样——它们本来就翻不了，也不该翻
+		for (const raw of ["$0", "<$0.01", "$1"]) {
+			expect(
+				translateText(raw, usageView),
+				`不应被翻译：${JSON.stringify(raw)}`,
+			).toBeNull();
+		}
+	});
+
+	it("keeps the Cancel button on the global dictionary", () => {
+		// 弹窗的「Cancel」不在本模块登记，靠 global 词条生效——重复登记会制造同键异译
+		expect(translateText("Cancel", usageView)).toBe("取消");
 	});
 });
