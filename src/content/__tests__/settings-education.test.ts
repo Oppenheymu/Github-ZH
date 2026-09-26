@@ -1,9 +1,9 @@
 // 教育权益页（/settings/education/benefits）实机文本节点回归。
 //
-// 边界强度：按维护者 2026-09 的实机截图逐行誊录，**未取节点边界**（没有 outerHTML / Console
-// 实证），故这里按「每行是一个独立文本节点」的假定登记——该页是营销式卡片，标题、段落与
-// 按钮各自成块。首次实机复验若发现某句漏翻，第一步是把那句的 outerHTML 取回来，
-// 按真实节点边界重收（见 docs/guides/development.md 的「采集实机渲染文本」）。
+// 边界强度：**实机 HTML 实证**（维护者 2026-09 提供，逐字照抄节点原文）。本页的实证事实：
+// 说明段落是**跨行的单个文本节点**（H2 与卡片说明句同理），归一空白后才等于词典键；
+// 按钮文案在 `<span class="Button-label">` 里，自身就是完整节点。页头「GitHub Education」
+// 仅有截图来源（该段 HTML 未包含），首次实机复验时留意。
 //
 // 刻意不登记：
 //   - 「Learn more」：实机已渲染为「了解更多」，由 global 的既有词条覆盖；
@@ -51,6 +51,39 @@ describe("教育权益页的实机节点边界", () => {
 				expect(translated ?? "").toMatch(/[\u4e00-\u9fff]/);
 			}
 		}
+	});
+
+	it("matches the real node boundaries taken from the live HTML", () => {
+		// 逐字照抄实机 HTML 的文本节点：H2 与两段说明都带源码缩进，其中说明段落
+		// **跨三行**——折叠空白后必须仍等于词典键，这就是「键按 normalizeKey 后的形态收」
+		expect(
+			translateText(
+				"\n      Free GitHub developer resources for students and teachers\n    ",
+				view,
+			),
+		).toBe("面向学生和教师的免费 GitHub 开发者资源");
+		expect(
+			translateText(
+				"\n      Get Copilot for free, 180 monthly Codespaces hours for cloud coding,\n      unlimited private repositories with GitHub Pro or Team, and dozens of\n      premium tools in the Student Developer Pack.\n    ",
+				view,
+			),
+		).toBe(
+			"免费使用 Copilot、每月 180 小时的 Codespaces 云端编码时长、GitHub Pro 或 Team 的不限私有仓库，以及学生开发者包中的数十种高级工具。",
+		);
+		expect(
+			translateText(
+				"\n            Complete a teacher or student application to unlock tools and\n            resources for your educational journey.\n        ",
+				view,
+			),
+		).toBe(
+			"完成教师或学生申请，解锁学习旅程所需的工具与资源。",
+		);
+		expect(translateText("Education Benefits", view)).toBe(
+			"教育权益",
+		);
+		expect(
+			translateText("Start an application", view),
+		).toBe("开始申请");
 	});
 
 	it("keeps the card heading apart from the settings sidebar item", () => {

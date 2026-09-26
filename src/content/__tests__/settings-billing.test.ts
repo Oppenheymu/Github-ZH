@@ -1167,8 +1167,17 @@ describe("付款历史页（/account/billing/history）的空态", () => {
 /**
  * 赞助订阅页（/settings/billing/subscriptions）的实机文本节点。
  *
- * 边界强度：按维护者 2026-09 的实机截图誊录，未取节点边界。该页仍在 /settings/billing/**
- * 这一支（实测 302 存活），与 /account/billing/** 由同一条路由覆盖，故用默认视图即可。
+ * 边界强度：**实机 HTML 实证**（维护者 2026-09 提供，逐字照抄节点原文）+ 截图补充。
+ * 该页仍在 /settings/billing/** 这一支（实测 302 存活），与 /account/billing/** 由同一条
+ * 路由覆盖，故用默认视图即可。
+ *
+ * 实证到的三条边界事实（都写进了下面的用例）：
+ *   1. 组织数那句是 `<div class="tmp-mb-4">` 的**首个文本节点**，带源码缩进与换行——
+ *      归一空白后是单行整句，规则两端 ^…$ 锚定成立；
+ *   2. `Manage your organizations` 在 `<summary>` 里带缩进，在
+ *      `<span class="SelectMenu-title">` 里是裸文本，两种形态都必须命中；
+ *   3. 空态那句是 `"You're currently not sponsoring anyone. "`（**直撇号 + 尾随空格**），
+ *      紧随其后的 `<a>` 链接文字 `Learn more about GitHub Sponsors` 是另一个节点。
  */
 const SUBSCRIPTION_NODES: readonly string[] = [
 	"Sponsorships",
@@ -1179,6 +1188,52 @@ const SUBSCRIPTION_NODES: readonly string[] = [
 ];
 
 describe("赞助订阅页（/settings/billing/subscriptions）", () => {
+	it("matches the real node boundaries taken from the live HTML", () => {
+		// 逐字照抄实机 HTML 的文本节点（含 \n 与源码缩进）
+		expect(
+			translateText(
+				"\n    In addition to your personal account, you manage 5 organizations.\n    ",
+				view,
+			),
+		).toBe("除个人账户外，你还管理 5 个组织。");
+		expect(
+			translateText(
+				"\n        Manage your organizations\n        ",
+				view,
+			),
+		).toBe("管理你的组织");
+		expect(
+			translateText("Manage your organizations", view),
+		).toBe("管理你的组织");
+		expect(
+			translateText(
+				"\n              Connect with the community that builds the tools you use\n            ",
+				view,
+			),
+		).toBe("与构建你所使用工具的社区建立联系");
+		// 空态：直撇号 + 尾随空格（链接文字是紧随其后的另一个节点）
+		expect(
+			translateText(
+				"\n            You're currently not sponsoring anyone. ",
+				view,
+			),
+		).toBe("你目前没有赞助任何人。");
+		expect(
+			translateText(
+				"Learn more about GitHub Sponsors",
+				view,
+			),
+		).toBe("详细了解 GitHub Sponsors");
+	});
+
+	it("leaves the pure product name alone", () => {
+		// `<div>GitHub Sponsors</div>` 是纯专名：不收录、保留英文即正确做法
+		//（收录成同形译文会触发自我循环，词典门禁也直接拒）
+		expect(
+			translateText("GitHub Sponsors", view),
+		).toBeNull();
+	});
+
 	it("translates every node the screenshot shows", () => {
 		for (const node of SUBSCRIPTION_NODES) {
 			const translated = translateText(node, view);
