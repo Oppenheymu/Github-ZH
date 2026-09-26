@@ -119,6 +119,7 @@
 		"Code, planning, and automation": "代码、规划与自动化",
 		"Interaction limits": "互动限制",
 		"Code review limits": "代码审查限制",
+		"Archives": "归档",
 		// —— 页面级属性与菜单 ——
 		"Settings menu": "设置菜单",
 		"Select settings context": "选择设置范围",
@@ -139,7 +140,12 @@
 		"email settings": "电子邮件设置",
 		"to learn more about how we use this information.": "以进一步了解我们如何使用这些信息。",
 		// —— 账号管理（/settings/admin）——
+		// 实机节点边界：`<p><a>Change</a> your username can have <a>unintended side effects</a>.</p>`
+		// 逐段对齐：译文末尾**不要**带空格（walker 会保留原节点的首尾空白）
 		"Change username": "更改用户名",
+		"Change": "更改",
+		"your username can have": "你的用户名可能会有",
+		"unintended side effects": "意想不到的副作用",
 		"Changing your username can have unintended side effects.": "更改用户名可能会带来意想不到的副作用。",
 		"Looking to manage account security settings? You can find them in the": "想管理账号安全设置？你可以在",
 		"Link Patreon account": "关联 Patreon 账户",
@@ -149,14 +155,23 @@
 		"Export all repositories and profile metadata for": "导出",
 		"Exports will be available for 7 days.": "导出数据将在 7 天内可用。",
 		"Successor settings": "账号继承设置",
-		"By clicking \"Add Successor\" below, I acknowledge that I am the owner of the": "点击下方的「添加继承者」，即表示我确认自己是",
+		// 实机节点边界：192 字符节点（含用户名纯文本，且以 "Successor," 结尾）+ <span> 尾段 + 整段
+		"By clicking \"Add Successor\" below, I acknowledge that I am the owner of the @Oppenheymu account, and am authorizing GitHub to transfer content within that account to my GitHub Successor,": "点击下方的「添加继承者」，即表示我确认自己是 @Oppenheymu 账户的所有者，并授权 GitHub 把该账户内的内容转移给我下方指定的 GitHub 继承者，",
+		", in the event of my death. I understand that this appointment of a successor does not override legally binding next-of-kin rules or estate laws of any relevant jurisdiction, and does not create a binding will.": "此项转移将在我去世后生效。我理解，此项继承者的指定不能凌驾于任何相关司法管辖区的、具有法律约束力的近亲规则或遗产法，也不构成具有约束力的遗嘱。",
 		"account, and am authorizing GitHub to transfer content within that account to my GitHub Successor, designated below, in the event of my death. I understand that this appointment of a successor does not override legally binding next-of-kin rules or estate laws of any relevant jurisdiction, and does not create a binding will.": "账户的所有者，并授权 GitHub 在我去世后，把该账户内的内容转移给下方指定的 GitHub 继承者。我理解，此项继承者的指定不能凌驾于任何相关司法管辖区的、具有法律约束力的近亲规则或遗产法，也不构成具有约束力的遗嘱。",
-		"Add successor": "添加继承者",
+		"Learn more about account successors.": "详细了解账号继承者。",
+		"Add Successor": "添加继承者",
 		"Search by username, full name, or email address": "按用户名、全名或电子邮件地址搜索",
 		"You have not designated a successor.": "你尚未指定继承者。",
 		"Delete account": "删除账户",
 		"Your account is currently an owner in these organizations": "你的账户目前是以下组织的所有者",
+		// 实机节点边界：`You must <a>…</a>, <a>…</a>, or <a>…</a> before you can delete your user.`
 		"You must remove yourself from these organizations, transfer ownership, or delete these organizations before you can delete your user.": "你必须先从这些组织中移除自己、转移所有权或删除这些组织，然后才能删除你的用户。",
+		"You must": "你必须先",
+		"remove yourself from these organizations": "从这些组织中移除自己",
+		"transfer ownership": "转移所有权",
+		"delete these organizations": "删除这些组织",
+		"before you can delete your user.": "然后才能删除你的用户。",
 		// —— 按钮 ——
 		"Connect with Patreon": "关联 Patreon",
 		"Start export": "开始导出",

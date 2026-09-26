@@ -283,6 +283,8 @@
 				"Code, planning, and automation",
 				"Interaction limits",
 				"Code review limits",
+				// 个人设置侧栏的「归档」（仓库设置里另有同键，两处都渲染）
+				"Archives",
 				// —— 页面级属性与菜单 ——
 				"Settings menu",
 				"Select settings context",
@@ -303,7 +305,12 @@
 				"email settings",
 				"to learn more about how we use this information.",
 				// —— 账号管理（/settings/admin）——
+				// 实机节点边界：`<p><a>Change</a> your username can have <a>unintended side effects</a>.</p>`
+				// → 整句只在「恰好拼成一个节点」时命中，真实渲染是三个节点，这里逐段收录
 				"Change username",
+				"Change",
+				"your username can have",
+				"unintended side effects",
 				"Changing your username can have unintended side effects.",
 				// 句中的「密码与身份验证」是链接 → 整句被拆开，链接后片段单独收录
 				// （链接文本 "Password and authentication" 已在上面的设置导航里收录）
@@ -313,23 +320,39 @@
 				"Connect a Patreon account for",
 				"to sponsor maintainers with. Get recognition on GitHub for sponsorships made on Patreon when the sponsored person has linked Patreon and GitHub, too, and has a public GitHub Sponsors profile.",
 				"Export account data",
-				// 导出说明句与「可用天数」之间可能夹着一个链接节点，故整句与尾句各收一条；
-				// 「Exports will be available for N days.」随天数变化，走 pages/settings 的
-				// export-available 规则（见 core/rules.jsonc）
+				// 实机节点边界：`导出 [<strong>@用户名</strong>][.][<strong>][Exports will be available for 7 days.]`
+				// ——句号属于用户名链接节点，故「可用天数」那句的节点值以 ". " 开头，
+				// 走 pages/settings 的 export-available 规则（pattern 允许可选的前导 ". "）
 				"Export all repositories and profile metadata for",
 				"Exports will be available for 7 days.",
 				"Successor settings",
-				// 首句里的「Learn more about account successors」是链接 → 链接前片段单独收录
-				"By clicking \"Add Successor\" below, I acknowledge that I am the owner of the",
+				// 实机节点边界（192 字符节点 + <span> + 尾段节点，最后跟 <a>）：
+				//   `By clicking "Add Successor" below, … to my GitHub Successor, ` | <span> |
+				//   `, in the event of my death. … does not create a binding will.` | <a> | 空白
+				// 即首句与次句被切开且都落在长节点里，故三条各按真实节点值逐字收录。
+				// 注意：用户名在首条里是纯文本（不是链接），上游若换成链接则此条会失效，
+				// 届时需改为规则（当前实机为非链接）
+				"By clicking \"Add Successor\" below, I acknowledge that I am the owner of the @Oppenheymu account, and am authorizing GitHub to transfer content within that account to my GitHub Successor,",
+				", in the event of my death. I understand that this appointment of a successor does not override legally binding next-of-kin rules or estate laws of any relevant jurisdiction, and does not create a binding will.",
 				"account, and am authorizing GitHub to transfer content within that account to my GitHub Successor, designated below, in the event of my death. I understand that this appointment of a successor does not override legally binding next-of-kin rules or estate laws of any relevant jurisdiction, and does not create a binding will.",
-				"Add successor",
+				"Learn more about account successors.",
+				// 按钮类是 <button>，可见文案就在文本节点上；大写 S 是实机原文
+				"Add Successor",
 				"Search by username, full name, or email address",
 				"You have not designated a successor.",
 				"Delete account",
-				// 组织清单随账号变化，清单本身与整句各走一条规则
-				// （owner-organizations / owner-organizations-list）
+				// 实机节点边界：`<p>Your account is currently an owner in these organizations: <strong>…清单…</strong></p>`
+				// → 句子节点不含清单，走 pages/settings 的 owner-organizations 规则（见 core/rules.jsonc）
 				"Your account is currently an owner in these organizations",
+				// 实机节点边界：`You must <a>remove yourself from these organizations</a>, <a>transfer ownership</a>,
+				// or <a>delete these organizations</a> before you can delete your user.`
+				// → 整句节点只在无链接时出现，真实渲染逐段收录
 				"You must remove yourself from these organizations, transfer ownership, or delete these organizations before you can delete your user.",
+				"You must",
+				"remove yourself from these organizations",
+				"transfer ownership",
+				"delete these organizations",
+				"before you can delete your user.",
 				// —— 按钮 ——
 				"Connect with Patreon",
 				"Start export",

@@ -68,17 +68,18 @@
 		{
 			"name": "pages/settings",
 			"rules": [
-				// 导出数据的可用天数（天数会随上游设置变化，用捕获组接住）
+				// 导出数据的可用天数。实机节点边界：句号属于用户名链接节点，
+				// 故本句所在文本节点的值形如 ".\n      Exports will be available for 7 days."，
+				// pattern 必须容忍可选的前导 ". "（纯句号节点翻译不了，跳过即可）
 				{
 					"id": "settings/export-available",
-					"pattern": "^Exports will be available for (\\d+) days?\\.$"
+					"pattern": "^[.]?\\s*Exports will be available for (\\d+) days?\\.$"
 				},
-				// 删除账号区块：当前作为所有者的组织清单。清单随账号变化（组织名保留原文），
-				// 故整句连清单一起用捕获组接住。刻意不为「清单片段」单独收规则：
-				// 纯拉丁译文过不了门禁的防循环检查（规则模板必须含目标语言文字系统）
+				// 删除账号区块：「你的账户目前是以下组织的所有者：」这个句子节点不含清单
+				// （清单是同级 <strong>），故冒号后允许为空；组织名保留原文
 				{
 					"id": "settings/owner-organizations",
-					"pattern": "^Your account is currently an owner in these organizations: (.+)$"
+					"pattern": "^Your account is currently an owner in these organizations:(?: (.+))?$"
 				}
 			]
 		},
