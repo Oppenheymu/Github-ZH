@@ -971,35 +971,43 @@ describe("许可页的实机节点边界", () => {
 /**
  * 付款信息页（/settings/billing/payment_information）的实机文本节点。
  *
- * 与许可页同档：**没进开发者模式导出**，节点原文按 2026-09 的实机截图逐行誊录。
+ * 节点边界分两档：
+ *   - **实机 HTML 实证**（用户提供）：地址 / 地址第二行 / 邮编三个标签被 `.text-normal`
+ *     拆成「主标签 + 括号说明」两个节点，故此处按拆分形态列，不列整行键；
+ *   - 其余行按 2026-09 的实机截图誊录。
  * 该路由同样只命中 ^/settings/billing，故词条归 pages/settings-billing 模块；
  * 页面标题「Payment information」由 pages/settings 提供（模块更靠前），不在此重复登记。
  *
  * 刻意不收录的内容：
  *   - 国家/地区下拉**展开后的选项名**（几百个国家名）：它们是随表单提交的值，
  *     改显示文案会坏功能，且必然撞用户内容；
- *   - 「Save billing information」等按钮的**文案本身**要收，但按钮的 id/name 不动
- *     （引擎只改文本节点与白名单属性）。
+ *   - 必填星号「*」：纯符号节点，可翻译判定就过不了（也不该翻）。
  */
 const PAYMENT_NODES: readonly string[] = [
 	"Billing information",
 	"Add your information to show on every invoice",
-	// 表单标签：实机里标签与必填星号「*」各自成节点（星号是纯符号节点，翻不了也不该翻）
 	"First name",
 	"Last name",
-	"Address (Street, P.O. box)",
-	"Address line 2 (Apartment, suite, unit)",
+	// 实机 HTML：`Address <span class="text-normal">(Street, P.O. box)</span>`
+	"Address",
+	"(Street, P.O. box)",
+	"Address line 2",
+	"(Apartment, suite, unit)",
 	"City",
 	"Country/Region",
 	"Choose your country/region",
 	"State/Province",
-	"Postal/zip code (9-digit zip code for US)",
+	"Postal/Zip code",
+	"(9-digit zip code for US)",
 	"Required for certain countries",
 	"VAT/GST ID",
 	"Save billing information",
 	"Coupon",
 	"Redeem a coupon",
 	"You don't have an active coupon.",
+	// `<h3 class="f4 d-inline">` 标题 + 问号图标的 tool-tip（sr-only，悬浮可见）
+	"Additional information",
+	"Add specific contact or tax information to your receipts, like your full business name, VAT/GST identification number, or address of record here. We’ll make sure it shows up on every receipt.",
 	"Add information",
 	"No additional information added to your receipts.",
 ];
@@ -1057,6 +1065,51 @@ describe("付款信息页的实机节点边界", () => {
 		expect(renderNodes(["First name", " ", "*"])).toBe(
 			"名 *",
 		);
+	});
+
+	it("renders the split labels around their text-normal spans", () => {
+		// 实机 HTML，逐字对应本轮修的三处边界（整行键在实机上永不命中）
+		expect(
+			renderNodes(["Address", " ", "(Street, P.O. box)"]),
+		).toBe("地址 （街道、邮政信箱）");
+		expect(
+			renderNodes([
+				"Address line 2",
+				"  ",
+				"(Apartment, suite, unit)",
+			]),
+		).toBe("地址第二行  （公寓、套房、单元）");
+		expect(
+			renderNodes([
+				"Postal/Zip code",
+				" ",
+				"(9-digit zip code for US)",
+			]),
+		).toBe("邮政编码 （美国为 9 位 ZIP 码）");
+		// 整行形态**必须原样保留**：它不是实机形态，收了只会是死键
+		expect(
+			translateText(
+				"Address (Street, P.O. box)",
+				paymentView,
+			),
+		).toBeNull();
+		// 截图里的小写形态「Postal/zip code」同理（实机是大写 Z）
+		expect(
+			translateText("Postal/zip code", paymentView),
+		).toBeNull();
+	});
+
+	it("translates the additional-information heading and its tooltip", () => {
+		// 标题是独立节点；tooltip 在 <tool-tip class="sr-only"> 里，按既定边界照常翻译
+		expect(
+			translateText("Additional information", paymentView),
+		).toBe("附加信息");
+		expect(
+			translateText(
+				"Add specific contact or tax information to your receipts, like your full business name, VAT/GST identification number, or address of record here. We’ll make sure it shows up on every receipt.",
+				paymentView,
+			),
+		).toContain("收据");
 	});
 
 	it("reuses the settings module for the page title", () => {

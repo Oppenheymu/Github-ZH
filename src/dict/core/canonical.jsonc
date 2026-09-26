@@ -757,13 +757,22 @@
 				"Add your information to show on every invoice",
 				"First name",
 				"Last name",
-				"Address (Street, P.O. box)",
-				"Address line 2 (Apartment, suite, unit)",
+				// 标签在实机里被 `.text-normal` 拆成**两个节点**（用户提供的 HTML 实证）：
+				// `        Address <span class="text-normal">(Street, P.O. box)</span>`，
+				// 故主标签与括号说明各收一条，**不要**收「Address (Street, P.O. box)」这种整行键
+				// ——它在实机上永不命中。`Address line 2` 的主标签同理
+				"Address",
+				"(Street, P.O. box)",
+				"Address line 2",
+				"(Apartment, suite, unit)",
 				"City",
 				"Country/Region",
 				"Choose your country/region",
 				"State/Province",
-				"Postal/zip code (9-digit zip code for US)",
+				// 邮编标签的实机写法是「Postal/Zip code」（大写 Z），与截图里的
+				// 「Postal/zip code」不同；大小写必须按实机渲染收，否则同样永不命中
+				"Postal/Zip code",
+				"(9-digit zip code for US)",
 				// 州/省与邮编两行的说明：同一个键在两个字段下各渲染一次，收录一条即可
 				"Required for certain countries",
 				"VAT/GST ID",
@@ -773,6 +782,12 @@
 				"You don't have an active coupon.",
 				"Add information",
 				"No additional information added to your receipts.",
+				// 卡片标题（`<h3 class="f4 d-inline">`）与问号图标上的 tool-tip 文案：
+				// tooltip 是 `<tool-tip>`（sr-only 定位，鼠标悬浮 / 聚焦才可见），
+				// 按「sr-only 照常翻译」的既定边界收录；原文里的撇号是**弯撇号** `\u2019`
+				// （tooltip 文案用 We’ll 而不是 We'll），抄录时勿顺手改成直撇号
+				"Additional information",
+				"Add specific contact or tax information to your receipts, like your full business name, VAT/GST identification number, or address of record here. We’ll make sure it shows up on every receipt.",
 				// —— 账单总览 / 预算页的功能卡片 ——
 				// 「Packages」原本靠 pages/repo 的越界路由（^/[^/]+/[^/]+ 命中 /settings/**）
 				// 顺带生效；2026-09 修掉那个越界后，它必须由**真正显示它的模块**自己登记。

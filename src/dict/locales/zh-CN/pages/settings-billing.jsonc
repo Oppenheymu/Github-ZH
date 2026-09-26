@@ -200,23 +200,30 @@
 		// 清单底部的对比入口
 		"See all features and compare plans": "查看所有功能并对比各方案",
 		// —— 付款信息页（/settings/billing/payment_information）——
-		// 键来自 2026-09 的实机截图（页面需登录，未进开发者模式导出），节点边界见
+		// 键来自 2026-09 的实机 HTML（用户提供 label 片段）与截图，节点边界见
 		// src/content/__tests__/settings-billing.test.ts 的 PAYMENT_NODES。
-		// 「First name」等表单标签在实机里通常与红星号分开成节点（见下方用例），
-		// 故键里不带「*」；国家/地区下拉的选项名一律不收录（表单值，改了会坏功能）
+		// 三条实机边界必须记住：
+		//   1. 表单标签被 `.text-normal` 拆成「主标签」+「括号说明」两个节点，
+		//      故键分开收（整行键在实机上永不命中）；
+		//   2. 必填星号 `*` 是纯符号节点，翻不了也不该翻，键里不带星号；
+		//   3. 国家/地区下拉的选项名一律不收录（表单值，改了会坏功能）
 		"Billing information": "账单信息",
 		"Add your information to show on every invoice": "添加显示在每张账单上的信息",
 		"First name": "名",
 		"Last name": "姓",
-		"Address (Street, P.O. box)": "地址（街道、邮政信箱）",
-		"Address line 2 (Apartment, suite, unit)": "地址第二行（公寓、套房、单元）",
+		// 主标签与括号说明各自成节点：译文里的括号说明按中文习惯写成全角括号
+		"Address": "地址",
+		"(Street, P.O. box)": "（街道、邮政信箱）",
+		"Address line 2": "地址第二行",
+		"(Apartment, suite, unit)": "（公寓、套房、单元）",
 		"City": "城市",
 		"Country/Region": "国家/地区",
 		"Choose your country/region": "选择你的国家/地区",
 		"State/Province": "州/省",
 		// 括号里的说明是链向邮编格式文档的链接文字；中文界面里同样保留在括号内，
 		// 这样「9 位」这个关键信息不丢
-		"Postal/zip code (9-digit zip code for US)": "邮政编码（美国为 9 位 ZIP 码）",
+		"Postal/Zip code": "邮政编码",
+		"(9-digit zip code for US)": "（美国为 9 位 ZIP 码）",
 		"Required for certain countries": "某些国家/地区必填",
 		"VAT/GST ID": "增值税号（VAT/GST ID）",
 		"Save billing information": "保存账单信息",
@@ -225,6 +232,10 @@
 		"You don't have an active coupon.": "你当前没有生效中的优惠券。",
 		"Add information": "添加信息",
 		"No additional information added to your receipts.": "尚未添加任何附加信息到你的收据。",
+		// 卡片标题与问号图标上的 tool-tip 文案（tooltip 在 sr-only 容器里，
+		// 按「sr-only 照常翻译」的既定边界收录）
+		"Additional information": "附加信息",
+		"Add specific contact or tax information to your receipts, like your full business name, VAT/GST identification number, or address of record here. We’ll make sure it shows up on every receipt.": "在这里添加会显示在收据上的具体联系或税务信息，例如你的完整企业名称、增值税/GST 识别号或注册地址。我们会确保它出现在每张收据上。",
 		// 功能卡片的产品名：与仓库页 / 个人主页的「Packages」同译（软件包）。
 		// 修掉 pages/repo 的越界路由后，这条不再能靠别的模块顺带生效，必须登记在本模块
 		"Packages": "软件包"
